@@ -17,7 +17,7 @@ use Modules\Factcolombia1\Models\Tenant\{
 use Modules\Factcolombia1\Models\TenantService\{
     Tax as TypeTaxes
 };
-
+use Modules\Accounting\Models\ChartOfAccount;
 use Modules\Factcolombia1\Http\Resources\Tenant\TaxCollection;
 
 class TaxController extends Controller
@@ -54,9 +54,12 @@ class TaxController extends Controller
     }
 
     public function tables() {
+
         return [
             'type_taxes' => TypeTaxes::all(),
-            'taxes_in_tax' => Tax::all()
+            'taxes_in_tax' => Tax::all(),
+            'chart_accounts_sales'=> ChartOfAccount::where('level','>=',4)->get(),
+            'chart_accounts_purchases' => ChartOfAccount::where('level','>=',4)->get()
         ];
     }
 
@@ -120,7 +123,10 @@ class TaxController extends Controller
         $tax->in_base = $request->in_base;
         $tax->in_tax = $request->in_tax;
         $tax->type_tax_id = $request->type_tax_id;
-
+        $tax->chart_account_sale = $request->chart_account_sale;
+        $tax->chart_account_purchase = $request->chart_account_purchase;
+        $tax->chart_account_return_sale = $request->chart_account_return_sale;
+        $tax->chart_account_return_purchase = $request->chart_account_return_purchase;
         $tax->save();
 
         return [

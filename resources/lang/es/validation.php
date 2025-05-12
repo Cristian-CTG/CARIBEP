@@ -193,7 +193,7 @@ return [
         'quantity' => 'cantidad',
         'category_id' => 'categoría',
         'brand_id' => 'marca',
-        
+
         'room_type' => 'tipo de habitación',
         'ocupation' => 'ocupación',
         'sex' => 'sexo',
@@ -262,9 +262,9 @@ return [
         'type_regime_id' => 'regimen',
         'merchant_registration' => 'registro mercantil',
         'currency_id' => 'moneda',
-        
 
-        
+
+
         'name'                  => 'nombre',
         'username'              => 'usuario',
         'email'                 => 'correo electrónico',
@@ -324,7 +324,7 @@ return [
         'accrued.worked_days' => 'días trabajados',
         'accrued.salary' => 'salario',
         'accrued.accrued_total' => 'total devengados',
-        
+
         'deduction.eps_type_law_deductions_id' => 'EPS - Deducciones por ley',
         'deduction.eps_deduction' => 'deducción EPS',
         'deduction.pension_type_law_deductions_id' => 'Pensión - Deducciones por ley',
@@ -339,7 +339,7 @@ return [
         'accrued.severance.*.payment' => 'pago cesantías',
         'accrued.severance.*.percentage' => '% interes',
         'accrued.severance.*.interest_payment' => 'pago intereses',
-        
+
         'accrued.bonuses.*.salary_bonus' => 'bonificación salarial',
         'accrued.bonuses.*.non_salary_bonus' => 'bonificación no salarial',
 
@@ -354,7 +354,7 @@ return [
         'accrued.common_vacation.*.end_date' => 'fecha término',
         'accrued.common_vacation.*.quantity' => 'n° de días',
         'accrued.common_vacation.*.payment' => 'pago',
-        
+
         'accrued.paid_vacation.*.start_date' => 'fecha inicio',
         'accrued.paid_vacation.*.end_date' => 'fecha término',
         'accrued.paid_vacation.*.quantity' => 'n° de días',
@@ -368,7 +368,7 @@ return [
 
         'deduction.labor_union.*.percentage' => 'porcentaje',
         'deduction.labor_union.*.deduction' => 'deducción',
-        
+
         'deduction.sanctions.*.public_sanction' => 'sanción pública',
         'deduction.sanctions.*.private_sanction' => 'sanción privada',
 
@@ -381,7 +381,7 @@ return [
         'accrued.paid_leave.*.end_date' => 'fecha término',
         'accrued.paid_leave.*.quantity' => 'cantidad',
         'accrued.paid_leave.*.payment' => 'pago',
-        
+
         'accrued.non_paid_leave.*.start_date' => 'fecha inicio',
         'accrued.non_paid_leave.*.end_date' => 'fecha inicio',
         'accrued.non_paid_leave.*.quantity' => 'cantidad',
@@ -396,7 +396,7 @@ return [
         'accrued.third_party_payments.*.third_party_payment' => 'pago',
 
         'accrued.advances.*.advance' => 'valor anticipo',
-        
+
         'accrued.compensations.*.ordinary_compensation' => 'compensación ordinaria',
         'accrued.compensations.*.extraordinary_compensation' => 'compensación extraordinaria',
 
@@ -412,7 +412,7 @@ return [
 
         'deduction.orders.*.description' => 'descripción',
         'deduction.orders.*.deduction' => 'deducción',
-        
+
         'deduction.third_party_payments.*.third_party_payment' => 'valor pago',
 
         'deduction.advances.*.advance' => 'valor anticipo',
@@ -437,10 +437,10 @@ return [
         'accrued.sustenance_support' => 'apoyo de sustento',
         'accrued.withdrawal_bonus' => 'bono de retiro',
         'accrued.compensation' => 'indemnización',
-        
+
         'deduction.fondossp_type_law_deductions_id' => 'fondo de seguridad pensional',
         'deduction.fondosp_deduction_SP' => 'deducción de fondo SP',
-        
+
         'deduction.fondossp_sub_type_law_deductions_id' => 'fondo de subsistencia',
         'deduction.fondosp_deduction_sub' => 'deducción de fondo subsistencia',
 

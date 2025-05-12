@@ -76,6 +76,7 @@ class Item extends ModelTenant
         // 'warehouse_id'
         'color_id',
         'size_id',
+        'chart_account_sale_configuration_id',
     ];
 
 

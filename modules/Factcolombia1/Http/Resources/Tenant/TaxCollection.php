@@ -21,6 +21,10 @@ class TaxCollection extends ResourceCollection
                 'in_base' => $row->in_base,
                 'in_tax' => $row->in_tax,
                 'type_tax_id_name' => $row->type_tax->name,
+                'chart_account_sale' => $row->chart_account_sale,
+                'chart_account_purchase' => $row->chart_account_purchase,
+                'chart_account_return_sale' => $row->chart_account_return_sale,
+                'chart_account_return_purchase' => $row->chart_account_return_purchase,
             ];
         });
     }

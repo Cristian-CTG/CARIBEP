@@ -19,7 +19,22 @@ class Tax extends Model
      *
      * @var array
      */
-    protected $fillable = ['name', 'code', 'rate', 'conversion', 'is_percentage', 'is_fixed_value', 'is_retention', 'in_base', 'in_tax', 'type_tax_id'];
+    protected $fillable = [
+        'name',
+        'code',
+        'rate',
+        'conversion',
+        'is_percentage',
+        'is_fixed_value',
+        'is_retention',
+        'in_base',
+        'in_tax',
+        'type_tax_id',
+        'chart_account_sale',
+        'chart_account_purchase',
+        'chart_account_return_sale',
+        'chart_account_return_purchase',
+    ];
 
     /**
      * The attributes that should be mutated to dates.

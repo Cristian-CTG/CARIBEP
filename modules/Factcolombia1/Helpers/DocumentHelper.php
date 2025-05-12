@@ -192,6 +192,13 @@ class DocumentHelper
 //\Log::debug("7");
         }
 //\Log::debug("8");
+
+        
+
+
+
+
+
         return $document;
     }
 

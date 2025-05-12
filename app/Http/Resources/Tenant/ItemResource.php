@@ -78,6 +78,7 @@ class ItemResource extends JsonResource
             'model' => $this->model,
             'color_id' => $this->color_id,
             'size_id' => $this->size_id,
+            'chart_account_sale_configuration_id' => $this->chart_account_sale_configuration_id,
 
         ];
     }

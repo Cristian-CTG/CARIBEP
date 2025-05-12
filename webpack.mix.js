@@ -32,6 +32,7 @@ mix.webpackConfig({
             '@viewsModulePayroll': path.resolve(__dirname, 'modules/Payroll/Resources/assets/js/views'),
             '@viewsModuleRadianEvent': path.resolve(__dirname, 'modules/RadianEvent/Resources/assets/js/views'),
             '@viewsModuleReport': path.resolve(__dirname, 'modules/Report/Resources/assets/js/views'),
+            '@viewsModuleAccounting': path.resolve(__dirname, 'modules/Accounting/Resources/assets/js/views'),
 
             '@viewsSystem': path.resolve(__dirname, 'resources/js/views/system'),
 

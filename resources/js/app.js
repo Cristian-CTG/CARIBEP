@@ -377,8 +377,11 @@ Vue.component('tenant-account-configuration-index', require('./views/tenant/acco
 //auto update
 Vue.component('system-update', require('./views/system/update/index.vue'));
 
-
-
+// contabilidad
+Vue.component('tenant-accounting-journal-entries-index', require('@viewsModuleAccounting/journal_entries/index.vue'));
+Vue.component('tenant-accounting-charts-index', require('@viewsModuleAccounting/chart_of_accounts/index.vue'));
+Vue.component('tenant-accounting-reports-financial-position-index', require('@viewsModuleAccounting/reports/financial_position.vue'));
+Vue.component('tenant-accounting-reports-income-statement-index', require('@viewsModuleAccounting/reports/income_statement.vue'));
 
 
 

@@ -1,0 +1,682 @@
+﻿code,name,type,level,parent_code
+1,ACTIVO,Asset,1,
+11,Disponible,Asset,2,1
+1105,Caja,Asset,3,11
+110505,Caja general,Asset,4,1105
+110510,Cajas menores,Asset,4,1105
+110515,Moneda extranjera,Asset,4,1105
+1110,Bancos,Asset,3,11
+111005,Moneda nacional,Asset,4,1110
+111010,Moneda extranjera,Asset,4,1110
+1115,Remesas en tránsito,Asset,3,11
+111505,Moneda nacional,Asset,4,1115
+111510,Moneda extranjera,Asset,4,1115
+1120,Cuentas de ahorro,Asset,3,11
+112005,Bancos,Asset,4,1120
+112010,Corporaciones de ahorro y vivienda,Asset,4,1120
+112015,Organismos cooperativos financieros,Asset,4,1120
+12,Inversiones,Asset,2,1
+1205,Acciones,Asset,3,12
+1210,Cuotas o partes de interés social,Asset,3,12
+1215,Bonos,Asset,3,12
+1220,Cédulas,Asset,3,12
+1225,Certificados,Asset,3,12
+1230,Papeles comerciales,Asset,3,12
+1235,Títulos,Asset,3,12
+1240,Aceptaciones bancarias o financieras,Asset,3,12
+1245,Derechos fiduciarios,Asset,3,12
+1250,Derechos de recompra de inversiones negociadas (repos),Asset,3,12
+1255,Obligatorias,Asset,3,12
+1260,Cuentas en participación,Asset,3,12
+1295,Otras inversiones,Asset,3,12
+1299,Provisiones,Asset,3,12
+13,Deudores,Asset,2,1
+1305,Clientes,Asset,3,13
+130505,Nacionales,Asset,4,1305
+130510,Del exterior,Asset,4,1305
+130515,Deudores del sistema,Asset,4,1305
+1310,Cuentas corrientes comerciales,Asset,3,13
+131005,Casa matriz,Asset,4,1310
+131010,Compañías vinculadas,Asset,4,1310
+131015,Accionistas o socios,Asset,4,1310
+131020,Particulares,Asset,4,1310
+1315,Cuentas por cobrar a casa matriz,Asset,3,13
+131505,Ventas,Asset,4,1315
+131510,Pagos a nombre de casa matriz,Asset,4,1315
+131515,Valores recibidos por casa matriz,Asset,4,1315
+131520,Préstamos,Asset,4,1315
+1320,Cuentas por cobrar a vinculados económicos,Asset,3,13
+132005,Filiales,Asset,4,1320
+132010,Subsidiarias,Asset,4,1320
+132015,Sucursales,Asset,4,1320
+1323,Cuentas por cobrar a directores,Asset,3,13
+1325,Cuentas por cobrar a socios y accionistas,Asset,3,13
+132505,A socios,Asset,4,1325
+132510,A accionistas,Asset,4,1325
+1328,Aportes por cobrar,Asset,3,13
+1330,Anticipos y avances,Asset,3,13
+133005,A proveedores,Asset,4,1330
+133010,A contratistas,Asset,4,1330
+133015,A trabajadores,Asset,4,1330
+133020,A agentes,Asset,4,1330
+133025,A concesionarios,Asset,4,1330
+133030,De adjudicaciones,Asset,4,1330
+133090,Anticipo de nómina,Asset,4,1330
+1332,Cuentas de operación conjunta,Asset,3,13
+1335,Depósitos,Asset,3,13
+1340,Promesas de compra venta,Asset,3,13
+1345,Ingresos por cobrar,Asset,3,13
+1350,Retención sobre contratos,Asset,3,13
+135005,De construcción,Asset,4,1350
+135010,De prestación de servicios,Asset,4,1350
+1355,Anticipo de impuestos y contribuciones o saldos a favor,Asset,3,13
+135505,Anticipo de impuestos de renta y complementarios,Asset,4,1355
+135510,Anticipo de impuestos de industria y comercio,Asset,4,1355
+135515,Retención en la fuente,Asset,5,1355
+13551505,Retención en la fuente 2.5%,Asset,6,135515
+13551510,Retención en la fuente 4%,Asset,6,135515
+13551515,Retención en la fuente 6%,Asset,6,135515
+13551520,Retención en la fuente 10%,Asset,6,135515
+13551525,Retención en la fuente 11%,Asset,6,135515
+13551530,Retención en la fuente 3.5%,Asset,6,135515
+13551535,Retención en la fuente 2%,Asset,6,135515
+13551540,Retención en la Fuente 1.5%,Asset,6,135515
+135517,Impuesto a las ventas retenido,Asset,4,1355
+13551705,Impuesto a las ventas retenido 15%,Asset,5,135517
+135518,Impuesto de industria y comercio retenido,Asset,4,1355
+135519,Otras retenciones a favor,Asset,4,1355
+135520,Sobrantes en liquidación privada de impuestos,Asset,4,1355
+135525,Contribuciones,Asset,4,1355
+135530,Impuestos descontables,Asset,4,1355
+13553005,Devolución de impuestos descontables,Asset,5,135530
+135590,Impuesto nacional al consumo a favor,Asset,4,1355
+135595,Otros impuestos descontables,Asset,4,1355
+1360,Reclamaciones,Asset,3,13
+136005,A compañías aseguradoras,Asset,4,1360
+136010,A transportadores,Asset,4,1360
+136015,Por tiquetes aéreos,Asset,4,1360
+1365,Cuentas por cobrar a trabajadores,Asset,3,13
+136505,Vivienda,Asset,4,1365
+136510,Vehículos,Asset,4,1365
+136515,Educación,Asset,4,1365
+136520,Médicos, odontológicos y similares,Asset,4,1365
+136525,Calamidad doméstica,Asset,4,1365
+136530,Responsabilidades,Asset,4,1365
+1370,Préstamos a particulares,Asset,3,13
+137005,Con garantía real,Asset,4,1370
+137010,Con garantía personal,Asset,4,1370
+1380,Deudores varios,Asset,3,13
+138005,Depositarios,Asset,4,1380
+138010,Comisionistas de bolsas,Asset,4,1380
+138015,Fondo de inversión,Asset,4,1380
+138020,Cuentas por cobrar de terceros,Asset,4,1380
+138025,Pagos por cuenta de terceros,Asset,4,1380
+138030,Fondos de inversión social,Asset,4,1380
+138035,Devoluciones a proveedores,Asset,4,1380
+1385,Derechos de recompra de cartera negociada,Asset,3,13
+1390,Deudas de difícil cobro,Asset,3,13
+1399,Provisiones,Asset,3,13
+139905,Clientes,Asset,4,1399
+139910,Cuentas corrientes comerciales,Asset,4,1399
+139915,Cuentas por cobrar a casa matriz,Asset,4,1399
+139920,Cuentas por cobrar a vinculados económicos,Asset,4,1399
+139925,Cuentas por cobrar a socios y accionistas,Asset,4,1399
+139930,Anticipos y avances,Asset,4,1399
+139932,Cuentas de operación conjunta,Asset,4,1399
+139935,Depósitos,Asset,4,1399
+139940,Promesas de compraventa,Asset,4,1399
+139945,Ingresos por cobrar,Asset,4,1399
+139950,Retención sobre contratos,Asset,4,1399
+139955,Reclamaciones,Asset,4,1399
+139960,Cuentas por cobrar a trabajadores,Asset,4,1399
+139965,Préstamos a particulares,Asset,4,1399
+139975,Deudores varios,Asset,4,1399
+139980,Derechos de recompra de cartera negociada,Asset,4,1399
+14,Inventarios,Asset,2,
+1430,Productos terminados,Asset,3,14
+143005,Productos manufacturados,Asset,4,1430
+143010,Productos extraídos y/o procesados,Asset,4,1430
+1435,Mercancías no fabricadas por la empresa,Asset,3,14
+1455,Materiales, repuestos y accesorios,Asset,3,14
+15,Propiedades, planta y equipo,Asset,2,
+1504,Terrenos,Asset,3,15
+150405,Urbanos,Asset,4,1504
+150410,Rurales,Asset,4,1504
+1506,Materiales proyectos petroleros,Asset,3,15
+1508,Construcciones en curso,Asset,3,15
+150805,Construcciones y edificaciones,Asset,4,1508
+1512,Maquinaria y equipos en montaje,Asset,3,15
+151205,Maquinaria y equipo,Asset,4,1512
+151210,Equipo de oficina,Asset,4,1512
+151215,Equipo de computación y comunicación,Asset,4,1512
+151230,Flota y equipo de transporte,Asset,4,1512
+1516,Construcciones y edificaciones,Asset,3,15
+151605,Edificios,Asset,4,1516
+1520,Maquinaria y equipo,Asset,3,15
+1524,Equipo de oficina,Asset,3,15
+152405,Muebles y enseres,Asset,4,1524
+152410,Equipos,Asset,4,1524
+1528,Equipo de computación y comunicación,Asset,3,15
+152805,Equipos de procesamiento de datos,Asset,4,1528
+152810,Equipos de telecomunicaciones,Asset,4,1528
+152815,Equipos de radio,Asset,4,1528
+152820,Satélites y antenas,Asset,4,1528
+152825,Líneas telefónicas,Asset,4,1528
+1592,Depreciación acumulada,Asset,3,15
+159205,Construcciones y edificaciones,Asset,4,1592
+159210,Maquinaria y equipo,Asset,4,1592
+159215,Equipo de oficina,Asset,4,1592
+159220,Equipo de computación y comunicación,Asset,4,1592
+159235,Flota y equipo de transporte,Asset,4,1592
+1596,Depreciación diferida,Asset,3,15
+159605,Exceso fiscal sobre la contable,Asset,4,1596
+159610,Defecto fiscal sobre la contable (CR),Asset,4,1596
+1597,Amortización acumulada,Asset,3,15
+1599,Provisiones,Asset,3,15
+1.,Propiedad, planta y equipo (Impuestos descontables),Asset,2,
+16,Intangibles,Asset,2,
+1605,Crédito mercantil,Asset,3,16
+160505,Formado o estimado,Asset,4,1605
+160510,Adquirido o comprado,Asset,4,1605
+1610,Marcas,Asset,3,16
+161005,Adquiridas,Asset,4,1610
+161010,Formadas,Asset,4,1610
+1615,Patentes,Asset,3,16
+161505,Adquiridas,Asset,4,1615
+161510,Formadas,Asset,4,1615
+1620,Concesiones y franquicias,Asset,3,16
+162005,Concesiones,Asset,4,1620
+162010,Franquicias,Asset,4,1620
+1625,Derechos,Asset,3,16
+162505,Derechos de autor,Asset,4,1625
+162510,Puesto de bolsa,Asset,4,1625
+162515,En fideicomisos inmobiliarios,Asset,4,1625
+162520,En fideicomisos de garantía,Asset,4,1625
+162525,En fideicomisos de administración,Asset,4,1625
+162530,De exhibición - películas,Asset,4,1625
+162535,En bienes recibidos en arrendamiento financiero (leasing),Asset,4,1625
+1630,Know how,Asset,3,16
+1635,Licencias,Asset,3,16
+1698,Depreciación y/o amortización acumulada,Asset,3,16
+169805,Crédito mercantil,Asset,4,1698
+169810,Marcas,Asset,4,1698
+169815,Patentes,Asset,4,1698
+169820,Concesiones y franquicias,Asset,4,1698
+169830,Derechos,Asset,4,1698
+169835,Know how,Asset,4,1698
+169840,Licencias,Asset,4,1698
+1699,Provisiones,Asset,3,16
+17,Diferidos,Asset,2,
+1705,Gastos pagados por anticipado,Asset,3,17
+170505,Intereses,Asset,4,1705
+170510,Honorarios,Asset,4,1705
+170515,Comisiones,Asset,4,1705
+170520,Seguros y fianzas,Asset,4,1705
+170525,Arrendamientos,Asset,4,1705
+170530,Bodegajes,Asset,4,1705
+170535,Mantenimiento equipos,Asset,4,1705
+170540,Servicios,Asset,4,1705
+170545,Suscripciones,Asset,4,1705
+1710,Cargos diferidos,Asset,3,17
+171004,Organización y preoperativos,Asset,4,1710
+171008,Remodelaciones,Asset,4,1710
+171012,Estudios, investigaciones y proyectos,Asset,4,1710
+171016,Programas para computador (software),Asset,4,1710
+171020,Útiles y papelería,Asset,4,1710
+171024,Mejoras a propiedades ajenas,Asset,4,1710
+171028,Contribuciones y afiliaciones,Asset,4,1710
+171032,Entrenamiento de personal,Asset,4,1710
+171036,Ferias y exposiciones,Asset,4,1710
+171040,Licencias,Asset,4,1710
+171044,Publicidad, propaganda y promoción,Asset,4,1710
+171048,Elementos de aseo y cafetería,Asset,4,1710
+171060,Dotación y suministro a trabajadores,Asset,4,1710
+171076,Impuesto de renta diferido débitos por diferencias temporales,Asset,4,1710
+171080,Concursos y licitaciones,Asset,4,1710
+1798,Amortización acumulada,Asset,3,17
+18,Otros activos,Asset,2,
+1805,Bienes de arte y cultura,Asset,3,18
+1895,Diversos,Asset,3,18
+1899,Provisiones,Asset,3,18
+19,Valorizaciones,Asset,2,
+1905,De inversiones,Asset,3,19
+190505,Acciones,Asset,4,1905
+190510,Cuotas o partes de interés social,Asset,4,1905
+190515,Derechos fiduciarios,Asset,4,1905
+171080,Concursos y licitaciones,Asset,4,1710
+1798,Amortización acumulada,Asset,3,17
+18,Otros activos,Asset,2,
+1805,Bienes de arte y cultura,Asset,3,18
+1895,Diversos,Asset,3,18
+1899,Provisiones,Asset,3,18
+19,Valorizaciones,Asset,2,
+1905,De inversiones,Asset,3,19
+190505,Acciones,Asset,4,1905
+190510,Cuotas o partes de interés social,Asset,4,1905
+190515,Derechos fiduciarios,Asset,4,1905
+1910,De propiedades,Asset,3,19
+191004,Terrenos,Asset,4,1910
+191008,Construcciones y edificaciones,Asset,4,1910
+191012,Maquinaria y equipo,Asset,4,1910
+191016,Equipo de oficina,Asset,4,1910
+191020,Equipo de computación y comunicación,Asset,4,1910
+191032,Flota y equipo de transporte,Asset,4,1910
+1995,De otros activos,Asset,3,19
+2,PASIVO,Liability,1,
+21,Obligaciones financieras,Liability,2,2
+2105,Bancos nacionales,Liability,3,21
+210505,Sobregiros,Liability,4,2105
+210510,Pagarés,Liability,4,2105
+210515,Cartas de crédito,Liability,4,2105
+210520,Aceptaciones bancarias,Liability,4,2105
+210525,Tarjeta de crédito,Liability,4,2105
+2110,Bancos del exterior,Liability,3,21
+211005,Sobregiros,Liability,4,2110
+211010,Pagarés,Liability,4,2110
+211015,Cartas de crédito,Liability,4,2110
+211020,Aceptaciones bancarias,Liability,4,2110
+2115,Corporaciones financieras,Liability,3,21
+211505,Pagarés,Liability,4,2115
+211510,Aceptaciones financieras,Liability,4,2115
+211515,Cartas de crédito,Liability,4,2115
+211520,Contratos de arrendamiento financiero (leasing),Liability,4,2115
+2120,Compañías de financiamiento comercial,Liability,3,21
+212005,Pagarés,Liability,4,2120
+212010,Aceptaciones financieras,Liability,4,2120
+212020,Contratos de arrendamiento financiero (leasing),Liability,4,2120
+2125,Corporaciones de ahorro y vivienda,Liability,3,21
+2130,Entidades financieras del exterior,Liability,3,21
+2135,Compromisos de recompra de inversiones negociadas,Liability,3,21
+2140,Compromisos de recompra de cartera negociada,Liability,3,21
+2145,Obligaciones gubernamentales,Liability,3,21
+214505,Gobierno Nacional,Liability,4,2145
+214510,Entidades oficiales,Liability,4,2145
+2195,Otras obligaciones,Liability,3,21
+22,Proveedores,Liability,2,
+2205,Nacionales,Liability,3,22
+2210,Del exterior,Liability,3,22
+2215,Cuentas corrientes comerciales,Liability,3,22
+2220,Casa matriz,Liability,3,22
+2225,Compañías vinculadas,Liability,3,22
+23,Cuentas por pagar,Liability,2,
+2305,Cuentas corrientes comerciales,Liability,3,23
+2310,A casa matriz,Liability,3,23
+2315,A compañías vinculadas,Liability,3,23
+2320,A contratistas,Liability,3,23
+2330,Órdenes de compra por utilizar,Liability,3,23
+2335,Costos y gastos por pagar,Liability,3,23
+233505,Gastos financieros,Liability,4,2335
+233510,Gastos legales,Liability,4,2335
+233515,Libros, periódicos y revistas,Liability,4,2335
+233520,Comisiones,Liability,4,2335
+233525,Honorarios,Liability,4,2335
+233530,Servicios técnicos,Liability,4,2335
+233535,Servicios de mantenimiento,Liability,4,2335
+233540,Arrendamientos,Liability,4,2335
+233545,Transportes,Liability,4,2335
+233550,Servicios públicos,Liability,4,2335
+233555,Seguros,Liability,4,2335
+233560,Gastos de viaje,Liability,4,2335
+233565,Gastos de representación y relaciones públicas,Liability,4,2335
+233570,Servicios aduaneros,Liability,4,2335
+2340,Instalamentos por pagar,Liability,3,23
+2345,Acreedores oficiales,Liability,3,23
+2350,Regalías por pagar,Liability,3,23
+2355,Deudas con accionistas o socios,Liability,3,23
+2357,Deudas con directores,Liability,3,23
+2360,Dividendos o participaciones por pagar,Liability,3,23
+236005,Dividendos,Liability,4,2360
+236010,Participaciones,Liability,4,2360
+236,Retenciones por pagar,Liability,3,23
+2365,Retención en la fuente,Liability,4,236
+236505,Salarios y pagos laborales,Liability,5,2365
+236510,Dividendos y/o participaciones,Liability,5,2365
+236515,Honorarios,Liability,5,2365
+236520,Comisiones,Liability,5,2365
+236525,Servicios,Liability,5,2365
+236530,Arrendamientos,Liability,5,2365
+236535,Rendimientos financieros,Liability,5,2365
+236540,Compras,Liability,5,2365
+236550,Por pagos al exterior,Liability,5,2365
+236555,Por ingresos obtenidos en el exterior,Liability,5,2365
+236560,Enajenación propiedades planta y equipo,Liability,5,2365
+236565,Por impuesto de timbre,Liability,5,2365
+236570,Otras retenciones y patrimonio,Liability,5,2365
+236575,Autorretenciones,Liability,5,2365
+2367,Impuesto a las ventas retenido,Liability,4,236
+2368,Impuesto de industria y comercio retenido,Liability,4,236
+2369,Otro tipo de retención por pagar,Liability,4,236
+2370,Retenciones y aportes de nómina,Liability,4,23
+237005,Aportes a entidades promotoras de salud,Liability,5,2370
+237006,Aportes a administradoras de riesgos profesionales,Liability,5,2370
+237010,Aportes al ICBF,Liability,5,2370
+237015,Aportes al FIC,Liability,5,2370
+237025,Embargos judiciales,Liability,5,2370
+237030,Libranzas,Liability,5,2370
+237035,Sindicatos,Liability,5,2370
+237040,Cooperativas,Liability,5,2370
+237045,Fondos,Liability,5,2370
+2375,Cuotas por devolver,Liability,4,23
+2380,Acreedores varios,Liability,4,23
+238005,Depositarios,Liability,5,2380
+238010,Comisionistas de bolsas,Liability,5,2380
+238015,Sociedad administradora-Fondos de inversión,Liability,5,2380
+238020,Reintegros por pagar,Liability,5,2380
+238025,Fondo de perseverancia,Liability,5,2380
+238030,Fondos de cesantías y/o pensiones,Liability,5,2380
+238035,Donaciones asignadas por pagar,Liability,5,2380
+238090,Devoluciones de clientes,Liability,5,2380
+24,Impuestos, gravámenes y tasas,Liability,2,
+2404,De renta y complementarios,Liability,3,
+240405,Vigencia fiscal corriente,Liability,4,2404
+240410,Vigencias fiscales anteriores,Liability,4,2404
+2408,Impuesto sobre las ventas por pagar,Liability,3,
+240805,IVA generado,Liability,4,2408
+24080501,Devolución de IVA generado,Liability,5,240805
+2412,De industria y comercio,Liability,3,
+2436,De vehículos,Liability,3,
+2485,Impuesto nacional al consumo,Liability,3,
+2495,Otros impuestos,Liability,3,
+25,Obligaciones laborales,Liability,2,
+2505,Salarios por pagar,Liability,3,25
+2510,Cesantías consolidadas,Liability,3,25
+251005,Ley laboral anterior,Liability,4,2510
+251010,Ley 50 de 1990 y normas posteriores,Liability,4,2510
+2515,Intereses sobre cesantías,Liability,3,25
+2520,Prima de servicios,Liability,3,25
+2525,Vacaciones consolidadas,Liability,3,25
+2530,Prestaciones extralegales,Liability,3,25
+253005,Primas,Liability,4,2530
+253010,Auxilios,Liability,4,2530
+253015,Dotación y suministro a trabajadores,Liability,4,2530
+253020,Bonificaciones,Liability,4,2530
+3,PATRIMONIO,Equity,1,
+31,Capital social,Equity,2,
+3105,Capital suscrito y pagado,Equity,3,31
+310505,Capital autorizado,Equity,4,3105
+310510,Capital por suscribir (DB),Equity,4,3105
+310515,Capital suscrito por cobrar (DB),Equity,4,3105
+3115,Aportes sociales,Equity,3,31
+311505,Cuotas o partes de interés social,Equity,4,3115
+311510,Aportes de socios-fondo mutuo de inversión,Equity,4,3115
+311515,Contribución de la empresa-fondo mutuo de inversión,Equity,4,3115
+311520,Suscripciones del público,Equity,4,3115
+3120,Capital asignado,Equity,3,31
+3125,Inversión suplementaria al capital asignado,Equity,3,31
+3130,Capital de personas naturales,Equity,3,31
+3135,Aportes del Estado,Equity,3,31
+3140,Fondo social,Equity,3,31
+32,Superávit de capital,Equity,2,
+3205,Prima en colocación de acciones, cuotas o partes de interés social,Equity,3,32
+320505,Prima en colocación de acciones,Equity,4,3205
+320510,Prima en colocación de acciones por cobrar (DB),Equity,4,3205
+320515,Prima en colocación de cuotas o partes de interés social,Equity,4,3205
+3210,Donaciones,Equity,3,
+3215,Crédito mercantil,Equity,3,
+3220,Know how,Equity,3,
+3225,Superávit método de participación,Equity,3,
+33,Reservas,Equity,2,
+3305,Reservas obligatorias,Equity,3,33
+330505,Reserva legal,Equity,4,3305
+330510,Reservas por disposiciones fiscales,Equity,4,3305
+330515,Reserva para readquisición de acciones,Equity,4,3305
+330516,Acciones propias readquiridas (DB),Equity,4,3305
+330517,Reserva para readquisición de cuotas o partes de interés social,Equity,4,3305
+330518,Cuotas o partes de interés social propias readquiridas (DB),Equity,4,3305
+3310,Reservas estatutarias,Equity,3,33
+3315,Reservas ocasionales,Equity,3,33
+34,Revalorización del patrimonio,Equity,2,
+3405,Ajustes por inflación,Equity,3,34
+340505,De capital social,Equity,4,3405
+340510,De superávit de capital,Equity,4,3405
+340515,De reservas,Equity,4,3405
+340520,De resultados de ejercicios anteriores,Equity,4,3405
+340545,Superávit método de participación,Equity,4,3405
+35,Dividendos o participaciones decretados en acciones, cuotas o partes de interés social,Equity,2,
+3505,Dividendos decretados en acciones,Equity,3,35
+3510,Participaciones decretadas en cuotas o partes de interés social,Equity,3,35
+36,Resultados del ejercicio,Equity,2,
+3605,Utilidad del ejercicio,Equity,3,36
+3610,Pérdida del ejercicio,Equity,3,36
+37,Resultados de ejercicios anteriores,Equity,2,
+3705,Utilidades acumuladas,Equity,3,37
+3710,Pérdidas acumuladas,Equity,3,37
+38,Superávit por valorizaciones,Equity,2,
+3805,De inversiones,Equity,3,38
+380505,Acciones,Equity,4,3805
+380510,Cuotas o partes de interés social,Equity,4,3805
+380515,Derechos fiduciarios,Equity,4,3805
+3810,De propiedades, planta y equipo,Equity,3,38
+3895,De otros activos,Equity,3,38
+39,Ajustes por saldos iniciales,Equity,2,
+3905,Ajustes iniciales en bancos,Equity,3,39
+3910,Ajustes iniciales en inventario,Equity,3,39
+4,INGRESOS,Revenue,1,
+41,Ingresos de actividades ordinarias,Revenue,2,
+4101,Ingresos por ventas,Revenue,3,41
+4175,Devoluciones en ventas,Revenue,3,41
+42,Otros ingresos,Revenue,2,
+4205,Otras ventas,Revenue,3,42
+4210,Financieros,Revenue,3,42
+421005,Intereses,Revenue,4,4210
+421010,Reajuste monetario-UPAC (hoy UVR),Revenue,4,4210
+421015,Descuentos amortizados,Revenue,4,4210
+421020,Diferencia en cambio,Revenue,4,4210
+421025,Financiación vehículos,Revenue,4,4210
+421045,Descuentos bancarios,Revenue,4,4210
+421050,Comisiones cheques de otras plazas,Revenue,4,4210
+4215,Dividendos y participaciones,Revenue,3,42
+4218,Ingresos método de participación,Revenue,3,42
+4220,Arrendamientos,Revenue,3,42
+4225,Comisiones,Revenue,3,42
+4230,Honorarios,Revenue,3,42
+4235,Servicios,Revenue,3,42
+4245,Utilidad en venta de propiedades, planta y equipo,Revenue,3,42
+4248,Utilidad en venta de otros bienes,Revenue,3,42
+4250,Recuperaciones,Revenue,3,42
+4255,Indemnizaciones,Revenue,3,42
+4260,Participaciones en concesiones,Revenue,3,42
+4295,Diversos,Revenue,3,42
+429581,Ajuste al peso,Revenue,4,4295
+47,Ajustes por inflación,Revenue,2,
+4705,Corrección monetaria,Revenue,3,47
+5,GASTOS,Expense,1
+51,Operacionales de administración,Expense,2,5
+5105,Gastos de personal,Expense,3,51
+510503,Salario integral,Expense,4,5105
+510506,Sueldos,Expense,4,5105
+510512,Jornales,Expense,4,5105
+510515,Horas extras y recargos,Expense,4,5105
+510518,Comisiones,Expense,4,5105
+510521,Viáticos,Expense,4,5105
+510524,Incapacidades,Expense,4,5105
+510527,Auxilio de transporte,Expense,4,5105
+510530,Cesantías,Expense,4,5105
+510533,Intereses sobre cesantías,Expense,4,5105
+510536,Prima de servicios,Expense,4,5105
+510539,Vacaciones,Expense,4,5105
+510542,Primas extralegales,Expense,4,5105
+510545,Auxilios,Expense,4,5105
+510548,Bonificaciones,Expense,4,5105
+510551,Dotación y suministro a trabajadores,Expense,4,5105
+510554,Seguros,Expense,4,5105
+510560,Indemnizaciones laborales,Expense,4,5105
+510563,Capacitación al personal,Expense,4,5105
+510566,Gastos deportivos y de recreación,Expense,4,5105
+510568,Aportes a administradoras de riesgos laborales, ARL,Expense,4,5105
+510569,Aportes a entidades promotoras de salud, EPS,Expense,4,5105
+510570,Aportes a fondos de pensiones y/o cesantías,Expense,4,5105
+510572,Aportes cajas de compensación familiar,Expense,4,5105
+510575,Aportes ICBF,Expense,4,5105
+510578,Aportes SENA,Expense,4,5105
+510584,Gastos médicos y drogas,Expense,4,5105
+5110,Honorarios,Expense,3,51
+511005,Junta directiva,Expense,4,5110
+511010,Revisoría fiscal,Expense,4,5110
+511015,Auditoría externa,Expense,4,5110
+511020,Avalúos,Expense,4,5110
+511025,Asesoría jurídica,Expense,4,5110
+511030,Asesoría financiera,Expense,4,5110
+511035,Asesoría técnica,Expense,4,5110
+5115,Impuestos,Expense,3,51
+511505,Industria y comercio,Expense,4,5115
+511510,De timbres,Expense,4,5115
+511515,A la propiedad raíz,Expense,4,5115
+511540,De vehículos,Expense,4,5115
+511570,IVA descontable,Expense,4,5115
+5120,Arrendamientos,Expense,3,51
+5125,Contribuciones y afiliaciones,Expense,3,51
+5130,Seguros,Expense,3,51
+513020,Vida colectiva,Expense,4,5130
+513025,Incendio,Expense,4,5130
+513030,Terremoto,Expense,4,5130
+513035,Sustracción y hurto,Expense,4,5130
+513040,Flota y equipo de transporte,Expense,4,5130
+513060,Responsabilidad civil y extracontractual,Expense,4,5130
+513075,Obligatorio accidente de tránsito,Expense,4,5130
+513080,Lucro cesante,Expense,4,5130
+513085,Transporte de mercancía,Expense,4,5130
+5135,Servicios,Expense,3,51
+513505,Aseo y vigilancia,Expense,4,5135
+513510,Temporales,Expense,4,5135
+513515,Asistencia técnica,Expense,4,5135
+513520,Procesamiento electrónico de datos,Expense,4,5135
+513525,Acueducto y alcantarillado,Expense,4,5135
+513530,Energía eléctrica,Expense,4,5135
+513535,Teléfono,Expense,4,5135
+513540,Correo, portes y telegramas,Expense,4,5135
+513550,Transporte, fletes y acarreos,Expense,4,5135
+513555,Gas,Expense,4,5135
+5140,Gastos legales,Expense,3,51
+514005,Notariales,Expense,4,5140
+514010,Registro mercantil,Expense,4,5140
+514015,Trámites y licencias,Expense,4,5140
+514020,Aduaneros,Expense,4,5140
+5145,Mantenimiento y reparaciones,Expense,3,51
+514505,Terrenos,Expense,4,5145
+514510,Construcciones y edificaciones,Expense,4,5145
+514515,Maquinaria y equipo,Expense,4,5145
+514520,Equipo de oficina,Expense,4,5145
+514525,Equipo de computación y comunicación,Expense,4,5145
+5150,Adecuación e instalación,Expense,3,51
+515005,Instalaciones eléctricas,Expense,4,5150
+515015,Reparaciones locativas,Expense,4,5150
+5155,Gastos de viaje,Expense,3,51
+515505,Alojamiento y manutención,Expense,4,5155
+515510,Pasajes fluviales y/o marítimos,Expense,4,5155
+515515,Pasajes aéreos,Expense,4,5155
+515520,Pasajes terrestres,Expense,4,5155
+515525,Pasajes férreos,Expense,4,5155
+5160,Depreciaciones,Expense,3,51
+516005,Construcciones y edificaciones,Expense,4,5160
+516010,Maquinaria y equipo,Expense,4,5160
+516015,Equipo de oficina,Expense,4,5160
+516020,Equipo de computación y comunicación,Expense,4,5160
+5165,Amortizaciones,Expense,3,51
+516510,Intangibles,Expense,4,5165
+516515,Cargos diferidos,Expense,4,5165
+5195,Diversos,Expense,3,51
+519505,Comisiones,Expense,4,5195
+519510,Libros, suscripciones, periódicos y revistas,Expense,4,5195
+519520,Gastos de representación y relaciones públicas,Expense,4,5195
+519525,Elementos de aseo y cafetería,Expense,4,5195
+519530,Útiles, papelería y fotocopias,Expense,4,5195
+519535,Combustibles y lubricantes,Expense,4,5195
+519540,Envases y empaques,Expense,4,5195
+519545,Taxis y buses,Expense,4,5195
+519550,Estampillas,Expense,4,5195
+519560,Casino y restaurante,Expense,4,5195
+519565,Parqueaderos,Expense,4,5195
+519570,Indemnización por daños a terceros,Expense,4,5195
+5199,Provisiones,Expense,3,51
+519905,Inversiones,Expense,4,5199
+519910,Deudores,Expense,4,5199
+519915,Propiedades, planta y equipo,Expense,4,5199
+519995,Otros activos,Expense,4,5199
+52,Operacionales de ventas,Expense,2,5
+5205,Gastos de personal,Expense,3,52
+520503,Salario integral,Expense,4,5205
+520506,Sueldos,Expense,4,5205
+520512,Jornales,Expense,4,5205
+520515,Horas extras y recargos,Expense,4,5205
+520518,Comisiones,Expense,4,5205
+520521,Viáticos,Expense,4,5205
+520524,Incapacidades,Expense,4,5205
+520527,Auxilio de transporte,Expense,4,5205
+520530,Cesantías,Expense,4,5205
+520533,Intereses sobre cesantías,Expense,4,5205
+520536,Prima de servicios,Expense,4,5205
+520539,Vacaciones,Expense,4,5205
+520542,Primas extralegales,Expense,4,5205
+520545,Auxilios,Expense,4,5205
+520548,Bonificaciones,Expense,4,5205
+520551,Dotación y suministro a trabajadores,Expense,4,5205
+520554,Seguros,Expense,4,5205
+520560,Indemnizaciones laborales,Expense,4,5205
+520563,Capacitación al personal,Expense,4,5205
+520566,Gastos deportivos y de recreación,Expense,4,5205
+520568,Aportes a administradoras de riesgos laborales, ARL,Expense,4,5205
+520569,Aportes a entidades promotoras de salud, EPS,Expense,4,5205
+520570,Aportes a fondos de pensiones y/o cesantías,Expense,4,5205
+520572,Aportes cajas de compensación familiar,Expense,4,5205
+520575,Aportes ICBF,Expense,4,5205
+520578,Aportes SENA,Expense,4,5205
+520584,Gastos médicos y drogas,Expense,4,5205
+53,No operacionales,Expense,2,5
+5305,Financieros,Expense,3,53
+530505,Gastos bancarios,Expense,4,5305
+530510,Reajuste monetario-UPAC (hoy UVR),Expense,4,5305
+530515,Comisiones,Expense,4,5305
+530520,Intereses,Expense,4,5305
+530525,Diferencia en cambio,Expense,4,5305
+530530,Gastos en negociación certificados de cambio,Expense,4,5305
+530535,Descuentos comerciales condicionados,Expense,4,5305
+530540,Gastos manejo y emisión de bonos,Expense,4,5305
+530545,Prima amortizada,Expense,4,5305
+5310,Pérdida en venta y retiro de bienes,Expense,3,53
+531005,Venta de inversiones,Expense,4,5310
+531010,Venta de cartera,Expense,4,5310
+531015,Venta de propiedades, planta y equipo,Expense,4,5310
+531020,Venta de intangibles,Expense,4,5310
+531025,Venta de otros activos,Expense,4,5310
+531030,Retiro de propiedades, planta y equipo,Expense,4,5310
+531035,Retiro de otros activos,Expense,4,5310
+531040,Pérdidas por siniestros,Expense,4,5310
+5313,Pérdidas método de participación,Expense,3,53
+5315,Gastos extraordinarios,Expense,3,53
+531505,Costas y procesos judiciales,Expense,4,5315
+531510,Actividades culturales y cívicas,Expense,4,5315
+531515,Costos y gastos de ejercicios anteriores,Expense,4,5315
+531520,Impuestos asumidos,Expense,4,5315
+5395,Gastos diversos,Expense,3,53
+539505,Demandas laborales,Expense,4,5395
+539510,Demandas por incumplimiento de contratos,Expense,4,5395
+539515,Indemnizaciones,Expense,4,5395
+539520,Multas, sanciones y litigios,Expense,4,5395
+539525,Donaciones,Expense,4,5395
+539530,Constitución de garantías,Expense,4,5395
+539535,Amortización de bienes entregados en comodato,Expense,4,5395
+539540,Ajustes por aproximaciones en cálculos,Expense,4,5395
+54,Impuesto de renta y complementarios,Expense,2
+5405,Impuesto de renta y complementarios,Expense,3,54
+540505,Impuesto de renta y complementarios,Expense,4,5405
+5410,Impuestos no acreditables,Expense,3,54
+541005,Impuestos no acreditables,Expense,4,5410
+5415,Retención en la fuente asumida,Expense,3,54
+541505,Retención en la fuente asumida,Expense,4,5415
+59,Ganancias y pérdidas,Expense,2
+5905,Ganancias y pérdidas,Expense,3,59
+590505,Ganancias y pérdidas,Expense,4,5905
+6,COSTOS DE VENTAS,Cost,1
+61,Costo de ventas y de prestación de servicios,Cost,2,6
+6101,Costos de ventas,Cost,3,61
+6135,Comercio al por mayor y al por menor,Cost,3,61
+6180,Ajustes,Cost,3,61
+618005,Ajustes de inventario,Cost,4,6180
+618010,Descuentos financieros,Cost,4,6180
+62,Compras,Cost,2
+6205,De mercancías,Cost,3,62
+6210,De materias primas,Cost,3,62
+6215,De materiales indirectos,Cost,3,62
+6220,Compra de energía,Cost,3,62
+6225,Devoluciones en compras (CR),Cost,3,62

@@ -238,6 +238,16 @@
                             </div>
                         </div>
 
+                        <div class="col-md-6">
+                            <div class="form-group" :class="{'has-danger': errors.chart_account_sale_configuration_id}">
+                                <label class="control-label">Clasificación contable</label>
+                                <el-select v-model="form.chart_account_sale_configuration_id" dusk="chart_account_sale_configuration_id" filterable>
+                                    <el-option v-for="option in account_sale_configurations" :key="option.id" :value="option.id" :label="option.accounting_clasification"></el-option>
+                                </el-select>
+                                <small class="form-control-feedback" v-if="errors.chart_account_sale_configuration_id" v-text="errors.chart_account_sale_configuration_id[0]"></small>
+                            </div>
+                        </div>
+
                         <div v-show="form.unit_type_id != 1" class="col-md-12">
                             <h5 class="separator-title">
                                 Listado de precios
@@ -501,6 +511,7 @@
                 sizes: [],
                 colors: [],
                 accounts: [],
+                account_sale_configurations: [],
                 show_has_igv:true,
                 have_account:false,
                 item_unit_type:{
@@ -533,6 +544,7 @@
                     this.sizes = response.data.sizes
                     this.attribute_types = response.data.attribute_types
                     this.configuration = response.data.configuration
+                    this.account_sale_configurations = response.data.account_sale_configurations
 
                     // this.form.sale_affectation_igv_type_id = (this.affectation_igv_types.length > 0)?this.affectation_igv_types[0].id:null
                     // this.form.purchase_affectation_igv_type_id = (this.affectation_igv_types.length > 0)?this.affectation_igv_types[0].id:null
@@ -697,6 +709,7 @@
                     purchase_tax_id: 1,
                     currency_type_id: 170,
                     model: null,
+                    chart_account_sale_configuration_id: 1,
                 }
                 this.show_has_igv = true
                 this.enabled_percentage_of_profit = false

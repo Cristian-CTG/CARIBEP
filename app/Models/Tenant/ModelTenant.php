@@ -10,11 +10,11 @@ use Illuminate\Database\Eloquent\Builder;
 class ModelTenant extends Model
 {
     use UsesTenantConnection;
-    
+
     public const EXEMPT_TAX_CODE = '07';
-    
+
     /**
-     * 
+     *
      * Filtrar registros dependiendo del perfil de usuario
      *
      * @param  Builder $query
@@ -28,7 +28,7 @@ class ModelTenant extends Model
 
 
     /**
-     * 
+     *
      * Aplicar formato
      *
      * @param  $value
@@ -39,10 +39,10 @@ class ModelTenant extends Model
     {
         return number_format($value, $decimals, ".", "");
     }
-    
+
 
     /**
-    * 
+    *
     * Filtros where like general para buscar campos en listados
     *
     * @param  Builder $query
@@ -53,13 +53,13 @@ class ModelTenant extends Model
    public function scopeGeneralWhereLikeColumn($query, $column, $value)
    {
        if(empty($value)) return $query;
-       
+
        return $query->where($column, 'like', "%{$value}%");
    }
 
 
    /**
-    * 
+    *
     * Filtros OR where like general para buscar campos en listados
     *
     * @param  Builder $query
@@ -70,7 +70,7 @@ class ModelTenant extends Model
    public function scopeGeneralOrWhereLikeColumn($query, $column, $value)
    {
        if(empty($value)) return $query;
-       
+
        return $query->orWhere($column, 'like', "%{$value}%");
    }
 

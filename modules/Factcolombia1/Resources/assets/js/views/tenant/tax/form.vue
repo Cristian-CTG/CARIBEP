@@ -2,123 +2,176 @@
     <el-dialog width="65%" :title="titleDialog" :visible="showDialog" :close-on-click-modal="false" @close="close" @open="create" append-to-body top="7vh">
         <form autocomplete="off" @submit.prevent="submit">
             <div class="form-body">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group" :class="{'has-danger': errors.name}">
-                            <label class="control-label">Nombre *</label>
-                            <el-input v-model="form.name"></el-input>
-                            <small class="form-control-feedback" v-if="errors.name" v-text="errors.name[0]"></small>
-                        </div>
-                    </div>
+                <el-tabs v-model="activeName">
+                    <el-tab-pane class="mb-3" name="general">
+                        <span slot="label">General</span>
+                    
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group" :class="{'has-danger': errors.name}">
+                                    <label class="control-label">Nombre *</label>
+                                    <el-input v-model="form.name"></el-input>
+                                    <small class="form-control-feedback" v-if="errors.name" v-text="errors.name[0]"></small>
+                                </div>
+                            </div>
 
-                    <div class="col-md-4">
-                        <div class="form-group" :class="{'has-danger': errors.code}">
-                            <label class="control-label">Codigo *</label>
-                            <el-input v-model="form.code"></el-input>
-                            <small class="form-control-feedback" v-if="errors.code" v-text="errors.code[0]"></small>
-                        </div>
-                    </div>
+                            <div class="col-md-4">
+                                <div class="form-group" :class="{'has-danger': errors.code}">
+                                    <label class="control-label">Codigo *</label>
+                                    <el-input v-model="form.code"></el-input>
+                                    <small class="form-control-feedback" v-if="errors.code" v-text="errors.code[0]"></small>
+                                </div>
+                            </div>
 
-                    <div class="col-md-4">
-                        <div class="form-group" :class="{'has-danger': errors.rate}">
-                            <label class="control-label">Tasa *</label>
-                            <el-input v-model="form.rate"></el-input>
-                            <small class="form-control-feedback" v-if="errors.rate" v-text="errors.rate[0]"></small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group" :class="{'has-danger': errors.conversion}">
-                            <label class="control-label">Conversion *</label>
-                            <el-input v-model="form.conversion"></el-input>
-                            <small class="form-control-feedback" v-if="errors.conversion" v-text="errors.conversion[0]"></small>
-                        </div>
-                    </div>
-
-                     <div class="col-md-4">
-                        <div class="form-group" :class="{'has-danger': errors.is_percentage}">
-                            <label class="control-label">Tasa porcentaje *</label>
-                            <div>
-                                <el-switch
-                                    v-model="form.is_percentage"
-                                    active-text="Si"
-                                    inactive-text="No"
-                                    @change="validateRate(form.is_percentage)">
-                                </el-switch>
-                                <small class="form-control-feedback" v-if="errors.is_percentage" v-text="errors.is_percentage[0]"></small>
+                            <div class="col-md-4">
+                                <div class="form-group" :class="{'has-danger': errors.rate}">
+                                    <label class="control-label">Tasa *</label>
+                                    <el-input v-model="form.rate"></el-input>
+                                    <small class="form-control-feedback" v-if="errors.rate" v-text="errors.rate[0]"></small>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="col-md-4">
-                        <div class="form-group" :class="{'has-danger': errors.is_fixed_value}">
-                            <label class="control-label">Tasa valor fijo *</label>
-                            <div>
-                                <el-switch
-                                    v-model="form.is_fixed_value"
-                                    active-text="Si"
-                                    inactive-text="No"
-                                    @change="validateRate(form.is_fixed_value, false)">
-                                </el-switch>
-                                <small class="form-control-feedback" v-if="errors.is_fixed_value" v-text="errors.is_fixed_value[0]"></small>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group" :class="{'has-danger': errors.conversion}">
+                                    <label class="control-label">Conversion *</label>
+                                    <el-input v-model="form.conversion"></el-input>
+                                    <small class="form-control-feedback" v-if="errors.conversion" v-text="errors.conversion[0]"></small>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group" :class="{'has-danger': errors.is_percentage}">
+                                    <label class="control-label">Tasa porcentaje *</label>
+                                    <div>
+                                        <el-switch
+                                            v-model="form.is_percentage"
+                                            active-text="Si"
+                                            inactive-text="No"
+                                            @change="validateRate(form.is_percentage)">
+                                        </el-switch>
+                                        <small class="form-control-feedback" v-if="errors.is_percentage" v-text="errors.is_percentage[0]"></small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group" :class="{'has-danger': errors.is_fixed_value}">
+                                    <label class="control-label">Tasa valor fijo *</label>
+                                    <div>
+                                        <el-switch
+                                            v-model="form.is_fixed_value"
+                                            active-text="Si"
+                                            inactive-text="No"
+                                            @change="validateRate(form.is_fixed_value, false)">
+                                        </el-switch>
+                                        <small class="form-control-feedback" v-if="errors.is_fixed_value" v-text="errors.is_fixed_value[0]"></small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group" :class="{'has-danger': errors.is_retention}">
-                            <label class="control-label">Impuesto de retención *</label>
-                            <div>
-                                <el-switch
-                                    v-model="form.is_retention"
-                                    active-text="Si"
-                                    inactive-text="No">
-                                </el-switch>
-                                <small class="form-control-feedback" v-if="errors.is_retention" v-text="errors.is_retention[0]"></small>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group" :class="{'has-danger': errors.is_retention}">
+                                    <label class="control-label">Impuesto de retención doc *</label>
+                                    <div>
+                                        <el-switch
+                                            v-model="form.is_retention"
+                                            active-text="Si"
+                                            inactive-text="No">
+                                        </el-switch>
+                                        <small class="form-control-feedback" v-if="errors.is_retention" v-text="errors.is_retention[0]"></small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group" :class="{'has-danger': errors.in_base}">
+                                    <label class="control-label">Retención en base *</label>
+                                    <div>
+                                        <el-switch
+                                            v-model="form.in_base"
+                                            active-text="Si"
+                                            inactive-text="No">
+                                        </el-switch>
+                                        <small class="form-control-feedback" v-if="errors.in_base" v-text="errors.in_base[0]"></small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group" :class="{'has-danger': errors.in_tax}">
+                                    <label class="control-label">Retención en impuesto</label>
+                                    <el-select v-model="form.in_tax" filterable :disabled="in_tax_retention_disabled()">
+                                        <el-option v-for="option in taxes_in_tax" :key="option.id" :value="option.id" :label="option.name"></el-option>
+                                    </el-select>
+                                    <small class="form-control-feedback" v-if="errors.in_tax" v-text="errors.in_tax[0]"></small>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="col-md-4">
-                        <div class="form-group" :class="{'has-danger': errors.in_base}">
-                            <label class="control-label">Retención en base *</label>
-                            <div>
-                                <el-switch
-                                    v-model="form.in_base"
-                                    active-text="Si"
-                                    inactive-text="No">
-                                </el-switch>
-                                <small class="form-control-feedback" v-if="errors.in_base" v-text="errors.in_base[0]"></small>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group" :class="{'has-danger': errors.type_tax_id}">
+                                    <label class="control-label">Tipo impuesto</label>
+                                    <el-select v-model="form.type_tax_id" filterable >
+                                        <el-option v-for="option in type_taxes" :key="option.id" :value="option.id" :label="option.name"></el-option>
+                                    </el-select>
+                                    <small class="form-control-feedback" v-if="errors.type_tax_id" v-text="errors.type_tax_id[0]"></small>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="col-md-4">
-                        <div class="form-group" :class="{'has-danger': errors.in_tax}">
-                            <label class="control-label">Retención en impuesto</label>
-                            <el-select v-model="form.in_tax" filterable :disabled="in_tax_retention_disabled()">
-                                <el-option v-for="option in taxes_in_tax" :key="option.id" :value="option.id" :label="option.name"></el-option>
-                            </el-select>
-                            <small class="form-control-feedback" v-if="errors.in_tax" v-text="errors.in_tax[0]"></small>
+                    </el-tab-pane>
+                    <el-tab-pane class="mb-3" name="account">
+                        <span slot="label">Configuración contable</span>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="control-label">Configura las cuentas contables que se utilizarán en los movimientos</label>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="form-group" :class="{'has-danger': errors.chart_account_sale}">
+                                    <label class="control-label">Cuenta contable ventas</label>
+                                    <el-select v-model="form.chart_account_sale" filterable >
+                                        <el-option v-for="option in chart_accounts_sales" :key="option.code" :value="option.code" :label="`${option.code} - ${option.name}`"></el-option>
+                                    </el-select>
+                                    <small class="form-control-feedback" v-if="errors.chart_account_sale" v-text="errors.chart_account_sale[0]"></small>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="form-group" :class="{'has-danger': errors.chart_account_purchase}">
+                                    <label class="control-label">Cuenta contable compras</label>
+                                    <el-select v-model="form.chart_account_purchase" filterable >
+                                        <el-option v-for="option in chart_accounts_purchases" :key="option.code" :value="option.code" :label="`${option.code} - ${option.name}`"></el-option>
+                                    </el-select>
+                                    <small class="form-control-feedback" v-if="errors.chart_account_purchase" v-text="errors.chart_account_purchase[0]"></small>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="form-group" :class="{'has-danger': errors.chart_account_return_sale}">
+                                    <label class="control-label">Cuenta contable devoluciones ventas</label>
+                                    <el-select v-model="form.chart_account_return_sale" filterable >
+                                        <el-option v-for="option in chart_accounts_sales" :key="option.code" :value="option.code" :label="`${option.code} - ${option.name}`"></el-option>
+                                    </el-select>
+                                    <small class="form-control-feedback" v-if="errors.chart_account_return_sale" v-text="errors.chart_account_return_sale[0]"></small>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="form-group" :class="{'has-danger': errors.chart_account_return_purchase}">
+                                    <label class="control-label">Cuenta contable devoluciones compras</label>
+                                    <el-select v-model="form.chart_account_return_purchase" filterable >
+                                        <el-option v-for="option in chart_accounts_purchases" :key="option.code" :value="option.code" :label="`${option.code} - ${option.name}`"></el-option>
+                                    </el-select>
+                                    <small class="form-control-feedback" v-if="errors.chart_account_return_purchase" v-text="errors.chart_account_return_purchase[0]"></small>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    </el-tab-pane>
 
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group" :class="{'has-danger': errors.type_tax_id}">
-                            <label class="control-label">Tipo impuesto</label>
-                            <el-select v-model="form.type_tax_id" filterable >
-                                <el-option v-for="option in type_taxes" :key="option.id" :value="option.id" :label="option.name"></el-option>
-                            </el-select>
-                            <small class="form-control-feedback" v-if="errors.type_tax_id" v-text="errors.type_tax_id[0]"></small>
-                        </div>
-                    </div>
-                </div>
+                </el-tabs>
             </div>
             <div class="form-actions text-right pt-2">
                 <el-button @click.prevent="close()">Cancelar</el-button>
@@ -151,6 +204,9 @@
                 configuration: {},
                 type_taxes: [],
                 taxes_in_tax: [],
+                activeName: 'general',
+                chart_accounts_sales: [],
+                chart_accounts_purchases: [],
             }
         },
 
@@ -160,6 +216,8 @@
                 .then(response => {
                     this.type_taxes = response.data.type_taxes
                     this.taxes_in_tax = response.data.taxes_in_tax
+                    this.chart_accounts_sales = response.data.chart_accounts_sales
+                    this.chart_accounts_purchases = response.data.chart_accounts_purchases
 //                    this.type_identity_documents = response.data.typeIdentityDocuments
 //                    this.countries = response.data.countries
                 })
@@ -188,6 +246,10 @@
                     in_base: false,
                     in_tax: null,
                     type_tax_id: null,
+                    chart_account_sale: null,
+                    chart_account_purchase: null,
+                    chart_account_return_sale: null,
+                    chart_account_return_purchase: null,
                 }
             },
 

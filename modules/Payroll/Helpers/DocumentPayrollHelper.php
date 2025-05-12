@@ -27,7 +27,7 @@ class DocumentPayrollHelper
     {
         $this->company = ServiceCompany::select('test_set_id_payroll', 'api_token', 'payroll_type_environment_id')->firstOrFail();
     }
-    
+
     /**
      * Retorna arreglo con data lista para insertar en payroll
      *
@@ -54,11 +54,11 @@ class DocumentPayrollHelper
             'state_document_id' => self::REGISTERED, //estado inicial
             'payroll_type_environment_id' => $this->company->payroll_type_environment_id,
         ];
- 
+
         return $inputs->merge($values)->all();
     }
 
-    
+
     /**
      * Retorna arreglo con data para registro en nomina de eliminacion
      *
@@ -69,10 +69,10 @@ class DocumentPayrollHelper
     {
         $values = $this->getValuesAdjustNote($inputs);
         // dd($values);
- 
+
         return $inputs->merge($values)->all();
     }
-    
+
 
     /**
      * Obetener arreglo con data dependiendo del tipo (eliminar/reemplazar)
@@ -140,12 +140,12 @@ class DocumentPayrollHelper
             'payroll_type_environment_id' => $this->company->payroll_type_environment_id,
             'adjust_note' => $adjust_note,
         ];
-        
+
     }
 
-    
+
     /**
-     * 
+     *
      * Obtener url y data para enviar nómina a api
      *
      * @param  DocumentPayroll $document
@@ -181,12 +181,12 @@ class DocumentPayrollHelper
     {
 
         $connection_api = new HttpConnectionApi($this->company->api_token);
-        
+
         $data_api = $this->getEndpointDataApi($document, $inputs);
         $params = $data_api['params'];
         $url = $data_api['url'];
         // dd($url, $params);
-        
+
         $send_request_to_api = $connection_api->sendRequestToApi($url, $params, 'POST');
 
         //error validacion form request api
@@ -202,7 +202,7 @@ class DocumentPayrollHelper
         return $send_request_to_api;
 
     }
-    
+
 
     /**
      * Validar respuesta al enviar nomina, entorno prueba/produccion
@@ -221,10 +221,10 @@ class DocumentPayrollHelper
 
             $zip_key = null;
             // dd($send_request_to_api);
-    
+
             if(array_key_exists('urlpayrollpdf', $send_request_to_api) && array_key_exists('urlpayrollxml', $send_request_to_api))
             {
-                
+
                 //error desconocido - certificado
                 $send_test_set_async_response = $send_request_to_api['ResponseDian']['Envelope']['Body']['SendTestSetAsyncResponse'] ?? null;
 
@@ -237,7 +237,7 @@ class DocumentPayrollHelper
 
                 $send_test_set_async_result = $send_test_set_async_response['SendTestSetAsyncResult'];
                 $zip_key = $send_test_set_async_result['ZipKey'];
-    
+
                 if(!is_string($zip_key))
                 {
                     if(is_string($send_test_set_async_result['ErrorMessageList']['XmlParamsResponseTrackId']['Success']))
@@ -249,7 +249,7 @@ class DocumentPayrollHelper
                     }
                 }
             }
-            
+
             // $this->validateZipKey($zip_key, $number_full, $connection_api);
 
         }
@@ -276,10 +276,10 @@ class DocumentPayrollHelper
         }
 
     }
-    
+
 
     /**
-     * 
+     *
      * Realiza peticion a ubl2.1/status/zip/{$zip_key} para validar el estado de la nomina (entorno pruebas/habilitacion)
      *
      * @param  string $zip_key
@@ -294,7 +294,7 @@ class DocumentPayrollHelper
         if(!$connection_api){
             $connection_api = new HttpConnectionApi($this->company->api_token);
         }
-        
+
         if($zip_key)
         {
             //esperar 3 segundos para ejecutar servicio status
@@ -330,7 +330,7 @@ class DocumentPayrollHelper
 
                     //excepcion
                     $status_code = $dian_response['StatusCode'] ?? [];
-                    
+
                     // 'Batch en proceso de validación.'
                     if(empty($status_code)){
                         $this->throwException("Error al Validar Nómina Nro: {$number_full} Errores: {$error_message_zip_key}");
@@ -353,10 +353,10 @@ class DocumentPayrollHelper
         }
 
     }
-    
-    
+
+
     /**
-     * 
+     *
      * Actualizar mensaje de respuesta al consultar zipkey de la nómina
      *
      * @param  string $response_message_query_zipkey
@@ -371,7 +371,7 @@ class DocumentPayrollHelper
     }
 
     /**
-     * 
+     *
      * Actualizar estado de la nómina dependiendo de la validación al enviar a la dian
      *
      * @param  int $state_document_id
@@ -387,7 +387,7 @@ class DocumentPayrollHelper
 
 
     /**
-     * 
+     *
      * Obtener array para enviar a la api (nómina eliminación y reemplazo)
      *
      * @param $document
@@ -445,12 +445,12 @@ class DocumentPayrollHelper
         return array_merge($adjust_note_replace_inputs, $general_inputs);
 
     }
-    
+
     /**
-     * 
+     *
      * Obtener array para enviar a la api
      * Usado para enviar nomina inicial y de ajuste (reemplazo)
-     * 
+     *
      * @param  mixed $document
      * @param  mixed $inputs
      * @return array
@@ -502,7 +502,7 @@ class DocumentPayrollHelper
                 'salary' => $worker->salary,
             ],
             'payment' => $document->payment,
-            'payment_dates' => $document->payment_dates, 
+            'payment_dates' => $document->payment_dates,
             'accrued' => [
                 'worked_days' => $accrued->worked_days,
                 'salary' => $accrued->salary,
@@ -513,7 +513,7 @@ class DocumentPayrollHelper
                 'salary_viatics' => $accrued->salary_viatics,
                 'non_salary_viatics' => $accrued->non_salary_viatics,
                 'refund' => $accrued->refund,
-                
+
                 'sustenance_support' => $accrued->sustenance_support,
                 'withdrawal_bonus' => $accrued->withdrawal_bonus,
                 'compensation' => $accrued->compensation,
@@ -576,7 +576,7 @@ class DocumentPayrollHelper
 
     }
 
-    
+
     /**
      * Obtener correlativo desde el api
      *
@@ -599,7 +599,7 @@ class DocumentPayrollHelper
         return null;
     }
 
-        
+
     /**
      * Envio de correo
      *
@@ -614,7 +614,7 @@ class DocumentPayrollHelper
         return $this->getGeneralResponseFromApi($send_request_to_api, $connection_api);
     }
 
-    
+
     /**
      *
      * @param  bool $success
@@ -628,7 +628,7 @@ class DocumentPayrollHelper
             'message' => $message,
         ];
     }
-    
+
     /**
      * Parsea respuesta api, y retorna arreglo con datos para la vista
      *
@@ -638,7 +638,7 @@ class DocumentPayrollHelper
      */
     public function getGeneralResponseFromApi($response, HttpConnectionApi $connection_api)
     {
-        
+
         //error validacion form request api
         if(isset($response['errors']))
         {

@@ -31,30 +31,30 @@
                     <tr slot-scope="{ index, row }">
                         <td>{{ index }}</td>
                         <td>{{ row.date_of_issue }}</td>
-                        <td>{{ row.worker_full_name }}</td>  
-                        <td class="text-left">{{ row.type_payroll_description }}</td>  
-                        <td class="text-center">{{ row.number_full }}</td>  
+                        <td>{{ row.worker_full_name }}</td>
+                        <td class="text-left">{{ row.type_payroll_description }}</td>
+                        <td class="text-center">{{ row.number_full }}</td>
                         <td class="text-center">
                             <template v-if="row.state_document_id">
                                 <span class="badge bg-secondary text-white" :class="{'bg-secondary': (row.state_document_id === 1), 'bg-success': (row.state_document_id === 5), 'bg-dark': (row.state_document_id === 6)}">
                                     {{ row.state_document_name }}
                                 </span>
                             </template>
-                        </td>  
+                        </td>
                         <td>
                             <template v-for="(item, index) in row.affected_adjust_notes">
                                 <span class="ml-1" :key="index">
-                                    {{ item.number_full }} 
+                                    {{ item.number_full }}
                                     <template v-if="item.type_payroll_adjust_note_name">
                                         ({{ item.type_payroll_adjust_note_name }})
                                     </template>
                                     <br>
                                 </span>
                             </template>
-                        </td>  
-                        <td class="text-center">{{ row.salary }}</td>  
-                        <td class="text-center">{{ row.accrued_total }}</td>  
-                        <td class="text-center">{{ row.deductions_total }}</td>  
+                        </td>
+                        <td class="text-center">{{ row.salary }}</td>
+                        <td class="text-center">{{ row.accrued_total }}</td>
+                        <td class="text-center">{{ row.deductions_total }}</td>
                         <td class="text-right">
 
                             <template v-if="row.btn_adjust_note_elimination">
@@ -78,15 +78,15 @@
                     </tr>
                 </data-table>
             </div>
- 
 
-            <document-payroll-options :showDialog.sync="showDialogDocumentPayrollOptions"     
+
+            <document-payroll-options :showDialog.sync="showDialogDocumentPayrollOptions"
                             :recordId="recordId"
                             :showDownload="true"
                             :showClose="true">
                             </document-payroll-options>
 
-            <document-payroll-elimination :showDialog.sync="showDialogDocumentPayrollElimination"     
+            <document-payroll-elimination :showDialog.sync="showDialogDocumentPayrollElimination"
                             :recordId="recordId"
                             :recordNumberFull="recordNumberFull"
                             >
@@ -97,8 +97,8 @@
 <script>
 
     // import WorkersForm from './form.vue'
-    import DocumentPayrollOptions from './partials/options.vue' 
-    import DocumentPayrollElimination from './partials/elimination_payroll.vue' 
+    import DocumentPayrollOptions from './partials/options.vue'
+    import DocumentPayrollElimination from './partials/elimination_payroll.vue'
     import DataTable from '@components/DataTableResource.vue'
     import {deletable} from '@mixins/deletable'
 
@@ -116,9 +116,9 @@
                 loading: false,
             }
         },
-        created() { 
+        created() {
         },
-        methods: { 
+        methods: {
             clickReplacePayroll(recordId){
                 location.href = `document-payroll-adjust-notes/${recordId}`
             },
@@ -130,7 +130,7 @@
             async clickQueryZipKey(recordId) {
 
                 this.loading = true
-                
+
                 await this.$http.post(`/${this.resource}/query-zipkey`, {
                     id : recordId
                 }).then(response => {
@@ -158,11 +158,11 @@
                 }).then(() => {
                     this.loading = false
                 })
-            },  
+            },
             clickOptions(recordId = null) {
                 this.recordId = recordId
                 this.showDialogDocumentPayrollOptions = true
-            },  
+            },
         }
     }
 </script>
