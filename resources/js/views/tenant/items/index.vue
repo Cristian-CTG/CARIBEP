@@ -16,9 +16,6 @@
             </div>
         </div>
         <div class="card mb-0">
-            <div class="card-header bg-info">
-                <h3 class="my-0">Listado de productos</h3>
-            </div>
             <div class="card-body">
                 <data-table :resource="resource">
                     <tr slot="heading" width="100%">

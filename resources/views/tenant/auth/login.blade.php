@@ -21,7 +21,7 @@
                 </div>
             </div>
             <div class="text-center">
-                <h1 class="auth__title">Bienvenido a<br>{{ $vc_company->trade_name }}</h1>
+                <h1 class="auth__title"><span class="text-xs">Bienvenido a</span><br>{{ $vc_company->trade_name }}</h1>
                 <p>Ingresa a tu cuenta</p>
             </div>
             <div class="form-group">

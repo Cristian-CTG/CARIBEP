@@ -27,7 +27,7 @@
                         <th class="text-center">T. Devengados</th>
                         <th class="text-center">T. Deducciones</th>
                         <th class="text-right">Acciones</th>
-                    <tr>
+                    </tr>
                     <tr slot-scope="{ index, row }">
                         <td>{{ index }}</td>
                         <td>{{ row.date_of_issue }}</td>

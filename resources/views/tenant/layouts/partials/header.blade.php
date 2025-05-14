@@ -104,7 +104,7 @@
 <div id="supportBackdrop" class="support-backdrop" onclick="toggleSupportSidebar()"></div>
 
 
-
+@push('scripts')
 <script>
 function toggleSupportSidebar() {
     const sidebar = document.getElementById('supportSidebar');
@@ -113,3 +113,4 @@ function toggleSupportSidebar() {
     backdrop.classList.toggle('show');
 }
 </script>
+@endpush

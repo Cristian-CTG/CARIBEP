@@ -12,6 +12,7 @@ use Modules\Factcolombia1\Models\System\{
 use Carbon\Carbon;
 use App\Models\System\Module;
 use App\Models\System\Plan;
+use GuzzleHttp\Client;
 
 trait CompanyTrait
 {
@@ -60,9 +61,7 @@ trait CompanyTrait
         $base_url = config('tenant.service_fact');
         $number = $request->identification_number;
         $dv = $request->dv;
-        $ch = curl_init("{$base_url}ubl2.1/config/{$number}/{$dv}");
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        $url = "{$base_url}ubl2.1/config/{$number}/{$dv}";
 
         $bodyContent = [
             'type_document_identification_id'=> $request->type_document_identification_id,
@@ -83,20 +82,29 @@ trait CompanyTrait
             'type_currency_id'=> $request->type_currency_id
         ];
 
+        $client = new Client([
+            'verify' => false, // Desactiva la verificación SSL como en tu cURL
+        ]);
+
         $data_companiee = json_encode($bodyContent);
 
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($ch, CURLOPT_POSTFIELDS,($data_companiee));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Content-Type: application/json',
-            'Accept: application/json',
-        ));
+        try {
+            $response = $client->post($url, [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
+                ],
+                'json' => $bodyContent,
+            ]);
 
-        $response = curl_exec($ch);
-        curl_close($ch);
-
-        return json_decode($response);
+            return json_decode($response->getBody()->getContents());
+        } catch (\Exception $e) {
+            // Manejo de errores, puedes personalizarlo
+            return (object)[
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
     }
 
 

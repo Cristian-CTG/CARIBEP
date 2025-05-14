@@ -10,6 +10,9 @@
                 <li class="active">
                     <span>Dashboard</span>
                 </li>
+                <li>
+                    <span>Listado de compañias</span>
+                </li>
             </ol>
         </header>
         <!-- <div class="row">
@@ -69,7 +72,6 @@
         </div>-->
 
         <div class="card" id="client-list">
-            <div class="card-header bg-info">Listado de compañias</div>
             <div class="card-body">
                 <div class="row">
                     <div class="col">
@@ -117,7 +119,14 @@
                                 <td>{{ row.identification_number }}</td>
                                 <td>{{ row.name }}</td>
                                 <td>{{ row.email }}</td>
-                                <td>{{ row.hostname }}</td>
+                                <td>
+                                    <a :href="`${protocol}//${row.hostname}`"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="text-dark">
+                                        {{ row.hostname }}
+                                    </a>
+                                </td>
                                 <!-- <td>{{ row.plan }}</td> -->
                                 <td class="text-center">{{ row.limit_documents }}</td>
                                 <td class="text-center">{{ row.limit_users }}</td>
@@ -358,6 +367,7 @@ export default {
                     }
                 ]
             },
+            protocol: window.location.protocol,
         };
     },
     async mounted() {

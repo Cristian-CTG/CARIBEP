@@ -25,7 +25,7 @@
                         <th>Descripción</th>
                         <th v-if="typeUser != 'seller'" class="text-right">P.Unitario (Compra)</th>
                         <th class="text-right">Acciones</th>
-                    <tr>
+                    </tr>
                     <tr slot-scope="{ index, row }" >
                         <td>{{ index }}</td>
                         <td>{{ row.internal_id }}</td>
@@ -36,7 +36,7 @@
                         <td class="text-right">
                             <template v-if="typeUser === 'admin'">
                                 <button type="button" class="btn waves-effect waves-light btn-xs btn-info" @click.prevent="clickCreate(row.id)">Editar</button>
-                                <button type="button" class="btn waves-effect waves-light btn-xs btn-danger" @click.prevent="clickDelete(row.id)">Eliminar</button> 
+                                <button type="button" class="btn waves-effect waves-light btn-xs btn-danger" @click.prevent="clickDelete(row.id)">Eliminar</button>
                             </template>
                         </td>
                     </tr>
@@ -72,16 +72,16 @@
         },
         created() {
         },
-        methods: { 
+        methods: {
             clickCreate(recordId = null) {
                 this.recordId = recordId
                 this.showDialog = true
-            }, 
+            },
             clickDelete(id) {
                 this.destroy(`/${this.resource}/${id}`).then(() =>
                     this.$eventHub.$emit('reloadData')
                 )
-            }, 
+            },
         }
     }
 </script>

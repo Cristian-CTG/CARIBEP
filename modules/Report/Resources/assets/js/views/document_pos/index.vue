@@ -16,7 +16,7 @@
                         <th class="text-center">Estado</th>
                         <th class="text-center">Moneda</th>
                         <th class="text-right">Total</th>
-                    <tr>
+                    </tr>
                     <tr slot-scope="{ index, row }">
                         <td>{{ index }}</td>
                         <td>{{row.user_name}}</td>

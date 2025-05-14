@@ -1,6 +1,6 @@
-# **Facturador PRO 2**
+# **Facturador PRO 3**
 
-### Instalación de PRO2 (con api incluido)
+### Instalación de PRO3 (con api incluido)
 
  Linux - Docker - SSL opcional <br>
 * [ajustes necesarios de dominio](https://gitlab.buho.la/facturalatam/co-facturadorpro2/-/snippets/26#dominio) <br>
@@ -8,7 +8,7 @@
 * [script para ubuntu 20](https://gitlab.buho.la/facturalatam/co-facturadorpro2/-/snippets/26#L1) <br>
 * [script para ubuntu 22](https://gitlab.buho.la/facturalatam/co-facturadorpro2/-/snippets/26#L1) <br>
 
-### Instalación de PRO2 (sin api incluido)
+### Instalación de PRO3 (sin api incluido)
 
 * Linux - Ubuntu 20 - Docker - SSL opcional<br>
 [ver pasos y script](https://gitlab.buho.la/facturalatam/co-facturadorpro2/-/snippets/2 "ver")
@@ -41,7 +41,7 @@
 ### Actualización del PRO 2
 
 * Linux - Ubuntu 20 -Docker<br>
-[ver pasos](https://gitlab.buho.la/facturalatam/co-facturadorpro2/-/blob/master/proceso_de_actualizacion_docker.md "ver")
+[ver pasos](https://gitlab.buho.la/facturalatam/co-facturadorpro3/-/blob/master/proceso_de_actualizacion_docker.md "ver")
 * Windows - Laragon - entorno local<br>
 [ver pasos](https://gitlab.buho.la/facturalatam/co-facturadorpro2/-/snippets/5#user-content-pasos-para-actualizar "ver")
 

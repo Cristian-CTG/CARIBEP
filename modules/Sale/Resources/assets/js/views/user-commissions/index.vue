@@ -17,14 +17,14 @@
                 <data-table :resource="resource">
                     <tr slot="heading" width="100%">
                         <th>#</th>
-                        <th>Vendedor</th> 
-                        <th>Tipo</th> 
+                        <th>Vendedor</th>
+                        <th>Tipo</th>
                         <th>Comisión</th>
                         <th class="text-right">Acciones</th>
-                    <tr>
+                    </tr>
                     <tr slot-scope="{ index, row }">
                         <td>{{ index }}</td>
-                        <td>{{ row.user_name }}</td> 
+                        <td>{{ row.user_name }}</td>
                         <td>{{ row.type }}</td>
                         <td>{{ row.amount }}</td>
                         <td class="text-right">
@@ -39,7 +39,7 @@
 
             <user-commissions-form :showDialog.sync="showDialog"
                         :recordId="recordId"></user-commissions-form>
- 
+
 
         </div>
     </div>
@@ -65,11 +65,11 @@
         },
         created() {
         },
-        methods: { 
+        methods: {
             clickCreate(recordId = null) {
                 this.recordId = recordId
                 this.showDialog = true
-            }, 
+            },
             clickDelete(id) {
                 this.destroy(`/${this.resource}/${id}`).then(() =>
                     this.$eventHub.$emit('reloadData')

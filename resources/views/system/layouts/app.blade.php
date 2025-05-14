@@ -29,6 +29,7 @@
     <link rel="stylesheet" href="{{ asset('porto-light/css/theme.css') }}" />
     <link rel="stylesheet" href="{{ asset('porto-light/css/custom.css') }}" />
     <link rel="stylesheet" href="{{ asset('porto-light/css/skins/theme-modern.css')}}" />
+    <link rel="stylesheet" href="{{ asset('theme/admin_styles.css') }}" />
 
     @if (file_exists(public_path('theme/custom_styles.css')))
         <link rel="stylesheet" href="{{ asset('theme/custom_styles.css') }}" />

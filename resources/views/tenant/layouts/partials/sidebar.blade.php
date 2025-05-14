@@ -30,7 +30,7 @@
                 <ul class="nav nav-main">
                     @if(in_array('dashboard', $vc_modules))
                     <li class="{{ ($path[0] === 'dashboard')?'nav-active':'' }}">
-                        <a class="nav-link" href="{{ route('tenant.dashboard.index') }}">
+                        <a class="nav-link dashboard-link" href="{{ route('tenant.dashboard.index') }}">
                             <span class="float-right badge badge-red badge-danger mr-3">Nuevo</span>
                             <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
                             <span>Dashboard</span>

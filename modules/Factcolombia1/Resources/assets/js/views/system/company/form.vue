@@ -209,7 +209,7 @@
                 </div>
                 <div class="row mt-2">
                     <div class="col-md-12" >
-                        <div class="form-group">
+                        <div class="">
                             <label class="control-label">Módulos</label>
                             <div class="row">
                                 <div class="col-4" v-for="(module,ind) in form.modules" :key="ind">

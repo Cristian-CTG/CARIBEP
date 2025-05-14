@@ -1,14 +1,14 @@
-- VPS Tener instalada la API 2023 
+- VPS Tener instalada la API 2023
 - Dominio (goddady, mi.com, etc)
 - Putty
-- Script de Instalacion InstallPRO2.sh (Repositorio Facturador PRO2)
+- Script de Instalacion InstallPRO3.sh (Repositorio Facturador PRO3)
 
-vi installPRO2.sh
-	* Copiar el contenido del archivo installPRO2.sh del repositorio
+vi installPRO3.sh
+	* Copiar el contenido del archivo installPRO3.sh del repositorio
 :w para guardar
 :q para salir
-chmod 700 installPRO2.sh
-./installPRO2.sh nombredeldominio.com
+chmod 700 installPRO3.sh
+./installPRO3.sh nombredeldominio.com
 
 docker ps
 docker exec -ti nombre-o-numero-del-contenedor bash

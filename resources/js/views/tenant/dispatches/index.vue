@@ -19,7 +19,7 @@
                         <th>Número</th>
                         <th class="text-center">Fecha Envío</th>
                         <th class="text-center">Descargas</th>
-                    <tr>
+                    </tr>
                     <tr slot-scope="{ index, row }" :class="{'text-danger': (row.state_type_id === '11')}">
                         <td>{{ index }}</td>
                         <td class="text-center">{{ row.date_of_issue }}</td>

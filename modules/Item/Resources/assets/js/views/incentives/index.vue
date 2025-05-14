@@ -5,7 +5,7 @@
             <ol class="breadcrumbs">
                 <li class="active"><span>Comisiones</span></li>
             </ol>
-            <div class="right-wrapper pull-right"> 
+            <div class="right-wrapper pull-right">
             </div>
         </div>
         <div class="card mb-0">
@@ -17,15 +17,15 @@
                     <tr slot="heading" width="100%">
                         <th>#</th>
                         <!-- <th>Cód. Interno</th> -->
-                        <th>Producto</th> 
-                        <th>Tipo</th> 
+                        <th>Producto</th>
+                        <th>Tipo</th>
                         <th>Comisión</th>
                         <th class="text-right">Acciones</th>
-                    <tr>
+                    </tr>
                     <tr slot-scope="{ index, row }">
                         <td>{{ index }}</td>
                         <!-- <td>{{ row.internal_id }}</td> -->
-                        <td>{{ row.full_description }}</td> 
+                        <td>{{ row.full_description }}</td>
                         <td>{{ row.commission_type }}</td>
                         <td>{{ row.commission_amount }}</td>
                         <td class="text-right">
@@ -40,7 +40,7 @@
 
             <items-form :showDialog.sync="showDialog"
                         :recordId="recordId"></items-form>
- 
+
 
         </div>
     </div>
@@ -64,11 +64,11 @@
         },
         created() {
         },
-        methods: { 
+        methods: {
             clickCreate(recordId = null) {
                 this.recordId = recordId
                 this.showDialog = true
-            }, 
+            },
             clickDelete(id) {
                 this.destroy(`/${this.resource}/${id}`).then(() =>
                     this.$eventHub.$emit('reloadData')

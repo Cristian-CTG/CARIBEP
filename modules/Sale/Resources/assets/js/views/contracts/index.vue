@@ -43,7 +43,7 @@
                         <th class="text-right">Total</th>
                         <!-- <th class="text-center">PDF</th> -->
                         <th class="text-right">Acciones</th>
-                    <tr>
+                    </tr>
                     <tr slot-scope="{ index, row }" :class="{ anulate_color : row.state_type_id == '11' }">
                         <td>{{ index }}</td>
                         <td class="text-center">{{ row.date_of_issue }}</td>
@@ -152,20 +152,20 @@
 
                 await this.updateStateType(`/${this.resource}/state-type/${row.state_type_id}/${row.id}`).then(() =>
                     this.$eventHub.$emit('reloadData')
-                ) 
+                )
 
             },
             filter(){
                 this.$http.get(`/${this.resource}/filter`)
-                            .then(response => { 
-                                this.state_types = response.data.state_types 
+                            .then(response => {
+                                this.state_types = response.data.state_types
                             })
             },
             clickEdit(id)
             {
                 this.recordId = id
                 this.showDialogFormEdit = true
-            }, 
+            },
             clickOptionsPdf(recordId = null) {
                 this.recordId = recordId
                 this.showDialogOptionsPdf = true

@@ -21,7 +21,7 @@
                         <th>Nombre</th>
                         <th>Fecha creación</th>
                         <th class="text-right">Acciones</th>
-                    <tr>
+                    </tr>
                     <tr slot-scope="{ index, row }">
                         <td>{{ index }}</td>
                         <td>{{ row.name }}</td>
@@ -34,17 +34,17 @@
                 </data-table>
             </div>
 
-            <category-form 
+            <category-form
                 :showDialog.sync="showDialog"
                 :recordId="recordId"
-                    ></category-form> 
+                    ></category-form>
         </div>
     </div>
 </template>
 
 <script>
 
-    import CategoryForm from './form.vue' 
+    import CategoryForm from './form.vue'
     import DataTable from '../../../../../../../resources/js/components/DataTable.vue'
     import {deletable} from '../../../../../../../resources/js/mixins/deletable'
 
@@ -54,7 +54,7 @@
         data() {
             return {
                 title: null,
-                showDialog: false, 
+                showDialog: false,
                 resource: 'categories',
                 recordId: null,
             }
@@ -62,11 +62,11 @@
         created() {
             this.title = 'Categorías'
         },
-        methods: { 
+        methods: {
             clickCreate(recordId = null) {
                 this.recordId = recordId
                 this.showDialog = true
-            }, 
+            },
             clickDelete(id) {
                 this.destroy(`/${this.resource}/${id}`).then(() =>
                     this.$eventHub.$emit('reloadData')

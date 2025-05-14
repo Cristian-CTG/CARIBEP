@@ -33,7 +33,7 @@
                         <th>Retención en impuesto</th>
                         <th>Tipo impuesto</th>
                         <th class="text-right">Acciones</th>
-                    <tr>
+                    </tr>
                     <tr slot-scope="{ index, row }">
                         <td>{{ index }}</td>
                         <td>{{ row.name }}</td>
