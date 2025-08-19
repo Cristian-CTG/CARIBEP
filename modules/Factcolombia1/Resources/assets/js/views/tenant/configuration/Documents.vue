@@ -23,7 +23,7 @@
                 <table class="table">
                     <thead>
                         <tr>
-                                <th>#</th>
+                                <!-- <th>#</th> -->
                                 <th>Nombre</th>
                                 <th>Prefijo</th>
                                 <th>Desde</th>
@@ -39,7 +39,7 @@
                     </thead>
                     <tbody>
                         <tr v-for="(row, index) in typeDocuments" :key="index">
-                            <td>{{ index + 1 }}</td>
+                            <!-- <td>{{ index + 1 }}</td> -->
                             <td>{{ row.name }}</td>
                             <td>{{ row.prefix }}</td>
                             <td>{{ row.from }}</td>

@@ -25,7 +25,7 @@
             <div class="card-body">
                 <data-table :resource="resource">
                     <tr slot="heading">
-                        <th>#</th>
+                        <!-- <th>#</th> -->
                         <th># Referencia</th>
                         <th>Vendedor</th>
                         <th class="text-center">Apertura</th>
@@ -38,7 +38,7 @@
                         <th class="text-center">Acciones</th>
                     </tr>
                     <tr slot-scope="{ index, row }">
-                        <td>{{ index }}</td>
+                        <!-- <td>{{ index }}</td> -->
                         <td>{{ row.reference_number }}</td>
                         <td>{{ row.user }}</td>
                         <td class="text-center">{{ row.opening }}</td>

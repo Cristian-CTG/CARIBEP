@@ -29,7 +29,7 @@
                 </div>
                 <data-table :resource="resource">
                     <tr slot="heading">
-                        <th>#</th>
+                        <!-- <th>#</th> -->
                         <th class="text-center">Fecha Emisión</th>
                         <th>Cliente</th>
                         <th>Nota de Venta</th>
@@ -53,7 +53,7 @@
                         <th class="text-right">Acciones</th>
                     </tr>
                     <tr slot-scope="{ index, row }">
-                        <td>{{ index }}</td>
+                        <!-- <td>{{ index }}</td> -->
                         <td class="text-center">{{ row.date_of_issue }}</td>
                         <td>{{ row.customer_name }}<br/><small v-text="row.customer_number"></small><br/></td>
                         <td>{{ row.full_number }}

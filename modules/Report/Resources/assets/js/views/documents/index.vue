@@ -36,7 +36,7 @@
                 <div class="card-body">
                     <data-table :applyCustomer="true" :resource="resource" :colspan="11">
                         <tr slot="heading">
-                            <th class="">#</th>
+                            <!-- <th class="">#</th> -->
                             <th class="">Usuario/Vendedor</th>
                             <th class="">Tipo Documento</th>
                             <th class="">Comprobante</th>
@@ -50,7 +50,7 @@
                             <th class="text-right">Total</th>
                         </tr>
                         <tr slot-scope="{ index, row }">
-                            <td>{{ index }}</td>
+                            <!-- <td>{{ index }}</td> -->
                             <td>{{row.user_name}}</td>
                             <td>{{row.document_type_description}}</td>
                             <td>{{row.number}}</td>

@@ -47,7 +47,7 @@
                 <div class="card-body">
                     <data-table :resource="resource">
                         <tr slot="heading">
-                            <th>#</th>
+                            <!-- <th>#</th> -->
                             <th>Vendedor</th>
                             <th class="text-center">Tipo comisión</th>
                             <th class="text-center">Monto comisión</th>
@@ -55,7 +55,7 @@
                             <th class="text-center">Total comisiones</th>
                         <tr>
                         <tr slot-scope="{ index, row }">
-                            <td>{{ index }}</td>  
+                            <!-- <td>{{ index }}</td>   -->
                             <td>{{row.user_name}}</td>
                             <td class="text-center">{{row.type}}</td>
                             <td class="text-center">{{row.amount}}</td> 

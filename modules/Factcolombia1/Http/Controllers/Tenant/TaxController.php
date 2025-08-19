@@ -41,7 +41,8 @@ class TaxController extends Controller
 
     public function records(Request $request)
     {
-        $records = Tax::where($request->column, 'like', "%{$request->value}%");
+        $records = Tax::where($request->column, 'like', "%{$request->value}%")
+        ->orderBy('id', 'desc');
 
         return new TaxCollection($records->paginate(config('tenant.items_per_page')));
     }

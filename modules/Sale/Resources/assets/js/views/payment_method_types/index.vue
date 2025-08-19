@@ -21,7 +21,7 @@
                 <table class="table">
                     <thead>
                     <tr>
-                        <th>#</th>
+                        <!-- <th>#</th> -->
                         <th>Código</th>
                         <th>Descripción</th>
                         <th class="text-right">Acciones</th>
@@ -29,7 +29,7 @@
                     </thead>
                     <tbody>
                     <tr v-for="(row, index) in records" :key="index">
-                        <td>{{ index + 1 }}</td>
+                        <!-- <td>{{ index + 1 }}</td> -->
                         <td>{{ row.id }}</td>
                         <td>{{ row.description }}</td>
                         <td class="text-right">

@@ -25,14 +25,14 @@
             <div class="card-body">
                 <data-table :resource="resource">
                     <tr slot="heading">
-                        <th>#</th>
+                        <!-- <th>#</th> -->
                         <th>Producto</th>
                         <th>Almacén</th>
                         <th class="text-right">Stock</th>
                         <th class="text-right">Acciones</th>
                     <tr>
                     <tr slot-scope="{ index, row }">
-                        <td>{{ index }}</td>
+                        <!-- <td>{{ index }}</td> -->
                         <td>{{ row.item_fulldescription }}</td>
                         <td>{{ row.warehouse_description }}</td>
                         <td class="text-right">{{ row.stock }}</td>

@@ -20,7 +20,7 @@
             <div class="card-body">
                 <data-table :resource="resource">
                     <tr slot="heading" width="100%">
-                        <th>#</th>
+                        <!-- <th>#</th> -->
                         <!-- <th>Cód. Interno</th> -->
                         <th>Producto</th> 
                         <th>Tipo</th> 
@@ -28,7 +28,7 @@
                         <th class="text-right">Acciones</th>
                     <tr>
                     <tr slot-scope="{ index, row }">
-                        <td>{{ index }}</td>
+                        <!-- <td>{{ index }}</td> -->
                         <!-- <td>{{ row.internal_id }}</td> -->
                         <td>{{ row.full_description }}</td> 
                         <td>{{ row.commission_type }}</td>

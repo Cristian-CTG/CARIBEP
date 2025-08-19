@@ -77,7 +77,7 @@
                   <table class="table">
                     <thead>
                       <tr>
-                        <th class>#</th>
+                        <!-- <th class>#</th> -->
                         <th class="text-left">Fecha emisión</th>
                         <th class="text-center">Cliente</th>
                         <th class>Documento</th>
@@ -90,7 +90,7 @@
                     </thead>
                     <tbody>
                       <tr v-for="(row, index) in records" :key="index + 'R'">
-                        <td>{{ index }}</td>
+                        <!-- <td>{{ index }}</td> -->
                         <td class="text-left">{{ row.created_at }}</td>
                         <td class="text-center">{{ row.customer.name }}</td>
 
@@ -128,7 +128,7 @@
                   <table class="table">
                     <thead>
                       <tr>
-                        <th class>#</th>
+                        <!-- <th class>#</th> -->
                         <th class="text-left">Fecha emisión</th>
                         <th class="text-center">Cliente</th>
                         <th class>Documento</th>
@@ -141,7 +141,7 @@
                     </thead>
                     <tbody>
                       <tr v-for="(row, index) in dataPurchases" :key="index + 'B'">
-                        <td>{{ index }}</td>
+                        <!-- <td>{{ index }}</td> -->
                         <td class="text-left">{{ row.created_at }}</td>
                         <td class="text-center">{{ row.customer.name }}</td>
 

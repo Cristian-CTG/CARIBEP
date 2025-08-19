@@ -21,16 +21,16 @@
             <div class="card-body">
                 <data-table :resource="resource">
                     <tr slot="heading">
-                        <th>#</th>
-                        <th class="text-center">Fecha Emisión</th>
+                        <!-- <th>#</th> -->
+                        <th class="text-left">Fecha Emisión</th>
                         <th>Estado</th>
                         <th>Documento</th> 
                         <th class="text-center">Descarga</th>
                         <th class="text-right">Acciones</th>
                     <tr>
                     <tr slot-scope="{ index, row }" >
-                        <td>{{ index }}</td>
-                        <td class="text-center">{{ row.date_of_issue }}</td>
+                        <!-- <td>{{ index }}</td> -->
+                        <td class="text-left">{{ row.date_of_issue }}</td>
                         <td>{{row.state_type_description}}</td>
                         <td>{{ row.identifier }} 
                         </td>  

@@ -24,7 +24,7 @@
             <div class="card-body">
                 <data-table :resource="resource" :loading="loadDataTable">
                     <tr slot="heading" width="100%">
-                        <th>#</th>
+                        <!-- <th>#</th> -->
                         <th>Título</th>
                         <th>Descripción</th>
                         <th>Monto mínimo compras</th>
@@ -34,7 +34,7 @@
                         <th class="text-right">Acciones</th>
                     <tr>
                     <tr slot-scope="{ index, row }">
-                        <td>{{ index }}</td>
+                        <!-- <td>{{ index }}</td> -->
                         <td>{{ row.title }}</td>
                         <td>{{ row.description }}</td>
                         <td>{{ row.minimum_purchase_amount }}</td>

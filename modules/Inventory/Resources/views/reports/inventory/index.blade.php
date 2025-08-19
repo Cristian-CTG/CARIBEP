@@ -101,7 +101,7 @@
                             <table width="100%" class="table">
                                 <thead class="">
                                     <tr>
-                                        <th>#</th>
+                                        {{-- <th>#</th> --}}
                                         <th>Descripción</th>
                                         <th>Inventario actual</th>
                                         <th>Precio de venta</th>
@@ -139,7 +139,7 @@
                                             @endphp
 
                                             <tr>
-                                                <td class="celda">{{$loop->iteration}}</td>
+                                                {{-- <td class="celda">{{$loop->iteration}}</td> --}}
                                                 <td class="celda">{{$value->item->internal_id ?? ''}} {{$value->item->internal_id ? '-':''}} {{$value->item->name ?? ''}}</td>
                                                 <td class="celda">{{number_format($value->stock, 0, '.', ',')}}</td>
                                                 <td class="celda">

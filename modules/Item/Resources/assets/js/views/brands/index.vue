@@ -22,7 +22,7 @@
             <div class="card-body">
                 <data-table :resource="resource">
                     <tr slot="heading">
-                        <th>#</th>
+                        <!-- <th>#</th> -->
                         <th>Nombre</th>
                         <th>Fecha creación</th>
                         <th class="text-right">Acciones</th>

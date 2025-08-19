@@ -39,7 +39,7 @@
                 <div class="card-body">
                     <data-table :resource="resource" :applyCustomer="true">
                         <tr slot="heading">
-                            <th>#</th>
+                            <!-- <th>#</th> -->
                             <th>Fecha Emisión</th>
                             <th class="">Usuario/Vendedor</th>
                             <th>Cliente</th>
@@ -59,7 +59,7 @@
                             <th class="text-center">Total</th>
                         <tr>
                         <tr slot-scope="{ index, row }">
-                            <td>{{ index }}</td>  
+                            <!-- <td>{{ index }}</td>   -->
                             <td>{{row.date_of_issue}}</td>
                             <td>{{row.user_name}}</td>
                             <td>{{row.customer_name}}</td>

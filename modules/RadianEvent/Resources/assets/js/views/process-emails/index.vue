@@ -20,7 +20,7 @@
                 
                 <data-table :resource="resource">
                     <tr slot="heading">
-                        <th>#</th>
+                        <!-- <th>#</th> -->
                         <th>Usuario</th>
                         <th>Fecha y hora inicio</th>
                         <th>Fecha y hora término</th>
@@ -30,7 +30,7 @@
                         <th class="text-right">Acciones</th>
                     <tr>
                     <tr slot-scope="{ index, row }">
-                        <td>{{ index }}</td>
+                        <!-- <td>{{ index }}</td> -->
                         <td>{{ row.email_user }}</td>
                         <td>{{ row.start_date }} {{ row.start_time }} </td>
                         <td>{{ row.end_date }} {{ row.end_time }} </td>

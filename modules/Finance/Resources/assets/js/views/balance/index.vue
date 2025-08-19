@@ -30,7 +30,7 @@
                 <div class="card-body">
                     <data-table :resource="resource">
                         <tr slot="heading">
-                            <th class="">#</th>
+                            <!-- <th class="">#</th> -->
                             <th class=""><strong>Nombre de la cuenta / Total pagos</strong></th>
                             <th class="text-center"> <strong>Factura Electrónica</strong></th>
                             <th class="text-center"> <strong>Remisión</strong></th>
@@ -44,7 +44,7 @@
                             <th class="text-center"> <strong>Saldo</strong></th>
                         <tr>
                         <tr slot-scope="{ index, row }">
-                            <td>{{ index }}</td> 
+                            <!-- <td>{{ index }}</td>  -->
                             <td>{{row.description}}</td>
                             <td class="text-center">{{formatNumber(row.document_payment)}}</td>
                             <td class="text-center">{{formatNumber(row.remission_payment)}}</td>

@@ -21,14 +21,14 @@
             <div class="card-body">
                 <data-table :resource="resource">
                     <tr slot="heading" width="100%">
-                        <th>#</th>
+                        <!-- <th>#</th> -->
                         <th>Vendedor</th> 
                         <th>Tipo</th> 
                         <th>Comisión</th>
                         <th class="text-right">Acciones</th>
                     <tr>
                     <tr slot-scope="{ index, row }">
-                        <td>{{ index }}</td>
+                        <!-- <td>{{ index }}</td> -->
                         <td>{{ row.user_name }}</td> 
                         <td>{{ row.type }}</td>
                         <td>{{ row.amount }}</td>

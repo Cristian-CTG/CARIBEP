@@ -39,7 +39,7 @@
                     <div class="card-body">
                         <data-table :resource="resource">
                             <tr slot="heading">
-                                <th class="">#</th>
+                                <!-- <th class="">#</th> -->
                                 <th class="">Fecha</th>
                                 <th class="">Tipo Documento</th>
                                 <th class="">Prefijo</th>
@@ -50,7 +50,7 @@
                                 <th class="">Monto</th>
                             <tr>
                             <tr slot-scope="{ index, row }">
-                                <td>{{ index }}</td> 
+                                <!-- <td>{{ index }}</td>  -->
                                 <td>{{row.date_of_issue}}</td>
                                 <td>{{row.document_type_description}}</td>
                                 <td>{{row.series}}</td>

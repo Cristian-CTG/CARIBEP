@@ -29,7 +29,7 @@
             <div class="card-body">
                 <data-table :resource="resource" :loading="loadDataTable">
                     <tr slot="heading" width="100%">
-                        <th>#</th>
+                        <!-- <th>#</th> -->
                         <th>Nombre</th>
                         <th>Código</th>
                         <th>Tasa</th>
@@ -43,7 +43,7 @@
                         <th class="text-right">Acciones</th>
                     <tr>
                     <tr slot-scope="{ index, row }">
-                        <td>{{ index }}</td>
+                        <!-- <td>{{ index }}</td> -->
                         <td>{{ row.name }}</td>
                         <td>{{ row.code }}</td>
                         <td>{{ row.rate }}</td>

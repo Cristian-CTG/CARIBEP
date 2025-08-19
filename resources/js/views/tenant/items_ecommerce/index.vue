@@ -38,7 +38,7 @@
       <div class="card-body">
         <data-table :resource="resource">
           <tr slot="heading" width="100%">
-            <th>#</th>
+            <!-- <th>#</th> -->
             <th>Cód. Interno</th>
             <th>Unidad</th>
             <th>Nombre</th>
@@ -52,7 +52,7 @@
           </tr>
           <tr></tr>
           <tr slot-scope="{ index, row }">
-            <td>{{ index }}</td>
+            <!-- <td>{{ index }}</td> -->
             <td>{{ row.internal_id }}</td>
             <td>{{ row.unit_type_id }}</td>
             <td>{{ row.name }}</td>

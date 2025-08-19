@@ -17,7 +17,7 @@
                 <table class="table">
                     <thead>
                     <tr width="100%">
-                        <th width="5%">#</th>
+                        <!-- <th width="5%">#</th> -->
                         <th width="10%">Código</th>
                         <th width="50%">Descripción</th>
                         <th width="5%">Activo</th>
@@ -26,7 +26,7 @@
                     </thead>
                     <tbody>
                     <tr v-for="(row, index) in records">
-                        <td>{{ index + 1 }}</td>
+                        <!-- <td>{{ index + 1 }}</td> -->
                         <td>{{ row.id }}</td>
                         <td>{{ row.description }}</td>
                         <td class="text-center">{{ row.active }}</td>

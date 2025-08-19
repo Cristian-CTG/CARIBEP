@@ -33,7 +33,7 @@
             <div class="card-body">
                 <data-table :resource="resource" ref="dataTable">
                     <tr slot="heading">
-                        <th>#</th>
+                        <!-- <th>#</th> -->
                         <th>Fecha</th>
                         <th>Número</th>
                         <th>Descripción</th>
@@ -42,7 +42,7 @@
                     </tr>
 
                     <tr slot-scope="{ index, row }">
-                        <td>{{ index }}</td>
+                        <!-- <td>{{ index }}</td> -->
                         <td>{{ row.date }}</td>
                         <td>{{ row.journal_prefix.prefix }}-{{ row.number }}</td>
                         <td>{{ row.description }}</td>

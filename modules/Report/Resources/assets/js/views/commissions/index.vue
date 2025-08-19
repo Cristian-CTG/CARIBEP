@@ -40,7 +40,7 @@
                 <div class="card-body">
                     <data-table :resource="resource">
                         <tr slot="heading">
-                            <th>#</th>
+                            <!-- <th>#</th> -->
                             <!-- <th class="text-center">Código vendedor</th> -->
                             <th>Vendedor</th>
                             <th class="text-center">Cantidad transacciones</th>
@@ -48,7 +48,7 @@
                             <th class="text-center">Total comisiones</th>
                         <tr>
                         <tr slot-scope="{ index, row }">
-                            <td>{{ index }}</td>  
+                            <!-- <td>{{ index }}</td>   -->
                             <!-- <td>{{row.user_name}}</td> -->
                             <td>{{row.user_name}}</td>
                             <td class="text-center">{{row.total_transactions}}</td>

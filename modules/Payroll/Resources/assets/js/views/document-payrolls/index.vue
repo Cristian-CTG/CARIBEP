@@ -18,7 +18,7 @@
             <div class="card-body">
                 <data-table :resource="resource" :init-search="initSearch">
                     <tr slot="heading" width="100%">
-                        <th>#</th>
+                        <!-- <th>#</th> -->
                         <th>Fecha</th>
                         <th>Empleado</th>
                         <th class="text-left">Tipo nómina</th>
@@ -31,7 +31,7 @@
                         <th class="text-right">Acciones</th>
                     </tr>
                     <tr slot-scope="{ index, row }">
-                        <td>{{ index }}</td>
+                        <!-- <td>{{ index }}</td> -->
                         <td>{{ row.date_of_issue }}</td>
                         <td>{{ row.worker_full_name }}</td>
                         <td class="text-left">{{ row.type_payroll_description }}</td>

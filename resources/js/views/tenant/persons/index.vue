@@ -18,13 +18,13 @@
             <div class="card-body">
                 <data-table :resource="resource+`/${this.type}`">
                     <tr slot="heading">
-                        <th>#</th>
+                        <!-- <th>#</th> -->
                         <th>Nombre</th>
                         <th class="text-right">Número</th>
                         <th class="text-right">Acciones</th>
                     <tr>
                     <tr slot-scope="{ index, row }" :class="{ disable_color : !row.enabled}">
-                        <td>{{ index }}</td>
+                        <!-- <td>{{ index }}</td> -->
                         <td>{{ row.name }}</td>
                         <td class="text-right">{{ row.number }}</td>
                         <td class="text-right">

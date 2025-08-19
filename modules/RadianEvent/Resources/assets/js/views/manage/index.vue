@@ -17,7 +17,7 @@
             <div class="card-body">
                 <data-table :resource="resource">
                     <tr slot="heading">
-                        <th>#</th>
+                        <!-- <th>#</th> -->
                         <th>Tipo Documento</th>
                         <th>Fecha</th>
                         <th>Nit Empresa</th>
@@ -36,7 +36,7 @@
                         <th>Historial</th>
                     </tr>
                     <tr slot-scope="{ index, row }">
-                        <td>{{ index }}</td>
+                        <!-- <td>{{ index }}</td> -->
 
                         <td>{{ row.type_document_name }}</td>
 

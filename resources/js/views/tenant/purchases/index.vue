@@ -33,8 +33,8 @@
             <div class="card-body">
                 <data-table :resource="resource" :init-search="initSearch">
                     <tr slot="heading">
-                        <th>#</th>
-                        <th class="text-center">F. Emisión</th>
+                        <!-- <th>#</th> -->
+                        <th class="text-left">F. Emisión</th>
                         <th class="text-center" v-if="columns.date_of_due.visible" >F. Vencimiento</th>
                         <th>Proveedor</th>
                         <th>Estado</th>
@@ -53,8 +53,8 @@
                         <th class="text-right">Acciones</th>
                     </tr>
                     <tr slot-scope="{ index, row }">
-                        <td>{{ index }}</td>
-                        <td class="text-center">{{ row.date_of_issue }}</td>
+                        <!-- <td>{{ index }}</td> -->
+                        <td class="text-left">{{ row.date_of_issue }}</td>
                         <td v-if="columns.date_of_due.visible" class="text-center">{{ row.date_of_due }}</td>
                         <td>{{ row.supplier_name }}<br/><small v-text="row.supplier_number"></small></td>
                         <td>{{row.state_type_description}}</td>

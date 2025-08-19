@@ -19,8 +19,8 @@
             <div class="card-body">
                 <data-table :resource="resource">
                     <tr slot="heading">
-                        <th>#</th>
-                        <th class="text-center">Fecha Emisión</th>
+                        <!-- <th>#</th> -->
+                        <th class="text-left">Fecha Emisión</th>
                         <th>Proveedor</th>
                         <th>Número</th>
                         <th>Motivo</th>
@@ -30,8 +30,8 @@
                         <th class="text-center">Dist. Gasto</th>
                     <tr>
                     <tr slot-scope="{ index, row }" :class="{'text-danger': (row.state_type_id === '11'), 'text-warning': (row.state_type_id === '13'), 'border-light': (row.state_type_id === '01'), 'border-left border-info': (row.state_type_id === '03'), 'border-left border-success': (row.state_type_id === '05'), 'border-left border-secondary': (row.state_type_id === '07'), 'border-left border-dark': (row.state_type_id === '09'), 'border-left border-danger': (row.state_type_id === '11'), 'border-left border-warning': (row.state_type_id === '13')}">
-                        <td>{{ index }}</td>
-                        <td class="text-center">{{ row.date_of_issue }}</td>
+                        <!-- <td>{{ index }}</td> -->
+                        <td class="text-left">{{ row.date_of_issue }}</td>
                         <td>{{ row.supplier_name }}<br/><small v-text="row.supplier_number"></small></td>
                         <td>{{ row.number }}<br/>
                             <small v-text="row.expense_type_description"></small><br/>

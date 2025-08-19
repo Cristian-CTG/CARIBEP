@@ -30,7 +30,7 @@
             <div class="card-body">
                 <data-table :resource="resource">
                     <tr slot="heading" width="100%">
-                        <th>#</th>
+                        <th>ID</th>
                         <th>Cód. Interno</th>
                         <th>Unidad</th>
                         <th>Nombre</th>
@@ -44,7 +44,7 @@
                     </tr>
                     <tr slot-scope="{ index, row }" :class="{ disable_color : !row.active}">
                         <el-tooltip effect="dark" :content="`Stock actual: ${row.stock}`" placement="top">
-                            <td>{{ index }}</td>
+                            <td>{{ row.id }}</td>
                         </el-tooltip>
                         <el-tooltip effect="dark" :content="`Stock actual: ${row.stock}`" placement="top">
                             <td>{{ row.internal_id }}</td>

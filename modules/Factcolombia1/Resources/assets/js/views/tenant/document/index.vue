@@ -38,7 +38,7 @@
             <div class="card-body ">
                 <data-table :resource="resource" :init-search="initSearch">
                     <tr slot="heading">
-                        <th>#</th>
+                        <!-- <th>#</th> -->
                         <th class="text-center">Fecha Emisión</th>
                         <th>Cliente</th>
                         <th>Documento</th>
@@ -55,7 +55,7 @@
                         <th class="text-right">Acciones</th>
                     </tr>
                     <tr slot-scope="{ index, row }" >
-                        <td>{{ index }}</td>
+                        <!-- <td>{{ index }}</td> -->
                         <td class="text-center">{{ row.date_of_issue }}</td>
                         <td>{{ row.customer_name }}<br/><small v-text="row.customer_number"></small></td>
                         <td>{{ row.number_full }}<br/>

@@ -39,7 +39,7 @@
                     <div class="card-body">
                         <data-table :resource="resource"  :applyCustomer="true" :colspan="8">
                             <tr slot="heading">
-                                <th class="">#</th>
+                                <!-- <th class="">#</th> -->
                                 <th class="">F. Emisión</th>
                                 <th class="">F. Vencimiento</th>
                                 <th class="">Proveedor</th>
@@ -52,7 +52,7 @@
                                 <th class="">Total</th>
                             <tr>
                             <tr slot-scope="{ index, row }">
-                                <td>{{ index }}</td>
+                                <!-- <td>{{ index }}</td> -->
                                 <td>{{row.date_of_issue}}</td>
                                 <td>{{row.date_of_due}}</td>
                                 <td>{{ row.supplier_name }}<br/><small v-text="row.supplier_number"></small></td>

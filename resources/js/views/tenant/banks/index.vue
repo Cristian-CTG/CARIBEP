@@ -12,14 +12,14 @@
                 <table class="table">
                     <thead>
                     <tr>
-                        <th>#</th>
+                        <!-- <th>#</th> -->
                         <th>Descripción</th>
                         <th class="text-right">Acciones</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr v-for="(row, index) in records">
-                        <td>{{ index + 1 }}</td>
+                        <!-- <td>{{ index + 1 }}</td> -->
                         <td>{{ row.description }}</td>
                         <td class="text-right">
                             <button type="button" class="btn waves-effect waves-light btn-xs btn-info" @click.prevent="clickCreate(row.id)">Editar</button>

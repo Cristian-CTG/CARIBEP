@@ -38,14 +38,14 @@
       <div class="card-body">
         <data-table :resource="resource">
           <tr slot="heading" width="100%">
-            <th>#</th>
+            <!-- <th>#</th> -->
             <th>Nombre</th>
             <th>Descripción</th>
             <th class="text-right">Acciones</th>
           </tr>
           <tr></tr>
           <tr slot-scope="{ index, row }">
-            <td>{{ index }}</td>
+            <!-- <td>{{ index }}</td> -->
             <td>{{ row.name }}</td>
             <td>{{ row.description }}</td>
             <td class="text-right">

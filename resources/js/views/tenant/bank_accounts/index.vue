@@ -8,7 +8,7 @@
                 <table class="table">
                     <thead>
                     <tr>
-                        <th>#</th>
+                        <!-- <th>#</th> -->
                         <th>Descripción</th>
                         <th class="text-right">Número</th>
                         <th class="text-right">Cuenta Contable</th>
@@ -17,7 +17,7 @@
                     </thead>
                     <tbody>
                     <tr v-for="(row, index) in records">
-                        <td>{{ index + 1 }}</td>
+                        <!-- <td>{{ index + 1 }}</td> -->
                         <td>{{ row.description }}</td>
                         <td class="text-right">{{ row.number }}</td>
                         <td class="text-right">{{ row.chart_of_account_code }}</td>

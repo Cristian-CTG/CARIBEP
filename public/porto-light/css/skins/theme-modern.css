@@ -1599,7 +1599,8 @@ ul.nav-main>li a:hover {
 }
 ul.nav-main li a,
 ul.nav-main li .nav-children li.nav-active:not(.nav-parent) > a {
-    font-weight: 500;
+    font-weight: normal;
+    font-size: 14px;
 }
 html.sidebar-light ul.nav-main > li > a {
     padding: 0.40rem 0.50rem;
@@ -1611,6 +1612,7 @@ ul.nav-main li.nav-parent > a:after {
     font-family: 'Font Awesome 5 Free';
     transition: transform 0.3s ease;
     top: -3px;
+    right: -4px;
     padding: 10px 20px;
     font-size: 12px;
 }
