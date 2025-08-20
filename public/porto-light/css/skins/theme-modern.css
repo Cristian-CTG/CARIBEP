@@ -333,6 +333,9 @@ ul.nav-main li .nav-children li a:after {
     background: #ffffff;
     padding: 0.92rem;
 }
+.table{
+    margin-bottom: 0px !important;
+}
 .table-responsive{
     border: 1px solid var(--black-highlight);
     border-radius: 10px;
@@ -341,6 +344,9 @@ ul.nav-main li .nav-children li a:after {
 .table-responsive .table thead tr, .table-responsive .table tbody tr{
     border-top: 1px solid var(--black-highlight);
     border-bottom: 1px solid var(--black-highlight);
+}
+.table-responsive .table tbody tr{
+    border-bottom: none !important;
 }
 .table-responsive .table thead tr{
     border-top: none !important;
@@ -447,6 +453,7 @@ html .card-primary .card-header {
     background-color: var(--black-primary);
     border-color: var(--black-primary);
     opacity: 0.8;
+    color: var(--black-light) !important;
 }
 .page-item.active .page-link {
     background-color: #18181b !important;
@@ -919,6 +926,7 @@ ul.nav-main li .nav-children li a:before {
 
 .badge {
     padding: 0.7em;
+    font-size: 0.75rem !important;
 }
 
 .btn-warning {
@@ -1209,10 +1217,11 @@ html body .text-primary {
     border: 1px solid hsl(198, 100%, 73%) !important;
     color: hsl(201, 95%, 23%) !important;
 }
-.bg-danger {
+.bg-danger,
+.badge-red {
     background-color: hsl(0, 100%, 95%) !important;
     border: 1px solid hsl(0, 80%, 85%) !important;
-    color: hsl(0, 80%, 40%) !important;
+    color: oklch(57.7% .245 27.325) !important;
 }
 .bg-dark {
     background-color: hsl(240, 4%, 40%) !important;
@@ -1369,7 +1378,12 @@ html.fixed .sidebar-left a svg {
 .card h5.font-weight-semibold.text-right.text-white {
     margin: 0;
 }
-
+#main-wrapper {
+    width: auto;
+}
+.ui-sortable{
+    height: auto !important;
+}
 .card-footer.flex-wrap .el-row {
     display: flex;
     justify-content: space-between;
@@ -2004,9 +2018,6 @@ html.sidebar-light:not(.dark) .style-switcher:before{
 }
 
 /* Estilos para badges personalizados */
-.badge-red {
-  background: #E7355B !important;
-}
 
 /* Estilos para transiciones */
 .transition-box {

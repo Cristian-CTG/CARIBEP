@@ -26,6 +26,9 @@
                     </tr>
                     </thead>
                     <tbody>
+                    <tr v-if="records.length === 0">
+                        <td colspan="4" class="text-center text-muted">No hay registro</td>
+                    </tr>
                     <tr v-for="(row, index) in records" :key="index">
                         <!-- <td>{{ index + 1 }}</td> -->
                         <td>{{ row.description }}</td>
