@@ -324,6 +324,12 @@ ul.nav-main li .nav-children li a:focus,
 ul.nav-main li .nav-children li a:after {
     padding: 6px 15px;
 }
+ul.nav-main li a span.badge{
+    margin: 0 -1em 0 0;
+}
+div.sub-title.text-muted {
+    line-height: 1 !important;
+}
 .card.card-featured-left .table td, 
 .card.card-featured-left .table th {
     font-size: .9rem;

@@ -35,7 +35,7 @@
                                             <el-button type="primary" icon="el-icon-upload"></el-button>
                                         </el-upload>
                                     </el-input>
-                                    <div class="sub-title text-danger"><small>Se recomienda resoluciones 700x300</small></div>
+                                    <div class="sub-title text-muted"><small>Se recomienda resoluciones 700x300</small></div>
                                 </div>
                             </div>
                             <div class="col-md-3">
@@ -51,7 +51,7 @@
                                             <el-button type="primary" icon="el-icon-upload"></el-button>
                                         </el-upload>
                                     </el-input>
-                                    <div class="sub-title text-danger"><small>Se recomienda resoluciones 1024x768</small></div>
+                                    <div class="sub-title text-muted"><small>Se recomienda resoluciones 1024x768</small></div>
                                 </div>
                             </div>
                             <div class="col-md-3">
@@ -67,7 +67,7 @@
                                             <el-button type="primary" icon="el-icon-upload"></el-button>
                                         </el-upload>
                                     </el-input>
-                                    <div class="sub-title text-danger"><small>Debe ser un archivo JPG</small></div>
+                                    <div class="sub-title text-muted"><small>Debe ser un archivo JPG</small></div>
                                 </div>
                             </div>
                             <!-- <div class="col-md-6">

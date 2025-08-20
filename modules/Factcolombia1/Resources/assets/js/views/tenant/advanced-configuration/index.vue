@@ -7,7 +7,7 @@
                 <li><span class="text-muted">Avanzado</span></li>
             </ol>
         </div>
-        <div class="card card-dashboard border">
+        <div class="card card-dashboard">
             <div class="card-body card-advanced-config">
                 <template>
                     <form autocomplete="off">
