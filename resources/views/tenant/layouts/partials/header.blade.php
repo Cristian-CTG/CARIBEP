@@ -1,8 +1,8 @@
 <header class="header">
     <div class="logo-container">
-        <div class="sidebar-toggle" data-toggle-class="sidebar-left-collapsed" data-target="html"
+        <div class="sidebar-toggle p-1" data-toggle-class="sidebar-left-collapsed" data-target="html"
             data-fire-event="sidebar-left-toggle">
-            <i class="fas fa-bars" aria-label="Toggle sidebar"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-panel-left" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path></svg>
         </div>
         <div class="d-md-none toggle-sidebar-left" data-toggle-class="sidebar-left-opened" data-target="html" data-fire-event="sidebar-left-opened">
             <i class="fas fa-bars" aria-label="Toggle sidebar"></i>
@@ -101,14 +101,14 @@
                     <li class="divider"></li>
                     <li>
                         <a id="styleSwitcherOpen" role="menuitem" href="#" onclick="event.preventDefault(); document.getElementById('styleSwitcher')?.classList.toggle('open'); document.getElementById('styleSwitcher')?.scrollIntoView({behavior: 'smooth'});">
-                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-brush mr-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21v-4a4 4 0 1 1 4 4h-4" /><path d="M21 3a16 16 0 0 0 -12.8 10.2" /><path d="M21 3a16 16 0 0 1 -10.2 12.8" /><path d="M10.6 9a9 9 0 0 1 4.4 4.4" /></svg>
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="20"  height="20"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-brush mr-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21v-4a4 4 0 1 1 4 4h-4" /><path d="M21 3a16 16 0 0 0 -12.8 10.2" /><path d="M21 3a16 16 0 0 1 -10.2 12.8" /><path d="M10.6 9a9 9 0 0 1 4.4 4.4" /></svg>
                             Estilos y temas
                         </a>
                     </li>
                     <li class="divider"></li>
                     <li>
                         <a role="menuitem" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-logout mr-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" /><path d="M9 12h12l-3 -3" /><path d="M18 15l3 -3" /></svg>
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="20"  height="20"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-logout mr-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" /><path d="M9 12h12l-3 -3" /><path d="M18 15l3 -3" /></svg>
                             Cerrar Sesión
                         </a>
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
@@ -132,8 +132,23 @@
         <button class="close-btn" onclick="toggleSupportSidebar()">&times;</button>
     </div>
     <div class="support-body">
-    <p><strong>Email:</strong> <a class="support-link" href="https://mail.google.com/mail/?view=cm&fs=1&to={{ $user->address_contact }}" target="_blank">{{ $user->address_contact }}</a></p>
-    <p><strong>Teléfono:</strong> <a class="support-link" href="https://wa.me/{{ $user->phone }}" target="_blank">{{ $user->phone }}</a></p>
+        <p><strong>Email:</strong>
+            <a class="support-link" href="https://mail.google.com/mail/?view=cm&fs=1&to={{ $user->address_contact }}" target="_blank">
+                {{ $user->address_contact }}
+            </a>
+        </p>
+    
+        <p><strong>Teléfono:</strong>
+            <a class="support-link" href="tel:{{ $user->phone }}">
+                {{ $user->phone }}
+            </a>
+        </p>
+    
+        <p><strong>Número de WhatsApp:</strong>
+            <a class="support-link" href="https://wa.me/{{ $user->whatsapp_number }}" target="_blank">
+                {{ $user->whatsapp_number }}
+            </a>
+        </p>
     </div>
 </div>
 <div id="supportBackdrop" class="support-backdrop" onclick="toggleSupportSidebar()"></div>

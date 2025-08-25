@@ -38,6 +38,16 @@
 
             <nav id="menu" class="nav-main" role="navigation">
                 <ul class="nav nav-main">
+                    <li class="{{ ($path[0] === 'configurations')?'nav-active':'' }}">
+                        <a class="nav-link" href="{{route('system.configuration.index')}}">
+                            <i class="fas fa-cogs"></i><span>Configuracion</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <nav id="menu" class="nav-main" role="navigation">
+                <ul class="nav nav-main">
                     <li class="">
                         <a class="nav-link" href="{{url('logs')}}" target="_BLANK">
                             <i class="fas fa-bug"></i><span>Logs</span>

@@ -1,5 +1,5 @@
 <template>
-    <div class="card">
+    <div class="card card-config">
         <div class="card-header bg-info">
             <h3 class="my-0">Datos del Administrador <small>Acceso al sistema</small></h3>
         </div>
@@ -38,32 +38,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group" :class="{'has-danger': errors.phone}">
-                                <label class="control-label">Teléfono</label>
-                                <el-input v-model="form.phone"></el-input>
-                                <small class="form-control-feedback text-muted">Se mostrará un icono de Whatsapp en cada cliente. Agregar codigo de pais, ejemplo; 51955955955</small>
-                                <small class="form-control-feedback" v-if="errors.phone" v-text="errors.phone[0]"></small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group" :class="{'has-danger': errors.address_contact}">
-                                <label class="control-label">Correo de Contacto</label>
-                                <el-input v-model="form.address_contact"></el-input>
-                                <small class="form-control-feedback" v-if="errors.address_contact" v-text="errors.address_contact[0]"></small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group" :class="{'has-danger': errors.introduction}">
-                                <label class="control-label">Presentación</label>
-                                <el-input type="textarea" :rows="3" v-model="form.introduction"></el-input>
-                                <small class="form-control-feedback" v-if="errors.introduction" v-text="errors.introduction[0]"></small>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Phone, contact email and presentation moved to supportConfiguration component -->
                 </div>
                 <div class="form-actions text-right pt-2">
                     <el-button type="primary" native-type="submit" :loading="loading_submit">Guardar</el-button>

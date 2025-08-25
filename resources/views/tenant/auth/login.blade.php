@@ -14,8 +14,8 @@
         <form method="POST" action="{{ route('login') }}">
             @csrf
             <div class="text-left">
-                <h1 class="auth__title mb-2">Bienvenido a<br>{{ $vc_company->trade_name }}</h1>
-                <p class="mb-2 text-login">Ingrese su correo electrónico y contraseña a continuación para iniciar sesión en su cuenta.</p>
+                <h1 class="auth__title">Bienvenido a<br>{{ $vc_company->trade_name }}</h1>
+                <p class="mb-4 text-login">Ingrese su correo electrónico y contraseña a continuación para iniciar sesión en su cuenta.</p>
             </div>
             <div class="form-group mb-2">
                 <label for="email">Correo electrónico</label>
@@ -46,7 +46,7 @@
                     <div class="invalid-feedback">{{ $errors->first('password') }}</div>
                 @endif
             </div>
-            <button type="submit" class="btn btn-signin btn-block">Iniciar Sesión</button>
+            <button type="submit" class="btn btn-signin btn-block mt-4">Iniciar Sesión</button>
         </form>
     </article>
 </section>

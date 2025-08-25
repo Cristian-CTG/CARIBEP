@@ -25,20 +25,20 @@ class UserController extends Controller
         $id = $request->input('id');
         $user = User::firstOrNew(['id' => $id]);
 
+        $user->phone            = $request->input('phone');
+        $user->whatsapp_number  = $request->input('whatsapp_number');
+        $user->address_contact  = $request->input('address_contact');
+        $user->introduction     = $request->input('introduction');
+    
         if (config('tenant.password_change')) {
             $user->email = $request->input('email');
-            $user->name = $request->input('name');
-            $user->phone = $request->input('phone');
-            // Agregamos los nuevos campos no obligatorios
-            $user->address_contact = $request->input('address_contact');
-            $user->introduction = $request->input('introduction');
-        }
+            $user->name  = $request->input('name');
 
-        if (strlen($request->input('password')) > 0) {
-            if (config('tenant.password_change')) {
+            if (strlen($request->input('password')) > 0) {
                 $user->password = bcrypt($request->input('password'));
             }
         }
+
         $user->save();
 
         return [

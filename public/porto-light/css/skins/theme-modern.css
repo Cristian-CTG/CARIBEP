@@ -331,7 +331,8 @@ ul.nav-main li .nav-children li a:after {
 ul.nav-main li a span.badge{
     margin: 0 -1em 0 0;
 }
-div.sub-title.text-muted {
+div.sub-title.text-muted,
+.info-text {
     line-height: 1 !important;
 }
 .card.card-featured-left .table td, 
@@ -1035,8 +1036,10 @@ html.fixed.sidebar-white .sidebar-left .nano {
 }
 
 html.sidebar-left-collapsed .sidebar-left .nano:hover {
-    width: 300px;
-    box-shadow: 0 30px 30px rgb(0 0 0 / 20%);
+    width: 250px;
+    box-shadow: 0 30px 30px rgb(0 0 0 / 20%) !important;
+    z-index: 4;
+    border-radius: 0px;
 }
 
 .btn-signin {
@@ -1926,12 +1929,14 @@ html.sidebar-light:not(.dark) .style-switcher:before{
     transition: transform .2s ease;
 }
 #sticky-config.open .custom-caret{ transform: rotate(180deg); }
-
+html.sidebar-left-collapsed .config-btn .span-link span{
+    display: none;
+}
 .dropdown-menu-sidebar{
     position: absolute;
     left: 8px;
     right: 8px;
-    bottom: calc(100% + 8px);
+    bottom: calc(100% + -7px) !important;
     display: none;
     background: #FFFFFF;
     border: 1px solid var(--black-highlight);
@@ -1942,7 +1947,9 @@ html.sidebar-light:not(.dark) .style-switcher:before{
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1) !important;
 
 }
-
+html.no-overflowscrolling .nano {
+    height: calc(100% - 50px);
+}
 /* Ítems del menú */
 .dropdown-menu-sidebar .dropdown-item{
     width: auto;
@@ -1962,10 +1969,14 @@ html.sidebar-light:not(.dark) .style-switcher:before{
 #sticky-config .dropdown-menu-sidebar {
     display: none;
 }
-#sticky-config:hover .dropdown-menu-sidebar {
+#sticky-config .config-btn:hover + .dropdown-menu-sidebar,
+#sticky-config .dropdown-menu-sidebar:hover {
     display: block;
 }
-#sticky-config:hover .custom-caret {
+
+/* Rotar caret si el mouse está sobre el botón o sobre el menú */
+#sticky-config .config-btn:hover .custom-caret,
+#sticky-config .dropdown-menu-sidebar:hover ~ .config-btn .custom-caret {
     transform: rotate(180deg);
 }
 /* fin */

@@ -8,7 +8,7 @@
             </h2>
             <ol class="breadcrumbs">
                 <li class="active">
-                    <span>Dashboard</span>
+                    <span>Dashboard / Listado de compañias</span>
                 </li>
             </ol>
         </header>
@@ -69,7 +69,6 @@
         </div>-->
 
         <div class="card" id="client-list">
-            <div class="card-header bg-info">Listado de compañias</div>
             <div class="card-body">
                 <div class="row">
                     <div class="col">
