@@ -1,16 +1,22 @@
 <template>
     <div>
-        <header class="page-header">
+        <header class="page-header mx-0">
             <h2>
                 <a href="/co-companies">
-                    <i class="fa fa-list-alt"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-layout-dashboard"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M5 4h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1"></path><path d="M5 16h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1"></path><path d="M15 12h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1"></path><path d="M15 4h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1"></path></svg>
                 </a>
             </h2>
             <ol class="breadcrumbs">
                 <li class="active">
-                    <span>Dashboard / Listado de compañias</span>
+                    <span>Dashboard</span>
                 </li>
+                <li><span class="text-muted">Listado de compañias</span></li>
             </ol>
+
+            <button type="button" class="btn btn-custom btn-sm mt-2 mr-2 mb-3 pull-right"
+                @click.prevent="clickCreate()">
+                <i class="fa fa-plus-circle"></i> Crear nueva Compañia
+            </button>
         </header>
         <!-- <div class="row">
       <div class="col-lg-8 mb-3">
@@ -68,16 +74,8 @@
       </div>
         </div>-->
 
-        <div class="card" id="client-list">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <button type="button" class="btn btn-custom btn-sm mt-2 mr-2 mb-3"
-                            @click.prevent="clickCreate()">
-                            <i class="fa fa-plus-circle"></i> Nuevo
-                        </button>
-                    </div>
-                </div>
+        <div class="card w-100" id="client-list">
+            <div class="card-body card-companies">
                 <div class="table-responsive">
                     <table class="table">
                         <thead>
@@ -215,13 +213,19 @@
                                 <td class="text-right">
                                     <template v-if="!row.locked">
                                         <el-dropdown trigger="click">
-                                            <span class="el-dropdown-link" style="cursor:pointer;">
-                                                <i class="fa fa-ellipsis-v" style="font-size: 20px;"></i>
-                                            </span>
+                                            <el-button type="secondary" size="mini" class="btn btn-default btn-sm btn-dropdown-toggle">
+                                                <i class="fas fa-ellipsis-h"></i>
+                                            </el-button>
                                             <el-dropdown-menu slot="dropdown">
                                                 <el-dropdown-item @click.native="clickEdit(row.id)">Editar</el-dropdown-item>
                                                 <el-dropdown-item @click.native="openPasswordDialog(row.id)">Cambiar contraseña</el-dropdown-item>
-                                                <el-dropdown-item divided @click.native="clickDelete(row.id)">Eliminar</el-dropdown-item>
+                                                <el-dropdown-item divided></el-dropdown-item>
+                                                <el-dropdown-item @click.native="clickDelete(row.id)" class="text-danger">
+                                                    <span class="dropdown-item-content">
+                                                        Eliminar
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash text-danger"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M4 7l16 0"></path><path d="M10 11l0 6"></path><path d="M14 11l0 6"></path><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"></path></svg>
+                                                    </span>                                                    
+                                                </el-dropdown-item>
                                             </el-dropdown-menu>
                                         </el-dropdown>
                                     </template>
@@ -317,7 +321,15 @@
         <account-status :showDialog.sync="showDialogAccountStatus" :clientId="recordId"></account-status>
     </div>
 </template>
-
+<style>
+.dropdown-item-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    min-width: 120px;
+}
+</style>
 <script>
 import CompaniesForm from "./form.vue";
 //   import CompaniesFormEdit from './form_edit.vue'

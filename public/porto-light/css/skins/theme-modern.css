@@ -53,7 +53,7 @@ html.sidebar-left-big-icons .sidebar-left a {
     html.sidebar-left-big-icons.sidebar-light .sidebar-left .nano .nav-main>li.nav-active>a {
         background: var(--black-highlight);
         box-shadow: none;
-        border-radius: 6px !important;
+        border-radius: 0px !important;
         color: var(--black-dark) !important;
     }
 
@@ -126,7 +126,25 @@ sup.el-badge__content.el-badge__content--undefined.is-fixed {
     border: none;
     border-radius: 4px;
 }
-
+#select-width {
+    width: 100%;
+}
+#custom-select .el-input-group__prepend .el-select {
+    margin-left: 0px;
+}
+#custom-select .el-input-group__prepend {
+    width: 100%;
+    padding-left: 0px;
+    padding-right: 0px;
+    background: #fff;
+    color: #606266;
+}
+#custom-input {
+padding-left: 0px;
+padding-right: 0px;
+width: 0px;
+border-left: 0px;
+}
 .el-badge.el-tooltip.item.ml-4.item {
     margin-left: 1rem !important;
 }
@@ -432,13 +450,23 @@ div.sub-title.text-muted,
 .support-intro p{
     margin-bottom: 5px;
 }
-.support-body strong{
+.support-body strong,
+.el-collapse-item__header,
+.el-collapse-item__content{
     color: var(--black-dark);
 }
 .icon-support-container{
     display: flex;
     align-items: center;
     justify-content: center;
+}
+.icon-collapse{
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background-color: var(--black-highlight);
 }
 .icon-support-container div{
     padding: 6px;
@@ -791,6 +819,18 @@ html.fixed.sidebar-white:not(.dark) .sidebar-left a {
 .dropdown-menu .divider {
     margin: 8px 0;
     background-color: var(--black-highlight);
+}
+.userbox-system.show .dropdown-menu{
+    left: -80px !important;
+}
+.userbox.show .dropdown-menu a{
+    color: var(--black-dark);
+    margin: 0 5px;
+    border-radius: 8px
+}
+.userbox.show .dropdown-menu a:hover {
+    background-color: var(--black-light);
+    color: var(--black-dark);
 }
 .el-input__inner,
 .el-textarea__inner {
@@ -1780,6 +1820,10 @@ html.fixed .sidebar-left a svg {
     margin-top: 10px;
 }
 ul.nav-main>li a:hover {
+    padding-left: 0.50rem !important;
+    background-color: var(--black-highlight) !important;
+}
+.sidebar-system ul.nav-main>li a:hover {
     padding-left: 0rem !important;
     background-color: var(--black-highlight) !important;
 }
@@ -1858,6 +1902,9 @@ ul.nav-main li.nav-parent.nav-expanded > a:after {
 }
 .card-actions a:hover, .card-actions .card-action:hover{
     background-color: var(--black-light) !important;
+}
+.inner-wrapper-system {
+    height: 100vh;
 }
 ul.nav.list-config li:hover {
     background: var(--black-light) !important;
@@ -2310,6 +2357,31 @@ a.nav-link{
 .el-tabs--top .el-tabs__item.is-top:nth-child(2), .el-tabs--top .el-tabs__item.is-bottom:nth-child(2), .el-tabs--bottom .el-tabs__item.is-top:nth-child(2), .el-tabs--bottom .el-tabs__item.is-bottom:nth-child(2),
 .el-tabs--top .el-tabs__item.is-top:last-child, .el-tabs--top .el-tabs__item.is-bottom:last-child, .el-tabs--bottom .el-tabs__item.is-top:last-child, .el-tabs--bottom .el-tabs__item.is-bottom:last-child{
     padding: 0 20px;
+}
+.header-system{
+    border-bottom: 1px solid var(--black-highlight);
+}
+.sidebar-system{
+    margin: 15px 0 15px 15px;
+}
+.inner-wrapper-system #main-wrapper {
+    padding: 15px;
+}
+#client-list .card-companies{
+    padding: 0;
+}
+.logo-system{
+    margin-left: 15px;
+}
+.logo-system:hover{
+    text-decoration: none;
+}
+.inner-wrapper-system .page-header{
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+}
+.subdomain-input .el-input-group__append{
+    padding: 0 5px;
 }
 /* ESTILOS MODO OSCURO */
 html.dark .header, html.header-dark .header {
@@ -2929,6 +3001,9 @@ html.dark ul.nav-main li a{
     html.newinvoice .inner-wrapper {
         margin-top: 0px;
         padding-top: 60px;
+    }
+    html.scroll .sidebar-left, html.boxed .sidebar-left, html.sidebar-left-big-icons .sidebar-left {
+        min-height: auto;
     }
 }
 @media only screen and (max-width: 767px) {

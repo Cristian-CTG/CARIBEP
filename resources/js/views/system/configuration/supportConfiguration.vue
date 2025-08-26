@@ -11,11 +11,13 @@
                                 <div class="form-group" :class="{'has-danger': errors.phone}">
                                     <label class="control-label">Teléfono</label>
                                     <el-input v-model="form.phone"></el-input>
-                                    <small class="form-control-feedback text-muted info-text">
+                                    <div class="sub-title text-muted">
+                                      <small>
                                         Ingresa el número con el código de país, sin espacios ni símbolos.  
                                         Este número se mostrará en el panel de soporte de los clientes.  
                                         Ejemplo: 573155555555
-                                    </small>
+                                      </small>
+                                    </div>
                                     <small class="form-control-feedback" v-if="errors.phone" v-text="errors.phone[0]"></small>
                                 </div>
                             </div>
@@ -23,11 +25,12 @@
                                 <div class="form-group" :class="{'has-danger': errors.whatsapp_number}">
                                   <label class="control-label">Número de WhatsApp</label>
                                   <el-input v-model="form.whatsapp_number"></el-input>
-                                  <small class="form-control-feedback text-muted info-text">
-                                    Ingresa el número con el código de país, sin espacios ni símbolos.  
+                                  <div class="sub-title text-muted">
+                                    <small>Ingresa el número con el código de país, sin espacios ni símbolos.  
                                     Este será el número de WhatsApp que verán los clientes en el panel de soporte.  
                                     Ejemplo: 573155555555
-                                  </small>
+                                    </small>
+                                  </div>
                                   <small class="form-control-feedback" v-if="errors.whatsapp_number" v-text="errors.whatsapp_number[0]"></small>
                                 </div>
                             </div>
