@@ -47,16 +47,12 @@
                     <li class="
                         nav-parent
                         {{ ($path[0] === 'documents')?'nav-active nav-expanded':'' }}
-                        {{ ($path[0] === 'items')?'nav-active nav-expanded':'' }}
-                        {{ ($path[0] === 'persons' && $path[1] === 'customers')?'nav-active nav-expanded':'' }}
                         {{ ($path[0] === 'summaries')?'nav-active nav-expanded':'' }}
                         {{ ($path[0] === 'voided')?'nav-active nav-expanded':'' }}
                         {{ ($path[0] === 'quotations')?'nav-active nav-expanded':'' }}
                         {{ ($path[0] === 'sale-notes')?'nav-active nav-expanded':'' }}
                         {{ ($path[0] === 'contingencies')?'nav-active nav-expanded':'' }}
                         {{ ($path[0] === 'person-types')?'nav-active nav-expanded':'' }}
-                        {{ ($path[0] === 'brands')?'nav-active nav-expanded':'' }}
-                        {{ ($path[0] === 'categories')?'nav-active nav-expanded':'' }}
                         {{ ($path[0] === 'incentives')?'nav-active nav-expanded':'' }}
                         {{ ($path[0] === 'order-notes')?'nav-active nav-expanded':'' }}
                         {{ ($path[0] === 'sale-opportunities')?'nav-active nav-expanded':'' }}
@@ -66,8 +62,6 @@
                         {{ ($path[0] === 'user-commissions')?'nav-active nav-expanded':'' }}
 
                         {{ ($path[0] === 'co-documents')?'nav-active nav-expanded':'' }}
-                        {{ ($path[0] === 'co-items')?'nav-active nav-expanded':'' }}
-                        {{ ($path[0] === 'co-clients')?'nav-active nav-expanded':'' }}
                         {{ ($path[0] === 'co-taxes')?'nav-active nav-expanded':'' }}
                         {{ ($path[0] === 'co-documents-aiu')?'nav-active nav-expanded':'' }}
                         {{ ($path[0] === 'co-documents-health')?'nav-active nav-expanded':'' }}
@@ -89,27 +83,27 @@
                                     @if(in_array('new_document', $vc_module_levels))
                                         <li class="{{ ($path[0] === 'co-documents'  && $path[1] === 'create')?'nav-active':'' }}">
                                             <a class="nav-link" href="{{route('tenant.co-documents.create')}}">
-                                                Nueva Factura Electronica
+                                                Factura Electronica
                                             </a>
                                         </li>
 
                                         @if(in_array('invoicehealth', $vc_modules))
                                             <li class="{{ ($path[0] === 'co-documents-health'  && $path[1] === 'create')?'nav-active':'' }}">
                                                 <a class="nav-link" href="{{route('tenant.co-documents-health.create')}}">
-                                                    Nueva F.E. Sector Salud
+                                                    Factura Salud
                                                 </a>
                                             </li>
                                         @endif
 
                                         <li class="{{ ($path[0] === 'co-documents-aiu'  && $path[1] === 'create')?'nav-active':'' }}">
                                             <a class="nav-link" href="{{route('tenant.co-documents-aiu.create')}}">
-                                                Nueva Factura Electronica AIU
+                                                Factura AIU
                                             </a>
                                         </li>
 
                                         <li class="{{ ($path[0] === 'co-documents-unreferenced-note'  && $path[1] === 'create')?'nav-active':'' }}">
                                             <a class="nav-link" href="{{route('tenant.co-documents-unreferenced-note.create')}}">
-                                                Nueva Nota Contable Sin Referencia A Factura Electronica
+                                                Nota Contable (sin ref.)
                                             </a>
                                         </li>
                                         {{-- <li class="{{ ($path[0] === 'documents' && $path[1] === 'create')?'nav-active':'' }}">
@@ -132,7 +126,7 @@
 
                                     <li class="{{ ($path[0] === 'co-documents'  && $path[1] != 'create'  )?'nav-active':'' }}">
                                         <a class="nav-link" href="{{route('tenant.co-documents.index')}}">
-                                            Listado de comprobantes
+                                            Mis comprobantes
                                         </a>
                                     </li>
                                 @endif
@@ -161,69 +155,7 @@
                                 </li>
                                 @endif --}}
 
-                                @if(in_array('catalogs', $vc_module_levels))
-
-                                    <li class="nav-parent
-                                        {{ ($path[0] === 'items')?'nav-active nav-expanded':'' }}
-                                        {{ ($path[0] === 'co-items')?'nav-active nav-expanded':'' }}
-                                        {{ ($path[0] === 'co-clients')?'nav-active nav-expanded':'' }}
-                                        {{ ($path[0] === 'categories')?'nav-active nav-expanded':'' }}
-                                        {{ ($path[0] === 'brands')?'nav-active nav-expanded':'' }}
-                                        {{ ($path[0] === 'person-types')?'nav-active nav-expanded':'' }}
-                                        {{ ($path[0] === 'co-taxes')?'nav-active nav-expanded':'' }}
-                                        {{ ($path[0] === 'persons' && $path[1] === 'customers')?'nav-active nav-expanded':'' }}
-                                        ">
-                                        <a class="nav-link" href="#">
-                                            Catálogos
-                                        </a>
-                                        <ul class="nav nav-children">
-
-                                            {{-- <li class="{{ ($path[0] === 'co-items')?'nav-active':'' }}">
-                                                <a class="nav-link" href="{{route('tenant.co-items.index')}}">
-                                                    Productos colombia
-                                                </a>
-                                            </li>
-
-                                            <li class="{{ ($path[0] === 'co-clients')?'nav-active':'' }}">
-                                                <a class="nav-link" href="{{route('tenant.co-clients.index')}}">
-                                                    Clientes colombia
-                                                </a>
-                                            </li> --}}
-
-                                            <li class="{{ ($path[0] === 'co-taxes')?'nav-active':'' }}">
-                                                <a class="nav-link" href="{{route('tenant.co-taxes.index')}}">
-                                                    Impuestos colombia
-                                                </a>
-                                            </li>
-
-                                            <li class="{{ ($path[0] === 'items')?'nav-active':'' }}">
-                                                <a class="nav-link" href="{{route('tenant.items.index')}}">
-                                                    Productos
-                                                </a>
-                                            </li>
-                                            <li class="{{ ($path[0] === 'categories')?'nav-active':'' }}">
-                                                <a class="nav-link" href="{{route('tenant.categories.index')}}">
-                                                    Categorías
-                                                </a>
-                                            </li>
-                                            <li class="{{ ($path[0] === 'brands')?'nav-active':'' }}">
-                                                <a class="nav-link" href="{{route('tenant.brands.index')}}">
-                                                    Marcas
-                                                </a>
-                                            </li>
-                                            <li class="{{ ($path[0] === 'persons' && $path[1] === 'customers')?'nav-active':'' }}">
-                                                <a class="nav-link" href="{{route('tenant.persons.index', ['type' => 'customers'])}}">
-                                                    Clientes
-                                                </a>
-                                            </li>
-                                            <!-- <li class="{{ ($path[0] === 'person-types')?'nav-active':'' }}">
-                                                <a class="nav-link" href="{{route('tenant.person_types.index')}}">
-                                                    Tipos de clientes
-                                                </a>
-                                            </li> -->
-                                        </ul>
-                                    </li>
-                                @endif
+                                {{-- Catálogos removed: Productos moved to a top-level 'Productos' menu below Clientes --}}
 
                                 {{-- @if(in_array('summary_voided', $vc_module_levels) && $vc_company->soap_type_id != '03')
 
@@ -392,6 +324,52 @@
                                 <li class="{{ ($path[0] === 'document-pos'  )?'nav-active':'' }}">
                                     <a class="nav-link" href="{{route('tenant.document_pos.index')}}">
                                         Lista Documentos
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        @endif
+                        {{-- Clientes standalone menu moved here from Catalogos --}}
+                        @if(in_array('documents', $vc_modules) && auth()->user()->type != 'integrator')
+                        <li class="{{ ($path[0] === 'persons' && $path[1] === 'customers')?'nav-active':'' }}">
+                            <a class="nav-link" href="{{route('tenant.persons.index', ['type' => 'customers'])}}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-users"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"></path></svg>
+                                <span>Clientes</span>
+                            </a>
+                        </li>
+                        @endif
+
+                        {{-- Nuevo menú Productos (antes en Catálogos) colocado debajo de Clientes --}}
+                        @if(in_array('documents', $vc_modules) && auth()->user()->type != 'integrator')
+                        <li class="nav-parent
+                            {{ ($path[0] === 'items')?'nav-active nav-expanded':'' }}
+                            {{ ($path[0] === 'categories')?'nav-active nav-expanded':'' }}
+                            {{ ($path[0] === 'brands')?'nav-active nav-expanded':'' }}
+                            ">
+                            <a class="nav-link" href="#">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-category-2">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                    <path d="M14 4h6v6h-6z"></path>
+                                    <path d="M4 14h6v6h-6z"></path>
+                                    <path d="M17 17m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"></path>
+                                    <path d="M7 7m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"></path>
+                                </svg>
+                                <span>Productos</span>
+                            </a>
+                            <ul class="nav nav-children">
+                                <li class="{{ ($path[0] === 'items')?'nav-active':'' }}">
+                                    <a class="nav-link" href="{{route('tenant.items.index')}}">
+                                        Productos
+                                    </a>
+                                </li>
+                                <li class="{{ ($path[0] === 'categories')?'nav-active':'' }}">
+                                    <a class="nav-link" href="{{route('tenant.categories.index')}}">
+                                        Categorías
+                                    </a>
+                                </li>
+                                <li class="{{ ($path[0] === 'brands')?'nav-active':'' }}">
+                                    <a class="nav-link" href="{{route('tenant.brands.index')}}">
+                                        Marcas
                                     </a>
                                 </li>
                             </ul>
@@ -1084,6 +1062,7 @@
                     sidebarLeft.scrollTop = initialPosition;
                 }
             }
+            
         </script>
     </div>
     @php
@@ -1123,6 +1102,12 @@
                     <a class="dropdown-item" href="{{route('tenant.configuration.documents')}}">
                         <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-file-text"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 9l1 0" /><path d="M9 13l6 0" /><path d="M9 17l6 0" /></svg>
                         Documentos</a>
+                </li>
+                <li class="{{($path[0] === 'co-taxes') ? 'nav-active': ''}}">
+                    <a class="dropdown-item" href="{{route('tenant.co-taxes.index')}}">
+                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-receipt"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2l-3 2m4 -14h6m-6 4h6m-2 4h2" /></svg>
+                        Impuestos colombia
+                    </a>
                 </li>
                 <li class="{{($path[0] === 'co-configuration') ? 'nav-active': ''}}">                    
                     <a class="dropdown-item" href="{{route('tenant.configuration')}}">

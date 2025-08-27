@@ -2053,6 +2053,23 @@ html.sidebar-light:not(.dark) .style-switcher:before{
     width: 2px;
 }
 /* inicio */
+#configMenuToggle {
+    pointer-events: auto;       /* Permite eventos de hover */
+    cursor: default;            /* Cambia el cursor para indicar que no es clickeable */
+}
+
+#configMenuToggle {
+    /* Bloqueamos solo el clic, pero no el hover */
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+
+#configMenuToggle {
+    /* Prevenimos clics con un pequeño hack */
+}
+#configMenuToggle:active {
+    pointer-events: none; /* Ignora el clic pero el hover sigue funcionando */
+}
 #sticky-config.sidebar-config{
     position: sticky;
     bottom: 10px;

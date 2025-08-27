@@ -16,9 +16,9 @@
             <div class="right-wrapper pull-right" >
                 <a :href="`/${resource}/create`" class="btn btn-custom btn-sm  mt-2 mr-2"><i class="fa fa-plus-circle"></i> Nuevo</a>
                 <el-tooltip class="item" effect="dark" content="Importa las facturas con estado Aceptada en el API que no se encuentran registradas" placement="bottom">
-                    <el-button class="btn btn-custom btn-sm  mt-2 mr-2" :loading="Sincronizing" @click.prevent="openSyncDialog"><i class="fas fa-sync-alt" ></i> Sincronizar Envios API</el-button>
+                    <button class="btn btn-custom btn-sm  mt-2 mr-2" :loading="Sincronizing" @click.prevent="openSyncDialog"><i class="fas fa-sync-alt" ></i> Sincronizar Envios API</button>
                 </el-tooltip>
-                <el-button class="btn btn-custom btn-sm  mt-2 mr-2" @click.prevent="clickImport()"><i class="fa fa-arrows-alt" ></i> Carga Masiva</el-button>
+                <button class="btn btn-custom btn-sm  mt-2 mr-2" @click.prevent="clickImport()"><i class="fa fa-arrows-alt" ></i> Carga Masiva</button>
             </div>
         </div>
         <div class="card mb-0">
