@@ -483,31 +483,34 @@ div.sub-title.text-muted,
 }
 .support-email{
     background-color: #eff6ff;
-    border: 1px solid #76a6e3;
+    border: 1px solid #bbd3f2;
     color: #2663eb;
 }
 .support-phone{
     background-color: #fff7ed;
-    border: 1px solid #dec09b;
+    border: 1px solid #e7d5bd;
     color: #ea580b;
 }
 .support-body a.support-link-whatsapp{
-    color: #04966a;
+    color: #04966a !important;
     font-weight: bold;
 }
 .support-body a.support-link-whatsapp:hover{
     color: #04966a;
 }
 .support-body a.support-link-email{
-    color: #2663eb;
+    color: #2663eb !important;
     font-weight: bold;
 }
 .support-body a.support-link-phone{
-    color: #ea580b;
+    color: #ea580b !important;
     font-weight: bold;
 }
 .support-body a.support-link-phone:hover{
-    color: #ea580b;
+    color: #ea580b !important;
+}
+.support-right strong{
+    color: var(--black-dark) !important;
 }
 /* .tooltips-container button{
     padding: 8px 15px;
@@ -1453,8 +1456,8 @@ html body .text-primary {
     border-radius: 10px;
 }
 
-html.sidebar-light:not(.dark) .page-header .breadcrumbs a,
-html.sidebar-light:not(.dark) .page-header .breadcrumbs span,
+.page-header .breadcrumbs a,
+.page-header .breadcrumbs span,
 .card-report-links a,
 .card-report-links a:hover {
     color: var(--black-dark);
@@ -1752,7 +1755,7 @@ tbody tr:hover, tfoot tr:hover,
 .border-top-dashed{
     border-top: 3px dashed var(--black-highlight) !important;
 }
-html.sidebar-light:not(.dark) .page-header h2{
+.page-header h2{
     color: var(--black-dark);
     font-weight: bold;
 }
@@ -1917,8 +1920,8 @@ ul.nav.list-config li:hover {
     border-radius: 10px !important;
     padding: 5px !important;
 }
-html.sidebar-light:not(.dark) .page-header {
-    margin: 0 21px;
+.page-header {
+    margin: 0 21px !important;
     border-style: solid;
     border-width: 1px;
     border-color: var(--black-highlight);
@@ -2421,7 +2424,7 @@ html.fixed.sidebar-dark .sidebar-left, html.fixed.sidebar-dark .sidebar-header, 
 }
 html.dark .page-header,
 html.header-dark .page-header {
-    border-left-color: var(--black-bg-dark);
+    border-color: var(--black-border-dark);
     background: var(--black-bg-dark);
     box-shadow: 
         0 4px 6px -1px rgba(0, 0, 0, 0.3),
@@ -2894,14 +2897,21 @@ html.dark .el-tabs__nav {
     background: var(--black-content-dark);
 }
 html.dark .support-body p{
-    background-color: var(--black-input-dark);
-    border-color: var(--black-border-dark);
+    background-color: var(--black-bg-dark);
+    border-color: var(--black-bg-dark);
 }
 html.dark .support-body p:hover{
-    background-color: var(--black-content-dark);
+    background-color: var(--black-bg-dark);
 }
 html.dark .support-header{
-    border-color: var(--black-border-dark);
+    border-color: var(--black-bg-dark);
+}
+html.dark .close-btn {
+    color: var(--black-accent);
+}
+html.dark .close-btn:hover {
+    color: var(--black-light);
+    background-color: transparent;
 }
 html.dark .el-tabs__item.is-active h3,
 html.dark .dropdown-menu .dropdown-item,
@@ -3135,7 +3145,7 @@ html.dark ul.nav-main li a{
     html.dark li.btn-primary a svg.icon-tabler-logout{
         stroke: var(--black-dark);
     }
-    html.sidebar-light:not(.dark) .page-header{
+    .page-header{
         margin: 0 -15px 20px !important;
     }
     html.dark .sidebar-left,

@@ -4,13 +4,12 @@
 
     <section class="body-sign sign-system">
         <div class="center-sign">
-            <p class="card-title text-center mb-3">Acceso al Sistema</p>
+            <p class="card-title text-center mb-3">Panel administrador {{ config('app.name') }}</p>
             <div class="d-flex justify-content-center">
                 <div class="card-body card-sign">
                     <div class="text-left w-100">
                         <p class="h6 sign-text"><strong>Iniciar sesión</strong></p>
-                        <p class="mb-2">Ingrese su correo electrónico y contraseña a  <br> continuación para <br>
-                            iniciar sesión en tu cuenta</p>
+                        <p class="mb-2">Acceso solo para administradores de cuentas</p>
                     </div>
                     <form method="POST" action="{{ route('login') }}" class="w-100">
                         @csrf
@@ -63,7 +62,7 @@
                     </form>
                 </div>
             </div>
-            <p class="text-center text-muted mt-3 mb-3">&copy; Copyright {{ date('Y') }}. Todos los derechos reservados</p>
+            <p class="text-center text-muted mt-3 mb-3">&copy; Copyright {{ date('Y') }} {{ config('app.name') }}. Todos los derechos reservados</p>
         </div>
     </section>
 

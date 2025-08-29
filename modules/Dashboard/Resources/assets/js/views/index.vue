@@ -7,6 +7,33 @@
       <div>
         <h2>Dashboard</h2>
       </div>
+      <div>
+        <el-button 
+          type="primary"
+          @click="toggleFilters"
+          size="small"
+          class="mr-2 p-2"
+          :title="showFilters ? 'Ocultar filtros' : 'Mostrar filtros'"
+        >
+          <svg v-if="showFilters" xmlns="http://www.w3.org/2000/svg"  width="20"  height="20"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"
+            stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-adjustments-alt">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 8h4v4h-4z" />
+            <path d="M6 4l0 4" /><path d="M6 12l0 8" />
+            <path d="M10 14h4v4h-4z" /><path d="M12 4l0 10" />
+            <path d="M12 18l0 2" /><path d="M16 5h4v4h-4z" />
+            <path d="M18 4l0 1" /><path d="M18 9l0 11" />
+          </svg>
+
+          <svg v-else xmlns="http://www.w3.org/2000/svg"  width="20"  height="20"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"
+            stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-adjustments-off">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 10a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+            <path d="M6 6v2" /><path d="M6 12v8" /><path d="M10 16a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+            <path d="M12 4v4m0 4v2" /><path d="M12 18v2" />
+            <path d="M16 7a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M18 4v1" />
+            <path d="M18 9v5m0 4v2" /><path d="M3 3l18 18" />
+          </svg>
+        </el-button>
+      </div>
     </header>
     <div class="row">
       <div class="col-12" v-if="resolutions.length > 0">
@@ -18,11 +45,11 @@
           </button>
         </div>
       </div>
-      <div class="col-xl-6">
-        <section class="card card-featured-left card-featured-secondary">
+      <div class="col-xl-12 px-0" v-show="showFilters">
+        <section class="card card-featured-secondary">
           <div class="card-body">
             <div class="row">
-              <div class="col-md-6">
+              <div class="col-md-3">
                 <div class="form-group">
                   <label class="control-label">Establecimiento</label>
                   <el-select v-model="form.establishment_id" @change="loadAll">
@@ -35,7 +62,7 @@
                   </el-select>
                 </div>
               </div>
-              <div class="col-md-6">
+              <div class="col-md-3">
                 <label class="control-label">Periodo</label>
                 <el-select v-model="form.period" @change="changePeriod">
                   <el-option key="all" value="all" label="Todos"></el-option>
@@ -46,7 +73,7 @@
                 </el-select>
               </div>
               <template v-if="form.period === 'month' || form.period === 'between_months'">
-                <div class="col-md-6">
+                <div class="col-md-3">
                   <label class="control-label">Mes de</label>
                   <el-date-picker
                     v-model="form.month_start"
@@ -59,7 +86,7 @@
                 </div>
               </template>
               <template v-if="form.period === 'between_months'">
-                <div class="col-md-6">
+                <div class="col-md-3">
                   <label class="control-label">Mes al</label>
                   <el-date-picker
                     v-model="form.month_end"
@@ -73,7 +100,7 @@
                 </div>
               </template>
               <template v-if="form.period === 'date' || form.period === 'between_dates'">
-                <div class="col-md-6">
+                <div class="col-md-3">
                   <label class="control-label">Fecha del</label>
                   <el-date-picker
                     v-model="form.date_start"
@@ -86,7 +113,7 @@
                 </div>
               </template>
               <template v-if="form.period === 'between_dates'">
-                <div class="col-md-6">
+                <div class="col-md-3">
                   <label class="control-label">Fecha al</label>
                   <el-date-picker
                     v-model="form.date_end"
@@ -99,7 +126,7 @@
                   ></el-date-picker>
                 </div>
               </template>
-              <div class="col-md-6">
+              <div class="col-md-3">
                 <label class="control-label">Moneda
                     <el-tooltip class="item" effect="dark" content="Filtra por moneda del documento emitido" placement="top-start">
                         <i class="fa fa-info-circle"></i>
@@ -112,43 +139,7 @@
             </div>
           </div>
         </section>
-      </div>
-      <div class="col-xl-6" v-if="!disc.error">
-        <section class="card card-featured-left card-featured-secondary">
-          <div class="card-body">
-            <div class="widget-summary">
-              <div class="widget-summary-col">
-                <div class="row no-gutters">
-                  <div class="col-md-12 m-b-10">
-                    <h4 class="card-title">Disco Duro <small>Porcentaje de uso</small></h4>
-                  </div>
-                  <div class="col-lg-12 py-2">
-                    <div class="summary">
-                      <el-progress :percentage="disc.pcent"></el-progress>
-                    </div>
-                  </div>
-                  <!-- <div class="col-lg-4">
-                    <div class="summary">
-                      <h4 class="title">
-                        Disponible
-                      </h4>
-                      <el-progress :percentage="disc.avail"></el-progress>
-                    </div>
-                  </div>
-                  <div class="col-lg-4">
-                    <div class="summary">
-                      <h4 class="title">
-                        Uso
-                      </h4>
-                      <el-progress :percentage="disc.used"></el-progress>
-                    </div>
-                  </div> -->
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
+      </div>      
     </div>
     <div class="row">
       <div class="col-xl-12">
@@ -162,40 +153,42 @@
                       <div class="col-md-12 m-b-10">
                         <h2 class="card-title">Facturas Electrónicas</h2>
                       </div>
-                      <div class="col-lg-4">
-                        <div class="summary">
-                          <h4 class="title text-info">
-                            Total
-                            <br />Pagado
-                          </h4>
-                          <div class="info">
-                            <strong class="amount text-info">{{ formatNumber(sale_note.totals.total_payment) }}</strong>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-lg-4">
-                        <div class="summary">
-                          <h4 class="title text-danger">
-                            Total
-                            <br />por Pagar
-                          </h4>
-                          <div class="info">
-                            <strong
-                              class="amount text-danger"
-                            >{{ formatNumber(sale_note.totals.total_to_pay) }}</strong>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-lg-4">
-                        <div class="summary">
-                          <h4 class="title">
-                            Total
-                            <br />&nbsp;
-                          </h4>
-                          <div class="info">
-                            <strong class="amount">{{ formatNumber(sale_note.totals.total) }}</strong>
-                          </div>
-                        </div>
+                      <div class="col-lg-12 d-flex" v-if="sale_note.totals.total_payment > 0 || sale_note.totals.total_to_pay > 0 || sale_note.totals.total > 0">
+                         <div class="col-lg-4">
+                           <div class="summary">
+                             <h4 class="title text-info">
+                               Total
+                               <br />Pagado
+                             </h4>
+                             <div class="info">
+                               <strong class="amount text-info">{{ formatNumber(sale_note.totals.total_payment) }}</strong>
+                             </div>
+                           </div>
+                         </div>
+                         <div class="col-lg-4">
+                           <div class="summary">
+                             <h4 class="title text-danger">
+                               Total
+                               <br />por Pagar
+                             </h4>
+                             <div class="info">
+                               <strong
+                                 class="amount text-danger"
+                               >{{ formatNumber(sale_note.totals.total_to_pay) }}</strong>
+                             </div>
+                           </div>
+                         </div>
+                         <div class="col-lg-4">
+                           <div class="summary">
+                             <h4 class="title">
+                               Total
+                               <br />&nbsp;
+                             </h4>
+                             <div class="info">
+                               <strong class="amount">{{ formatNumber(sale_note.totals.total) }}</strong>
+                             </div>
+                           </div>
+                         </div>
                       </div>
                     </div>
                     <div class="row m-t-20">
@@ -217,39 +210,41 @@
                       <div class="col-md-12 m-b-10">
                         <h2 class="card-title">Remisiones</h2>
                       </div>
-                      <div class="col-lg-4">
-                        <div class="summary">
-                          <h4 class="title text-info">
-                            Total
-                            <br />Pagado
-                          </h4>
-                          <div class="info">
-                            <strong class="amount text-info">{{ formatNumber(document.totals.total_payment) }}</strong>
+                      <div class="col-lg-12 d-flex" v-if="document.totals.total_payment > 0 || document.totals.total_to_pay > 0 || document.totals.total > 0">
+                        <div class="col-lg-4">
+                          <div class="summary">
+                            <h4 class="title text-info">
+                              Total
+                              <br />Pagado
+                            </h4>
+                            <div class="info">
+                              <strong class="amount text-info">{{ formatNumber(document.totals.total_payment) }}</strong>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div class="col-lg-4">
-                        <div class="summary">
-                          <h4 class="title text-danger">
-                            Total
-                            <br />por Pagar
-                          </h4>
-                          <div class="info">
-                            <strong class="amount text-danger">{{ formatNumber(document.totals.total_to_pay) }}</strong>
+                        <div class="col-lg-4">
+                          <div class="summary">
+                            <h4 class="title text-danger">
+                              Total
+                              <br />por Pagar
+                            </h4>
+                            <div class="info">
+                              <strong class="amount text-danger">{{ formatNumber(document.totals.total_to_pay) }}</strong>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div class="col-lg-4">
-                        <div class="summary">
-                          <h4 class="title">
-                            Total
-                            <br />&nbsp;
-                          </h4>
-                          <div class="info">
-                            <strong class="amount">{{ formatNumber(document.totals.total) }}</strong>
+                        <div class="col-lg-4">
+                          <div class="summary">
+                            <h4 class="title">
+                              Total
+                              <br />&nbsp;
+                            </h4>
+                            <div class="info">
+                              <strong class="amount">{{ formatNumber(document.totals.total) }}</strong>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </div>                      
                     </div>
                     <div class="row m-t-20">
                       <div class="col-md-12">
@@ -270,39 +265,41 @@
                       <div class="col-md-12 m-b-10">
                         <h2 class="card-title">Ventas POS</h2>
                       </div>
-                      <div class="col-lg-4">
-                        <div class="summary">
-                          <h4 class="title text-info">
-                            Total
-                            <br />Pagado
-                          </h4>
-                          <div class="info">
-                            <strong class="amount text-info">{{ formatNumber(document_pos.totals.total_payment) }}</strong>
+                      <div class="col-lg-12 d-flex" v-if="document_pos.totals.total_payment > 0 || document_pos.totals.total_to_pay > 0 || document_pos.totals.total > 0">
+                        <div class="col-lg-4">
+                          <div class="summary">
+                            <h4 class="title text-info">
+                              Total
+                              <br />Pagado
+                            </h4>
+                            <div class="info">
+                              <strong class="amount text-info">{{ formatNumber(document_pos.totals.total_payment) }}</strong>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div class="col-lg-4">
-                        <div class="summary">
-                          <h4 class="title text-danger">
-                            Total
-                            <br />por Pagar
-                          </h4>
-                          <div class="info">
-                            <strong class="amount text-danger">{{ formatNumber(document_pos.totals.total_to_pay) }}</strong>
+                        <div class="col-lg-4">
+                          <div class="summary">
+                            <h4 class="title text-danger">
+                              Total
+                              <br />por Pagar
+                            </h4>
+                            <div class="info">
+                              <strong class="amount text-danger">{{ formatNumber(document_pos.totals.total_to_pay) }}</strong>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div class="col-lg-4">
-                        <div class="summary">
-                          <h4 class="title">
-                            Total
-                            <br />&nbsp;
-                          </h4>
-                          <div class="info">
-                            <strong class="amount">{{ formatNumber(document_pos.totals.total) }}</strong>
+                        <div class="col-lg-4">
+                          <div class="summary">
+                            <h4 class="title">
+                              Total
+                              <br />&nbsp;
+                            </h4>
+                            <div class="info">
+                              <strong class="amount">{{ formatNumber(document_pos.totals.total) }}</strong>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </div>                      
                     </div>
                     <div class="row m-t-20">
                       <div class="col-md-12">
@@ -711,6 +708,7 @@ export default {
   components: { DashboardStock },
   data() {
     return {
+      showFilters: false,
       loading_search:false,
       records_base: [],
       selected_customer: null,
@@ -790,6 +788,9 @@ export default {
   },
 
   methods: {
+    toggleFilters() {
+      this.showFilters = !this.showFilters;
+    },
     formatNumber(number) {
       if (number === undefined || number === null) return '0.00';
       return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",").replace(/\.(\d{2})/, ".$1");

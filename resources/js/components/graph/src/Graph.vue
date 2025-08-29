@@ -3,8 +3,8 @@
     <div class="empty-state" v-if="!hasData">
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="120"
-        height="120"
+        width="150"
+        height="150"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
