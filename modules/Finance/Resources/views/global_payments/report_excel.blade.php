@@ -78,8 +78,16 @@
                                     <td class="celda">{{$value->instance_type_description}}</td>
                                     <td class="celda">{{$value->destination_description}}</td>
                                     <td class="celda">{{$value->payment->date_of_payment->format('Y-m-d')}}</td>
-                                    <td class="celda">{{(($value->payment->payment_method_type) ? $value->payment->payment_method_type->description:$value->payment->expense_method_type->description)}}</td>
-                                    <td class="celda">{{$value->payment->reference}}</td>
+                                    <td class="celda">
+                                        @php
+                                            $payment = $value->payment;
+                                            $method = $payment->payment_method_type->description
+                                                ?? $payment->expense_method_type->description
+                                                ?? $payment->payment_method_name
+                                                ?? '';
+                                        @endphp
+                                        {{$method}}
+                                    </td>                                    <td class="celda">{{$value->payment->reference}}</td>
                                     <td class="celda">
                                         @if($value->payment_type === 'Modules\Expense\Models\ExpensePayment')
                                             @foreach($value->payment->associated_record_payment->items as $item)

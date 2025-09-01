@@ -221,17 +221,41 @@
 <table class="full-width">
 <tr>
     <td>
-    <strong>PAGOS:</strong> </td></tr>
+    <strong>PAGOS:</strong> </td>
+</tr>
+    @php
+        $payment = 0;
+    @endphp
+    @foreach($document->purchase_payments as $row)
+        <tr>
+            <td>
+                - 
+                {{-- Nuevo método de pago --}}
+                @if(isset($row->payment_method) && $row->payment_method)
+                    {{ $row->payment_method->name }}
+                {{-- Antiguo método de pago --}}
+                @elseif(isset($row->payment_method_type) && $row->payment_method_type)
+                    {{ $row->payment_method_type->description }}
+                @else
+                    <span style="color: #a00;">Método de pago no definido</span>
+                @endif
+
+                {{-- Referencia --}}
+                @if($row->reference)
+                    - {{ $row->reference }}
+                @endif
+
+                - {{ $document->currency->symbol }} {{ $row->payment }}
+            </td>
+        </tr>
         @php
-            $payment = 0;
+            $payment += (float) $row->payment;
         @endphp
-        @foreach($document->purchase_payments as $row)
-            <tr><td>- {{ $row->payment_method_type->description }} - {{ $row->reference ? $row->reference.' - ':'' }} {{ $document->currency->symbol }} {{ $row->payment }}</td></tr>
-            @php
-                $payment += (float) $row->payment;
-            @endphp
-        @endforeach
-        <tr><td><strong>SALDO:</strong> {{ $document->currency->symbol }} {{ number_format($document->total - $payment, 2) }}</td>
+    @endforeach
+    <tr>
+        <td>
+            <strong>SALDO:</strong> {{ $document->currency->symbol }} {{ number_format($document->total - $payment, 2) }}
+        </td>
     </tr>
 
 </table>

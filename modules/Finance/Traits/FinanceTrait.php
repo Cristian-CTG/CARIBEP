@@ -395,9 +395,7 @@ trait FinanceTrait
 
     public function getRecordsByPaymentMethodTypes($payment_method_types)
     {
-
-        $records = $payment_method_types->map(function($row){
-
+        return $payment_method_types->map(function($row){
             $document_payment = $this->getSumByPMT($row->document_payments);
             // $sale_note_payment = $this->getSumByPMT($row->sale_note_payments);
             $purchase_payment = $this->getSumByPMT($row->purchase_payments);
@@ -414,6 +412,8 @@ trait FinanceTrait
             $inc = $income_payment ?: 0;
             $pur = $purchase_payment ?: 0;
 
+            $total = $doc + $rem + $pos + $inc + $pur + $quotation_payment + $contract_payment;
+
             return [
 
                 'id' => $row->id,
@@ -428,13 +428,61 @@ trait FinanceTrait
                 'document_pos_payment' => number_format($pos, 2, ".", ""),
                 'total_income' => number_format($doc + $rem + $pos + $inc, 2, ".", ""),
                 'total_expense' => number_format($pur, 2, ".", "")
-            ];
-
-        });
-
-        return $records;
+            ] + ['_total_payments' => $total];
+        })
+        ->filter(function($row){
+            return $row['_total_payments'] > 0;
+        })
+        ->map(function($row){
+            unset($row['_total_payments']);
+            return $row;
+        })
+        ->values();
     }
 
+    public function getRecordsByPaymentMethods($payment_methods)
+    {
+        return $payment_methods->map(function($pm){
+            $document_payment = $this->getSumByPMT($pm->document_payments);
+            $purchase_payment = $this->getSumByPMT($pm->purchase_payments);
+            $quotation_payment = $this->getSumByPMT($pm->quotation_payments);
+            $contract_payment = $this->getSumByPMT($pm->contract_payments);
+            $income_payment = $this->getSumByPMT($pm->income_payments);
+            $remission_payment = $this->getSumByPMT($pm->remission_payments);
+            $document_pos_payment = $this->getSumByPMT($pm->document_pos_payments);
+
+            $doc = $document_payment ?: 0;
+            $rem = $remission_payment ?: 0;
+            $pos = $document_pos_payment ?: 0;
+            $inc = $income_payment ?: 0;
+            $pur = $purchase_payment ?: 0;
+
+            $total = $doc + $rem + $pos + $inc + $pur + $quotation_payment + $contract_payment;
+
+            return [
+                'id' => $pm->id,
+                'description' => $pm->name,
+                'expense_payment' => '-',
+                'document_payment' => number_format($doc, 2, ".", ""),
+                'purchase_payment' => number_format($pur, 2, ".", ""),
+                'quotation_payment' => number_format($quotation_payment, 2, ".", ""),
+                'contract_payment' => number_format($contract_payment, 2, ".", ""),
+                'income_payment' => number_format($inc, 2, ".", ""),
+                'remission_payment' => number_format($rem, 2, ".", ""),
+                'document_pos_payment' => number_format($pos, 2, ".", ""),
+                'total_income' => number_format($doc + $rem + $pos + $inc, 2, ".", ""),
+                'total_expense' => number_format($pur, 2, ".", "")
+            ] + ['_total_payments' => $total];
+        })
+        ->filter(function($row){
+            return $row['_total_payments'] > 0;
+        })
+        ->map(function($row){
+            unset($row['_total_payments']);
+            return $row;
+        })
+        ->values();
+    }
 
     public function getRecordsByExpenseMethodTypes($expense_method_types)
     {
@@ -488,22 +536,17 @@ trait FinanceTrait
         $t_document_pos = 0;
 
         foreach ($records_by_pmt as $value) {
-
-            $t_documents += $value['document_payment'];
-            // $t_sale_notes += $value['sale_note_payment'];
-            $t_quotations += $value['quotation_payment'];
-            $t_contracts += $value['contract_payment'];
-            $t_purchases += $value['purchase_payment'];
-            $t_income += $value['income_payment'];
-            $t_remissions += $value['remission_payment'];
-            $t_document_pos += $value['document_pos_payment'];
-
+            $t_documents     += is_numeric($value['document_payment'])     ? $value['document_payment']     : 0;
+            $t_quotations    += is_numeric($value['quotation_payment'])    ? $value['quotation_payment']    : 0;
+            $t_contracts     += is_numeric($value['contract_payment'])     ? $value['contract_payment']     : 0;
+            $t_purchases     += is_numeric($value['purchase_payment'])     ? $value['purchase_payment']     : 0;
+            $t_income        += is_numeric($value['income_payment'])       ? $value['income_payment']       : 0;
+            $t_remissions    += is_numeric($value['remission_payment'])    ? $value['remission_payment']    : 0;
+            $t_document_pos  += is_numeric($value['document_pos_payment']) ? $value['document_pos_payment'] : 0;
         }
 
         foreach ($records_by_emt as $value) {
-
-            $t_expenses += $value['expense_payment'];
-
+            $t_expenses += is_numeric($value['expense_payment']) ? $value['expense_payment'] : 0;
         }
 
         return [
