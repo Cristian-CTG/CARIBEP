@@ -50,10 +50,12 @@ class PurchaseCollection extends ResourceCollection
                 'payments' => $row->purchase_payments->transform(function($row, $key) {
                     return [
                         'id' => $row->id,
-                        'payment_method_type_description' => $row->payment_method_type->description,
+                        'payment_method_type_description' => optional($row->payment_method_type)->description,
                         'reference' => $row->reference,
                         'payment' => $row->payment,
                         'payment_method_type_id' => $row->payment_method_type_id,
+                        'payment_method_name' => optional($row->payment_method)->name ?? optional($row->payment_method_type)->description,
+                        'payment_method_id' => $row->payment_method_id,
                     ];
                 }),
                 'items' => $row->items->transform(function($row, $key) {

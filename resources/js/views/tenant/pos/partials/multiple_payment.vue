@@ -17,10 +17,17 @@
                     </thead>
                     <tbody>
                         <tr v-for="(row, index) in payments" :key="index">
-                            <td>
+                            <!-- <td>
                                 <div class="form-group mb-2 mr-2">
                                     <el-select v-model="row.payment_method_type_id">
                                         <el-option v-for="option in payment_method_types" :key="option.id" :value="option.id" :label="option.description"></el-option>
+                                    </el-select>
+                                </div>
+                            </td> -->
+                            <td>
+                                <div class="form-group mb-2 mr-2">
+                                    <el-select v-model="row.payment_method_id" placeholder="Método de pago">
+                                        <el-option v-for="option in payment_methods" :key="option.id" :value="option.id" :label="option.name"></el-option>
                                     </el-select>
                                 </div>
                             </td>
@@ -79,6 +86,7 @@
                 payment_destinations: [],
                 cards_brand:[],
                 payment_method_types_data: [],
+                payment_methods: [],
             }
         },
         async created() {
@@ -87,6 +95,7 @@
                 .then(response => {
                     this.payment_method_types = response.data.payment_method_types
                     this.payment_method_types_data = this.payment_method_types
+                    this.payment_methods = response.data.payment_methods
                     this.cards_brand = response.data.cards_brand
                     this.payment_destinations = response.data.payment_destinations
                     // this.clickAddPayment()
@@ -129,8 +138,9 @@
                     id: null,
                     document_id: null,
                     sale_note_id: null,
-                    date_of_payment:  moment().format('YYYY-MM-DD'),
-                    payment_method_type_id: '01',
+                    date_of_payment: moment().format('YYYY-MM-DD'),
+                    payment_method_type_id: null,
+                    payment_method_id: null,
                     payment_destination_id: 'cash',
                     reference: null,
                     payment: 0,

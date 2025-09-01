@@ -37,12 +37,13 @@ use Modules\Factcolombia1\Helpers\DocumentHelper;
 use App\Models\Tenant\ItemWarehouse;
 use App\Models\Tenant\InventoryKardex;
 use Carbon\Carbon;
-
+use Modules\Finance\Traits\FinanceTrait;
+use Modules\Sale\Models\RemissionPayment;
 
 class RemissionController extends Controller
 {
 
-    use StorageDocument;
+    use StorageDocument, FinanceTrait;
 
     protected $remission;
 
@@ -140,7 +141,13 @@ class RemissionController extends Controller
             foreach ($data['items'] as $row) {
                 $this->remission->items()->create($row);
             }
-
+            if(isset($data['payments']) && is_array($data['payments'])) {
+                foreach ($data['payments'] as $payment) {
+                    $payment['remission_id'] = $this->remission->id;
+                    $remission_payment = RemissionPayment::create($payment);
+                    $this->createGlobalPayment($remission_payment, $payment);
+                }
+            }
             $this->setFilename();
             $this->createPdf();
 

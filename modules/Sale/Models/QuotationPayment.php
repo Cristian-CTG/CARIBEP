@@ -17,6 +17,7 @@ class QuotationPayment extends ModelTenant
         'quotation_id',
         'date_of_payment',
         'payment_method_type_id',
+        'payment_method_id',
         'has_card',
         'card_brand_id',
         'reference',

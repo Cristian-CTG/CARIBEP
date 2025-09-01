@@ -47,6 +47,8 @@ class PurchaseResource extends JsonResource
                 'reference' => $row->reference,
                 'payment' => $row->payment,
                 'payment_method_type' => $row->payment_method_type,
+                'payment_method_id' => $row->payment_method_id,
+                'payment_method_name' => $row->payment_method_name,
                 'payment_destination_id' => ($row->global_payment) ? ($row->global_payment->type_record == 'cash' ? 'cash':$row->global_payment->destination_id):null,
                 'payment_filename' => ($row->payment_file) ? $row->payment_file->filename:null,
             ];

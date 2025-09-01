@@ -996,7 +996,7 @@ class DocumentController extends Controller
             }
 
             $this->document = DocumentHelper::createDocument($request, $nextConsecutive, $correlative_api, $this->company, $response, $response_status, $company->type_environment_id);
-            $payments = (new DocumentHelper())->savePayments($this->document, $request->payments);
+            (new DocumentHelper())->savePayments($this->document, $request->payments,$request);
 
             // Registrar asientos contables
             $this->registerAccountingSaleEntries($this->document);
@@ -2783,7 +2783,7 @@ class DocumentController extends Controller
 
             $request->merge(['state_document_id' => $state_document_id]);
             $this->document = DocumentHelper::createDocument($request, $nextConsecutive, $correlative_api, $this->company, $response, $response_status, $company->type_environment_id);
-            $payments = (new DocumentHelper())->savePayments($this->document, $request->payments);
+            (new DocumentHelper())->savePayments($this->document, $request->payments,$request);
 
 
         }

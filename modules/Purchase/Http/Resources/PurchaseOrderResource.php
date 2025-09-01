@@ -25,7 +25,10 @@ class PurchaseOrderResource extends JsonResource
             'upload_filename' => $this->upload_filename,
             'date_of_issue' => $this->date_of_issue->format('Y-m-d'), 
             'purchase_order' => $purchase_order,
-            'warehouse' => Warehouse::find($this->establishment_id)
+            'payment_method_id' => $this->payment_method_id,
+            'payment_method_type_id' => $this->payment_method_type_id,
+            'payment_method_name' => $this->payment_method_name,
+            'warehouse' => Warehouse::find($this->establishment_id),
         ];
     }
 }

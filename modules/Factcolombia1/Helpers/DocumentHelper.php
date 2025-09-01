@@ -204,8 +204,20 @@ class DocumentHelper
         return $document;
     }
 
-    public function savePayments($document, $payments){
+    public function savePayments($document, $payments ,$request){
 
+        if ((empty($payments) || count($payments) == 0) && $request && $request->payment_form_id == 1) {
+            $payments = [[
+                'date_of_payment' => $request->date_issue,
+                'payment_method_id' => $request->payment_method_id,
+                'payment_method_type_id' => null,
+                'payment_destination_id' => 'cash',
+                'reference' => null,
+                'change' => null,
+                'payment' => $request->total,
+            ]];
+        }
+        
         if($payments){
 
             $total = $document->total;

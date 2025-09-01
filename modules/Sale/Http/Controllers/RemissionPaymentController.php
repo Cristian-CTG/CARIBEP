@@ -6,6 +6,7 @@ use Modules\Sale\Http\Resources\RemissionPaymentCollection;
 use App\Models\Tenant\PaymentMethodType;
 use Exception, Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade as PDF;
+use Modules\Factcolombia1\Models\Tenant\PaymentMethod;
 use Modules\Finance\Traits\FinanceTrait; 
 use Modules\Sale\Models\{
     Remission,
@@ -30,6 +31,7 @@ class RemissionPaymentController extends Controller
     {
         return [
             'payment_method_types' => PaymentMethodType::all(),
+            'payment_methods' => PaymentMethod::all(),
             'payment_destinations' => $this->getPaymentDestinations()
         ];
     }
@@ -60,6 +62,9 @@ class RemissionPaymentController extends Controller
 
             $record = RemissionPayment::firstOrNew(['id' => $id]);
             $record->fill($request->all());
+            if ($request->filled('payment_method_id')) {
+                $record->payment_method_type_id = null;
+            }
             $record->save();
             $this->createGlobalPayment($record, $request->all());
 

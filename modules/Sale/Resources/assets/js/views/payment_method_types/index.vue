@@ -22,16 +22,16 @@
                     <thead>
                     <tr>
                         <th>#</th>
-                        <th>Código</th>
                         <th>Descripción</th>
+                        <th>Código</th>
                         <th class="text-right">Acciones</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr v-for="(row, index) in records" :key="index">
                         <td>{{ index + 1 }}</td>
-                        <td>{{ row.id }}</td>
-                        <td>{{ row.description }}</td>
+                        <td>{{ row.name }}</td>
+                        <td>{{ row.code }}</td>
                         <td class="text-right">
 
                             <template v-if="row.id !== '01'">
@@ -55,8 +55,7 @@
                 </div>
             </div> -->
         </div>
-        <payment-method-types-form :showDialog.sync="showDialog"
-                         :recordId="recordId"></payment-method-types-form>
+        <payment-method-types-form :showDialog.sync="showDialog" :recordId="recordId"></payment-method-types-form>
     </div>
 </template>
 
@@ -72,7 +71,7 @@
         data() {
             return {
                 showDialog: false,
-                resource: 'payment-method-types',
+                resource: 'co-payment-methods',
                 recordId: null,
                 records: [],
             }

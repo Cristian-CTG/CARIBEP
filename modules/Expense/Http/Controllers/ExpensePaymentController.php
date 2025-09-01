@@ -10,6 +10,7 @@ use Modules\Expense\Models\ExpensePayment;
 use Modules\Finance\Traits\FinanceTrait; 
 use Modules\Finance\Traits\FilePaymentTrait; 
 use Illuminate\Support\Facades\DB;
+use Modules\Factcolombia1\Models\Tenant\PaymentMethod;
 
 class ExpensePaymentController extends Controller
 {
@@ -27,6 +28,7 @@ class ExpensePaymentController extends Controller
     {
         return [
             'expense_method_types' => ExpenseMethodType::all(),
+            'payment_methods' => PaymentMethod::all(),
             'payment_destinations' => $this->getPaymentDestinations()
         ];
     }
@@ -61,7 +63,9 @@ class ExpensePaymentController extends Controller
             if($request->expense_method_type_id == 1){
                 $request['payment_destination_id'] = 'cash';
             }
-
+            if ($request->filled('payment_method_id')) {
+                $record->expense_method_type_id = null;
+            }
             $record->save();
             $this->createGlobalPayment($record, $request->all());
             $this->saveFiles($record, $request, 'expenses');

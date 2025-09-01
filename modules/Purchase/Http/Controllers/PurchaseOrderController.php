@@ -40,6 +40,7 @@ use App\CoreFacturalo\Requests\Inputs\Common\PersonInput;
 use Modules\Sale\Models\SaleOpportunity;
 use Modules\Factcolombia1\Models\Tenant\{
     Currency,
+    PaymentMethod,
     Tax,
 };
 use Modules\Factcolombia1\Models\TenantService\{
@@ -106,11 +107,12 @@ class PurchaseOrderController extends Controller
         // $currency_types = CurrencyType::whereActive()->get();
         $company = Company::active();
         $payment_method_types = PaymentMethodType::all();
+        $payment_methods = PaymentMethod::all();
 
         $currencies = Currency::all();
         $taxes = $this->table('taxes');
 
-        return compact('suppliers', 'establishment','company','currencies','payment_method_types', 'taxes');
+        return compact('suppliers', 'establishment','company','currencies','payment_method_types', 'payment_methods', 'taxes');
     }
 
 

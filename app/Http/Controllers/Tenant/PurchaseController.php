@@ -37,6 +37,7 @@ use Modules\Finance\Traits\FinanceTrait;
 use Modules\Item\Models\ItemLotsGroup;
 use Modules\Factcolombia1\Models\Tenant\{
     Currency,
+    PaymentMethod,
     Tax,
 };
 use Barryvdh\DomPDF\Facade as PDF;
@@ -148,6 +149,7 @@ class PurchaseController extends Controller
         // $charge_types = ChargeDiscountType::whereType('charge')->whereLevel('item')->get();
         $company = Company::active();
         $payment_method_types = PaymentMethodType::all();
+        $payment_methods = PaymentMethod::all();
         $payment_destinations = $this->getPaymentDestinations();
         $customers = $this->getPersons('customers');
 
@@ -155,7 +157,7 @@ class PurchaseController extends Controller
         $taxes = $this->table('taxes');
 
         return compact('suppliers', 'establishment','currencies',
-                    'taxes', 'document_types_invoice','company','payment_method_types', 'payment_destinations', 'customers', 'document_types_notes');
+                    'taxes', 'document_types_invoice','company','payment_method_types','payment_methods', 'payment_destinations', 'customers', 'document_types_notes');
     }
 
     public function item_tables()

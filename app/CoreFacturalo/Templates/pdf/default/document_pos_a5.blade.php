@@ -33,7 +33,7 @@
 <body>
 <table class="full-width">
     <tr>
-        @if($filename_logo != "")
+        @if($filename_logo != "" && file_exists($filename_logo))
             <td width="20%">
                 <div class="company_logo_box">
                     <img src="data:{{mime_content_type($filename_logo)}};base64, {{base64_encode(file_get_contents($filename_logo))}}" alt="{{$company->name}}" class="company_logo" style="max-width: 150px;">
@@ -323,7 +323,17 @@
                 $payment = 0;
             @endphp
             @foreach($document->payments as $row)
-                <div>- {{ $row->payment_method_type->description }} - {{ $row->reference ? $row->reference.' - ':'' }} {{ $document->currency->symbol }} {{ $row->payment }}</div>
+                <div>
+                    - 
+                    @if(!empty($row->payment_method_name))
+                        {{ $row->payment_method_name }}
+                    @elseif(isset($row->payment_method_type->description))
+                        {{ $row->payment_method_type->description }}
+                    @else
+                        Método de pago no disponible
+                    @endif
+                    - {{ $row->reference ? $row->reference.' - ' : '' }} {{ $document->currency->symbol }} {{ $row->payment }}
+                </div>
                 @php
                     $payment += (float) $row->payment;
                 @endphp
