@@ -236,49 +236,48 @@
                     <div class="row no-gutters">
                       <div class="col-md-12 m-b-10">
                         <h2 class="card-title">Facturas Electrónicas</h2>
-                      </div>
-                      <div class="col-lg-12 d-flex" v-if="sale_note.totals.total_payment > 0 || sale_note.totals.total_to_pay > 0 || sale_note.totals.total > 0">
-                         <div class="col-lg-4">
-                           <div class="summary">
-                             <h4 class="title text-info">
-                               Total
-                               <br />Pagado
-                             </h4>
-                             <div class="info">
-                               <strong class="amount text-info">{{ formatNumber(sale_note.totals.total_payment) }}</strong>
-                             </div>
-                           </div>
-                         </div>
-                         <div class="col-lg-4">
-                           <div class="summary">
-                             <h4 class="title text-danger">
-                               Total
-                               <br />por Pagar
-                             </h4>
-                             <div class="info">
-                               <strong
-                                 class="amount text-danger"
-                               >{{ formatNumber(sale_note.totals.total_to_pay) }}</strong>
-                             </div>
-                           </div>
-                         </div>
-                         <div class="col-lg-4">
-                           <div class="summary">
-                             <h4 class="title">
-                               Total
-                               <br />&nbsp;
-                             </h4>
-                             <div class="info">
-                               <strong class="amount">{{ formatNumber(sale_note.totals.total) }}</strong>
-                             </div>
-                           </div>
-                         </div>
-                      </div>
+                      </div>                      
                     </div>
                     <div class="row m-t-20">
                       <div class="col-md-12">
                         <x-graph type="doughnut" :all-data="sale_note.graph"></x-graph>
                       </div>
+                    </div>
+                    <div class="col-lg-12 d-flex flex-column text-center px-0" v-if="sale_note.totals.total_payment > 0 || sale_note.totals.total_to_pay > 0 || sale_note.totals.total > 0">
+                       <div class="col-lg-12 px-0">                         
+                         <div class="summary amount-container">
+                            <h4 class="title text-muted">
+                              Total &nbsp;
+                            </h4>
+                            <div>
+                              <strong class="amount">{{ formatNumber(sale_note.totals.total) }}</strong>
+                            </div>
+                          </div>
+                       </div>                       
+                       <div class="col-lg-12 px-0 d-flex mt-3">
+                        <div class="col-lg-6 px-0">
+                          <div class="summary amount-container">
+                           <h4 class="title text-muted">
+                             Total Pagado
+                           </h4>
+                           <div>
+                             <strong class="amount amount-small text-muted">{{ formatNumber(sale_note.totals.total_payment) }}</strong>
+                           </div>
+                         </div>
+                        </div>
+                        <div class="col-lg-6 px-0">
+                          <div class="summary amount-container">
+                            <h4 class="title amount-danger">
+                              Monto pendiente
+                            </h4>
+                            <div>
+                              <strong
+                                class="amount amount-small amount-danger"
+                              >{{ formatNumber(sale_note.totals.total_to_pay) }}</strong>
+                            </div>
+                          </div>
+                        </div>                        
+                       </div>
                     </div>
                   </div>
                 </div>
@@ -293,47 +292,48 @@
                     <div class="row no-gutters">
                       <div class="col-md-12 m-b-10">
                         <h2 class="card-title">Remisiones</h2>
-                      </div>
-                      <div class="col-lg-12 d-flex" v-if="document.totals.total_payment > 0 || document.totals.total_to_pay > 0 || document.totals.total > 0">
-                        <div class="col-lg-4">
-                          <div class="summary">
-                            <h4 class="title text-info">
-                              Total
-                              <br />Pagado
-                            </h4>
-                            <div class="info">
-                              <strong class="amount text-info">{{ formatNumber(document.totals.total_payment) }}</strong>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="col-lg-4">
-                          <div class="summary">
-                            <h4 class="title text-danger">
-                              Total
-                              <br />por Pagar
-                            </h4>
-                            <div class="info">
-                              <strong class="amount text-danger">{{ formatNumber(document.totals.total_to_pay) }}</strong>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="col-lg-4">
-                          <div class="summary">
-                            <h4 class="title">
-                              Total
-                              <br />&nbsp;
-                            </h4>
-                            <div class="info">
-                              <strong class="amount">{{ formatNumber(document.totals.total) }}</strong>
-                            </div>
-                          </div>
-                        </div>
                       </div>                      
                     </div>
                     <div class="row m-t-20">
                       <div class="col-md-12">
                         <x-graph type="doughnut" :all-data="document.graph"></x-graph>
                       </div>
+                    </div>
+                    <div class="col-lg-12 d-flex flex-column text-center px-0" v-if="document.totals.total_payment > 0 || document.totals.total_to_pay > 0 || document.totals.total > 0">
+                       <div class="col-lg-12 px-0">                         
+                         <div class="summary amount-container">
+                            <h4 class="title text-muted">
+                              Total &nbsp;
+                            </h4>
+                            <div>
+                              <strong class="amount">{{ formatNumber(document.totals.total) }}</strong>
+                            </div>
+                          </div>
+                       </div>                       
+                       <div class="col-lg-12 px-0 d-flex mt-3">
+                        <div class="col-lg-6 px-0">
+                          <div class="summary amount-container">
+                           <h4 class="title text-muted">
+                             Total Pagado
+                           </h4>
+                           <div>
+                             <strong class="amount amount-small text-muted">{{ formatNumber(document.totals.total_payment) }}</strong>
+                           </div>
+                         </div>
+                        </div>
+                        <div class="col-lg-6 px-0">
+                          <div class="summary amount-container">
+                            <h4 class="title amount-danger">
+                              Monto pendiente
+                            </h4>
+                            <div>
+                              <strong
+                                class="amount amount-small amount-danger"
+                              >{{ formatNumber(document.totals.total_to_pay) }}</strong>
+                            </div>
+                          </div>
+                        </div>                        
+                       </div>
                     </div>
                   </div>
                 </div>
@@ -348,47 +348,48 @@
                     <div class="row no-gutters">
                       <div class="col-md-12 m-b-10">
                         <h2 class="card-title">Ventas POS</h2>
-                      </div>
-                      <div class="col-lg-12 d-flex" v-if="document_pos.totals.total_payment > 0 || document_pos.totals.total_to_pay > 0 || document_pos.totals.total > 0">
-                        <div class="col-lg-4">
-                          <div class="summary">
-                            <h4 class="title text-info">
-                              Total
-                              <br />Pagado
-                            </h4>
-                            <div class="info">
-                              <strong class="amount text-info">{{ formatNumber(document_pos.totals.total_payment) }}</strong>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="col-lg-4">
-                          <div class="summary">
-                            <h4 class="title text-danger">
-                              Total
-                              <br />por Pagar
-                            </h4>
-                            <div class="info">
-                              <strong class="amount text-danger">{{ formatNumber(document_pos.totals.total_to_pay) }}</strong>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="col-lg-4">
-                          <div class="summary">
-                            <h4 class="title">
-                              Total
-                              <br />&nbsp;
-                            </h4>
-                            <div class="info">
-                              <strong class="amount">{{ formatNumber(document_pos.totals.total) }}</strong>
-                            </div>
-                          </div>
-                        </div>
                       </div>                      
                     </div>
                     <div class="row m-t-20">
                       <div class="col-md-12">
                         <x-graph type="doughnut" :all-data="document_pos.graph"></x-graph>
                       </div>
+                    </div>
+                    <div class="col-lg-12 d-flex flex-column text-center px-0" v-if="document_pos.totals.total_payment > 0 || document_pos.totals.total_to_pay > 0 || document_pos.totals.total > 0">
+                       <div class="col-lg-12 px-0">                         
+                         <div class="summary amount-container">
+                            <h4 class="title text-muted">
+                              Total &nbsp;
+                            </h4>
+                            <div>
+                              <strong class="amount">{{ formatNumber(document_pos.totals.total) }}</strong>
+                            </div>
+                          </div>
+                       </div>                       
+                       <div class="col-lg-12 px-0 d-flex mt-3">
+                        <div class="col-lg-6 px-0">
+                          <div class="summary amount-container">
+                           <h4 class="title text-muted">
+                             Total Pagado
+                           </h4>
+                           <div>
+                             <strong class="amount amount-small text-muted">{{ formatNumber(document_pos.totals.total_payment) }}</strong>
+                           </div>
+                         </div>
+                        </div>
+                        <div class="col-lg-6 px-0">
+                          <div class="summary amount-container">
+                            <h4 class="title amount-danger">
+                              Monto pendiente
+                            </h4>
+                            <div>
+                              <strong
+                                class="amount amount-small amount-danger"
+                              >{{ formatNumber(document_pos.totals.total_to_pay) }}</strong>
+                            </div>
+                          </div>
+                        </div>                        
+                       </div>
                     </div>
                   </div>
                 </div>
@@ -801,6 +802,16 @@
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
+}
+.amount-container h4.title{
+  font-size: .80rem !important;
+  font-weight: normal !important;
+}
+.amount-small{
+  font-size: 18px !important;
+}
+.amount-danger{
+  color: #e9797e !important;
 }
 @media (max-width: 525px) {
   .filters-container {
