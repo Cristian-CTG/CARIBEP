@@ -20,8 +20,15 @@
                 <h3 class="my-0">Listado de productos</h3>
             </div>
             <div class="card-body">
-                <data-table :resource="resource">
+                <data-table :resource="resource" ref="dataTable">
                     <tr slot="heading" width="100%">
+                        <th>
+                            <el-checkbox
+                                v-model="selectAll"
+                                @change="toggleSelectAll"
+                                :indeterminate="isIndeterminate"
+                            ></el-checkbox>
+                        </th>
                         <th>#</th>
                         <th>Cód. Interno</th>
                         <th>Unidad</th>
@@ -35,6 +42,12 @@
                         <th class="text-right">Acciones</th>
                     </tr>
                     <tr slot-scope="{ index, row }" :class="{ disable_color : !row.active}">
+                        <td>
+                            <el-checkbox
+                                v-model="selectedItems"
+                                :label="row.id"
+                            ></el-checkbox>
+                        </td>
                         <el-tooltip effect="dark" :content="`Stock actual: ${row.stock}`" placement="top">
                             <td>{{ index }}</td>
                         </el-tooltip>
@@ -83,6 +96,13 @@
                         </td>
                     </tr>
                 </data-table>
+                <div class="mt-3 text-right">
+                    <button type="button" class="btn btn-primary btn-sm"
+                        :disabled="selectedItems.length === 0"
+                        @click.prevent="printSelectedBarcodes">
+                        <i class="fa fa-barcode"></i> Imprimir Cod. Barras Seleccionados
+                    </button>
+                </div>
             </div>
 
             <items-form :showDialog.sync="showDialog"
@@ -123,7 +143,11 @@
                 resource: 'items',
                 recordId: null,
                 warehousesDetail:[],
-                config: {}
+                config: {},
+                selectedItems: [],
+                selectAll: false,
+                isIndeterminate: false,
+                items: [],
             }
         },
         created() {
@@ -131,7 +155,40 @@
                 this.config = response.data.data
             })
         },
+        watch: {
+            selectedItems(newVal) {
+                const visibleRecords = this.$refs.dataTable.records || [];
+                if (newVal.length === 0) {
+                    this.selectAll = false;
+                    this.isIndeterminate = false;
+                } else if (newVal.length === visibleRecords.length) {
+                    this.selectAll = true;
+                    this.isIndeterminate = false;
+                } else {
+                    this.selectAll = false;
+                    this.isIndeterminate = true;
+                }
+            }
+        },
         methods: {
+            toggleSelectAll(val) {
+                // Selecciona solo los productos visibles en la página actual
+                const visibleRecords = this.$refs.dataTable.records || [];
+                if (val) {
+                    this.selectedItems = visibleRecords.map(item => item.id);
+                } else {
+                    this.selectedItems = [];
+                }
+                this.isIndeterminate = false;
+            },
+            printSelectedBarcodes() {
+                if (this.selectedItems.length === 0) {
+                    this.$message.warning('Seleccione al menos un producto.');
+                    return;
+                }
+                // Abre la ruta para imprimir varios códigos de barras
+                window.open(`/${this.resource}/barcodes?ids=${this.selectedItems.join(',')}`, '_blank');
+            },
             duplicate(id)
             {
                 this.$http.post(`${this.resource}/duplicate`, {id})
@@ -199,3 +256,8 @@
         }
     }
 </script>
+<style scoped>
+>>> .el-checkbox__label {
+  display: none !important;
+}
+</style>
