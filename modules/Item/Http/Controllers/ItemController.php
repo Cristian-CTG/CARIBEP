@@ -30,7 +30,7 @@ class ItemController extends Controller
 
         ob_clean();
         header('Content-Type: image/png');
-        // header('Content-Disposition: attachment; filename="barcode_'.$item->internal_id.'.png"');
+        header('Content-Disposition: attachment; filename="barcode_'.$item->internal_id.'.png"');
         imagepng($image);
         imagedestroy($image);
         exit;
