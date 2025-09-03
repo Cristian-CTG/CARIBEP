@@ -30,7 +30,7 @@ class ItemController extends Controller
 
         ob_clean();
         header('Content-Type: image/png');
-        header('Content-Disposition: attachment; filename="barcode_'.$item->internal_id.'.png"');
+        // header('Content-Disposition: attachment; filename="barcode_'.$item->internal_id.'.png"');
         imagepng($image);
         imagedestroy($image);
         exit;
@@ -70,24 +70,46 @@ class ItemController extends Controller
     private function buildBarcodeImage($item, $companyName)
     {
         $fontPath = public_path('fonts/LiberationSans-Regular.ttf');
-        $fontSize = 18;         // Texto general más grande
-        $fontSizeTitle = 22;    // Título más grande
-        $fontSizeCode = 16;     // Código más grande
-        $fontSizePrice = 18;    // Precio más grande
-
-        // Tamaño fijo de etiqueta: 32x25 mm (378x295 px a 300 DPI)
         $finalWidth = 378;
         $finalHeight = 295;
-
-        $padding = 18;           // Más padding
-        $lineSpacing = 14;       // Más espacio entre líneas
+        $padding = 18;
+        $lineSpacing = 12;
 
         $image = imagecreatetruecolor($finalWidth, $finalHeight);
         $white = imagecolorallocate($image, 255, 255, 255);
         $black = imagecolorallocate($image, 0, 0, 0);
         imagefill($image, 0, 0, $white);
 
+        // Función para ajustar el tamaño de fuente
+        $fitFontSize = function($texts, $maxWidth, $fontPath, $maxFontSize, $minFontSize = 15) {
+            // $texts puede ser array o string
+            if (!is_array($texts)) $texts = [$texts];
+            for ($size = $maxFontSize; $size >= $minFontSize; $size--) {
+                $totalWidth = 0;
+                foreach ($texts as $text) {
+                    $bbox = imagettfbbox($size, 0, $fontPath, $text);
+                    $totalWidth += abs($bbox[2] - $bbox[0]);
+                }
+                // Suma 8px de espacio entre textos si hay más de uno
+                $totalWidth += (count($texts) - 1) * 8;
+                if ($totalWidth <= $maxWidth) return $size;
+            }
+            return $minFontSize;
+        };
+
+        // Título (empresa)
         $title = $companyName;
+        $titleFontSize = $fitFontSize($title, $finalWidth - 30, $fontPath, 22, 15);
+        $bboxTitle = imagettfbbox($titleFontSize, 0, $fontPath, $title);
+        $titleWidth = abs($bboxTitle[2] - $bboxTitle[0]);
+        $titleHeight = abs($bboxTitle[7] - $bboxTitle[1]);
+        $titleX = ($finalWidth - $titleWidth) / 2;
+        $y = $padding + $titleHeight;
+        imagettftext($image, $titleFontSize, 0, $titleX, $padding + $titleHeight, $black, $fontPath, $title);
+        $y += $titleHeight + $lineSpacing;
+
+        // Bloque de detalles: nombre, categoría, marca, color, talla
+        $detailLines = [];
         $mainLine = "{$item->name}";
         if ($item->category && $item->category->name) {
             $mainLine .= " | {$item->category->name}";
@@ -95,7 +117,24 @@ class ItemController extends Controller
         if ($item->brand && $item->brand->name) {
             $mainLine .= " | {$item->brand->name}";
         }
+        // Divide en líneas si es necesario
+        $maxLineWidth = $finalWidth - 30;
+        $words = explode(' ', $mainLine);
+        $currentLine = '';
+        foreach ($words as $word) {
+            $testLine = $currentLine ? $currentLine . ' ' . $word : $word;
+            $bbox = imagettfbbox(18, 0, $fontPath, $testLine);
+            $testWidth = abs($bbox[2] - $bbox[0]);
+            if ($testWidth > $maxLineWidth && $currentLine) {
+                $detailLines[] = $currentLine;
+                $currentLine = $word;
+            } else {
+                $currentLine = $testLine;
+            }
+        }
+        if ($currentLine) $detailLines[] = $currentLine;
 
+        // Color y talla en una línea aparte
         $secondLine = '';
         if ($item->color && $item->color->name) {
             $secondLine .= "{$item->color->name}";
@@ -103,37 +142,24 @@ class ItemController extends Controller
         if ($item->size && $item->size->name) {
             $secondLine .= ($secondLine ? " | " : "") . "{$item->size->name}";
         }
+        if ($secondLine) $detailLines[] = $secondLine;
 
-        // Título en negrita sutil
-        $bboxTitle = imagettfbbox($fontSizeTitle, 0, $fontPath, $title);
-        $titleWidth = abs($bboxTitle[2] - $bboxTitle[0]);
-        $titleHeight = abs($bboxTitle[7] - $bboxTitle[1]);
-        $titleX = ($finalWidth - $titleWidth) / 2;
-        $y = $padding + $titleHeight;
-        for ($i = 0; $i <= 1; $i++) {
-            imagettftext($image, $fontSizeTitle, 0, $titleX + $i, $padding + $titleHeight, $black, $fontPath, $title);
+        // Calcula el tamaño de fuente máximo para todas las líneas de detalles
+        $detailFontSize = $fitFontSize($detailLines, $maxLineWidth, $fontPath, 18, 15);
+
+        // Dibuja cada línea de detalles con el mismo tamaño
+        foreach ($detailLines as $line) {
+            $bboxLine = imagettfbbox($detailFontSize, 0, $fontPath, $line);
+            $lineWidth = abs($bboxLine[2] - $bboxLine[0]);
+            $lineHeight = abs($bboxLine[7] - $bboxLine[1]);
+            $lineX = ($finalWidth - $lineWidth) / 2;
+            imagettftext($image, $detailFontSize, 0, $lineX, $y + $lineHeight, $black, $fontPath, $line);
+            $y += $lineHeight + $lineSpacing;
         }
-        $y += $titleHeight + $lineSpacing;
-
-        // Línea principal
-        $bboxMain = imagettfbbox($fontSize, 0, $fontPath, $mainLine);
-        $mainWidth = abs($bboxMain[2] - $bboxMain[0]);
-        $mainHeight = abs($bboxMain[7] - $bboxMain[1]);
-        $mainX = ($finalWidth - $mainWidth) / 2;
-        imagettftext($image, $fontSize, 0, $mainX, $y + $mainHeight, $black, $fontPath, $mainLine);
-        $y += $mainHeight + $lineSpacing;
-
-        // Segunda línea
-        $bboxSecond = imagettfbbox($fontSize, 0, $fontPath, $secondLine);
-        $secondWidth = abs($bboxSecond[2] - $bboxSecond[0]);
-        $secondHeight = abs($bboxSecond[7] - $bboxSecond[1]);
-        $secondX = ($finalWidth - $secondWidth) / 2;
-        imagettftext($image, $fontSize, 0, $secondX, $y + $secondHeight, $black, $fontPath, $secondLine);
-        $y += $secondHeight + $lineSpacing;
 
         // Código de barras
         $generator = new BarcodeGeneratorPNG();
-        $barcodeData = $generator->getBarcode($item->internal_id, $generator::TYPE_CODE_128, 2, 40); // tamaño adecuado
+        $barcodeData = $generator->getBarcode($item->internal_id, $generator::TYPE_CODE_128, 2, 40);
         $barcodeImg = imagecreatefromstring($barcodeData);
         $barcodeWidth = imagesx($barcodeImg);
         $barcodeHeight = imagesy($barcodeImg);
@@ -150,8 +176,9 @@ class ItemController extends Controller
         $y += $barcodeHeight + $lineSpacing;
         imagedestroy($barcodeImg);
 
-        // Código
+        // Código (ajuste de tamaño)
         $codeText = $item->internal_id;
+        $fontSizeCode = $fitFontSize($codeText, $maxLineWidth, $fontPath, 16, 15);
         $bboxCode = imagettfbbox($fontSizeCode, 0, $fontPath, $codeText);
         $codeWidth = abs($bboxCode[2] - $bboxCode[0]);
         $codeHeight = abs($bboxCode[7] - $bboxCode[1]);
@@ -159,19 +186,26 @@ class ItemController extends Controller
         imagettftext($image, $fontSizeCode, 0, $codeX, $y + $codeHeight, $black, $fontPath, $codeText);
         $y += $codeHeight + $lineSpacing;
 
-        // Precio
+        // Precio: símbolo y número separados, tamaño ajustado
         $currencySymbol = $item->currency_type ? $item->currency_type->symbol : 'S/';
         $priceNumber = number_format($item->sale_unit_price, 2);
-        $bboxSymbol = imagettfbbox($fontSizePrice, 0, $fontPath, $currencySymbol);
+        $priceFontSize = $fitFontSize([$currencySymbol, $priceNumber], $maxLineWidth, $fontPath, 18, 15);
+
+        // Calcula posiciones
+        $bboxSymbol = imagettfbbox($priceFontSize, 0, $fontPath, $currencySymbol);
         $symbolWidth = abs($bboxSymbol[2] - $bboxSymbol[0]);
-        $bboxNumber = imagettfbbox($fontSizePrice, 0, $fontPath, $priceNumber);
+        $symbolHeight = abs($bboxSymbol[7] - $bboxSymbol[1]);
+        $bboxNumber = imagettfbbox($priceFontSize, 0, $fontPath, $priceNumber);
         $numberWidth = abs($bboxNumber[2] - $bboxNumber[0]);
-        $priceWidth = $symbolWidth + 8 + $numberWidth;
-        $priceX = ($finalWidth - $priceWidth) / 2;
-        for ($i = 0; $i < 2; $i++) {
-            imagettftext($image, $fontSizePrice, 0, $priceX + $i, $y + $fontSizePrice, $black, $fontPath, $currencySymbol);
-            imagettftext($image, $fontSizePrice, 0, $priceX + $symbolWidth + 8 + $i, $y + $fontSizePrice, $black, $fontPath, $priceNumber);
-        }
+        $numberHeight = abs($bboxNumber[7] - $bboxNumber[1]);
+        $space = 8; // espacio fijo entre símbolo y número
+        $totalWidth = $symbolWidth + $space + $numberWidth;
+        $priceX = ($finalWidth - $totalWidth) / 2;
+        $priceY = $y + max($symbolHeight, $numberHeight);
+
+        // Dibuja símbolo y número
+        imagettftext($image, $priceFontSize, 0, $priceX, $priceY, $black, $fontPath, $currencySymbol);
+        imagettftext($image, $priceFontSize, 0, $priceX + $symbolWidth + $space, $priceY, $black, $fontPath, $priceNumber);
 
         return $image;
     }
