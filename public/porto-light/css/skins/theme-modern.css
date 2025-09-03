@@ -268,6 +268,16 @@ body {
   transition-delay: 0s !important;
   transition-duration: 0s !important;
 }
+.el-tooltip__popper.is-dark {
+    background: #303133;
+    color: #FFFFFF;
+    max-width: 200px;
+    white-space: normal;
+    word-wrap: break-word;
+    padding: 8px 10px;
+    border-radius: 4px;
+    line-height: 1.2;
+}
 ul.nav-main li .nav-children li a {
     padding: 4px 8px;
     margin-bottom: 2px;
@@ -1263,7 +1273,13 @@ html.sidebar-white ul.nav-main li.nav-active:not(.nav-parent)>a {
     height: 40px;
     border-radius: 2px;
 }
-
+.sidebar-header .logo-contain img {
+    width: auto !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 54px !important;
+    object-fit: contain;
+}
 .invoice table.table>thead:first-child>tr>th {
     background-color: #f0f3f4;
     border-bottom: 0px solid #dadada;

@@ -45,9 +45,18 @@
 
             <div class="col-md-6">
               <div class="form-group d-flex flex-column" :class="{'has-danger': errors.login_bg_color}">
-                <label class="control-label">Color de fondo del panel de login</label>
+                <label class="control-label">Color de fondo del panel de login
+                  <el-tooltip 
+                    class="item" 
+                    effect="dark" 
+                    content="Puedes escribir un valor válido (por ejemplo: #ff0000, hsl(0, 100%, 50%)) y el sistema lo convertirá automáticamente a RGB." 
+                    placement="top-start"
+                  >
+                    <i class="fa fa-info-circle"></i>
+                  </el-tooltip>
+                </label>
                 <el-color-picker
-                  class="col-md-4 px-0"
+                  class="col-md-12 px-0"
                   v-model="form.login_bg_color"
                   :predefine="predefinedColors"
                   show-alpha

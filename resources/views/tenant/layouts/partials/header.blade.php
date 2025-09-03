@@ -75,7 +75,7 @@
         @php $supportUser = $systemUser::first(); @endphp
         @if($supportUser && ($supportUser->whatsapp_number || $supportUser->phone || $supportUser->address_contact))
         <li class="d-inline-block mr-2">
-        <a role="menuitem"  class="nav-link btn-suport btn-header"  onclick="toggleSupportSidebar()" title="Soporte">
+        <a role="menuitem"  class="nav-link btn-suport btn-header"  onclick="toggleSupportSidebar()" title="Soporte" data-toggle="tooltip">
             <svg width="22" height="22" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                     <g id="support" fill="currentColor" transform="translate(42.666667, 42.666667)">
@@ -88,7 +88,7 @@
         @endif
         <span class="separator"></span>
         <li class="d-inline-block">
-            <a role="menuitem" class="nav-link btn-header mr-2" id="fullscreen-btn" title="Pantalla completa" style="font-size: 16px">
+            <a role="menuitem" class="nav-link btn-header mr-2" id="fullscreen-btn" title="Pantalla completa" style="font-size: 16px" data-toggle="tooltip">
                 <i id="fullscreen-icon" class="fas fa-expand"></i>
             </a>
         </li>

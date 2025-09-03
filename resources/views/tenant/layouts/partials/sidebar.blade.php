@@ -16,7 +16,7 @@
 <aside id="sidebar-left" class="sidebar-left">
     <div class="sidebar-header">
         <a href="{{route('tenant.dashboard.index')}}"
-           class="logo pt-2 pt-md-0">
+           class="logo logo-contain pt-2 pt-md-0">
             @if($vc_company->logo)
                 <img src="{{ asset('storage/uploads/logos/'.$vc_company->logo) }}"
                      alt="Logo"/>

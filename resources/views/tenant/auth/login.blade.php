@@ -14,7 +14,7 @@
       class="auth__image"
       style="
         background-color: {{ $loginBgColor ?? 'rgb(248, 248, 248)' }};
-        padding: 5%;
+        padding: 5%; display: flex; justify-content: center; align-items: center; overflow: hidden;
       "
     >
         @if ($vc_company->logo ?? false)
@@ -24,20 +24,11 @@
               alt="Logo"
             />
         @endif
-    
-        <div
-          style="
-            background-image: url('{{ asset($path_background) }}');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            width: 100%;
-            height: 100%;
-            border-radius: 12px;
-            display: block;
-            background-color: transparent;
-          "
-        ></div>
+        <img 
+            src="{{ asset($path_background) }}" 
+            alt="Background Image" 
+            style="max-width: 100%; max-height: 100%; object-fit: contain;" 
+        />
     </article>
     <article class="auth__form">
         <form method="POST" action="{{ route('login') }}">
