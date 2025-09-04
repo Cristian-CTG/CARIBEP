@@ -4,7 +4,9 @@
         <!-- Close button: pone style.right = -260px y quita clases open/active -->
         <div class="d-flex justify-content-between align-items-center px-3 mt-3">
             <h4 class="m-0">Configuraciones visuales</h4>
-            <button type="button" class="style-switcher-close btn-close" @click="closeSwitcher" aria-label="Cerrar">+</button>
+            <button type="button" class="style-switcher-close btn-close" @click="closeSwitcher" aria-label="Cerrar">
+                <svg  xmlns="http://www.w3.org/2000/svg"  width="22"  height="22"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+            </button>
         </div>            
 
         <!-- <a id="styleSwitcherOpen" class="style-switcher-open" href="#"><i class="fas fa-cogs"></i></a> -->
@@ -18,24 +20,12 @@
             </div>
             <div v-if="typeUser != 'integrator'">
 
-                <h5>Fondo oscuro</h5>
-                <el-switch
-                    v-model="visuals.bg"
-                    active-text="Dark"
-                    inactive-text="Light"
-                    active-value="dark"
-                    inactive-value="light"
-                    active-color="#383f48"
-                    inactive-color="#ccc"
-                    @change="submit">
-                </el-switch>
-
-                <div class="hidden-on-dark pt-3">
-                    <h5>Encabezado</h5>
+                <div class="switch-container">
+                    <h5>Tema de la interfaz</h5>
                     <el-switch
-                        v-model="visuals.header"
-                        active-text="Dark"
-                        inactive-text="Light"
+                        v-model="visuals.bg"
+                        active-text="Oscuro"
+                        inactive-text="Claro"
                         active-value="dark"
                         inactive-value="light"
                         active-color="#383f48"
@@ -44,12 +34,12 @@
                     </el-switch>
                 </div>
 
-                <div class="hidden-on-dark pt-3">
-                    <h5>Paneles</h5>
+                <div class="switch-container pt-3">
+                    <h5>Tema del menú lateral</h5>
                     <el-switch
                         v-model="visuals.sidebars"
-                        active-text="Dark"
-                        inactive-text="Light"
+                        active-text="Oscuro"
+                        inactive-text="Claro"
                         active-value="dark"
                         inactive-value="light"
                         active-color="#383f48"
@@ -58,7 +48,7 @@
                     </el-switch>
                 </div>
 
-                <div class="pt-3">
+                <div class="pt-3 switch-container">
                     <h5>Menú lateral contraído</h5>
                     <div :class="{'has-danger': errors.compact_sidebar}">
                         <el-switch
