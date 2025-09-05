@@ -63,15 +63,20 @@
                 </div>
 
                 <div class="pt-3">
-                    <h5>Cantidad de columnas en POS</h5>
-                    <div :class="{'has-danger': errors.amount_plastic_bag_taxes}">
-                        <el-slider
-                            @change="submitForm"
-                            v-model="form.colums_grid_item"
-                            :min="3"
-                            :max="6">
-                        </el-slider>
-                        <small class="form-control-feedback" v-if="errors.amount_plastic_bag_taxes" v-text="errors.amount_plastic_bag_taxes[0]"></small>
+                    <h5>Visualización de productos en POS</h5>
+                    <div :class="{'has-danger': errors.colums_grid_item}">
+                        <el-select
+                          v-model="form.colums_grid_item"
+                          placeholder="Seleccionar diseño"
+                          @change="submitForm"
+                          style="width: 100%"
+                        >
+                          <el-option label="Predeterminado" :value="3" />
+                          <el-option label="Cómodo"         :value="4" />
+                          <el-option label="Compacto"       :value="5" />
+                          <el-option label="Apilado"        :value="6" />
+                        </el-select>
+                        <small class="form-control-feedback" v-if="errors.colums_grid_item" v-text="errors.colums_grid_item[0]"></small>
                     </div>
                 </div>
 
@@ -143,7 +148,7 @@
                 this.form = {
                     id: 1,
                     compact_sidebar: true,
-                    colums_grid_item: 4,
+                    colums_grid_item: "4",
                     enable_whatsapp: true,
                     phone_whatsapp: ''
                 }
@@ -153,6 +158,7 @@
                     if (response.data !== ''){
                         this.visuals = response.data.data.visual;
                         this.form = response.data.data;
+                        this.form.colums_grid_item = Number(this.form.colums_grid_item)
                     }
                 });
             },

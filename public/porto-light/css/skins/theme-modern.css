@@ -187,13 +187,18 @@ html body .text-blue {
 }
 
 .el-radio-button__orig-radio:checked+.el-radio-button__inner {
-    color: #fff;
-    background-color: #2f2f31 !important;
-    border-color: #2f2f31 !important;
+    color: #fff !important;
+    background-color: var(--black-primary) !important;
+    border-color: var(--black-primary) !important;
     -webkit-box-shadow: -1px 0 0 0 #2f2f31 !important;
     box-shadow: -1px 0 0 0 #2f2f31 !important;
 }
-
+.pos-product-row {
+    display: block;
+    border-bottom: 1px dashed var(--black-highlight);
+    margin-bottom: 2px;
+    padding-bottom: 2px;
+}
 a:hover,
 a:focus {
     color: #2f2f31;
@@ -1338,12 +1343,6 @@ html.sidebar-white ul.nav-main li.nav-active:not(.nav-parent)>a {
 .border-warning {
   border-color: var(--black-highlight) !important;
 }
-.btn-warning:hover,
-.btn-warning.hover {
-    background-color: #ffa71f;
-    border-color: #ffa71f;
-    box-shadow: none;
-}
 
 .btn-danger:hover,
 .btn-danger.hover {
@@ -1653,6 +1652,80 @@ a.ws-flotante {
 }
 .el-tabs__nav-wrap:after {
     background-color: transparent;
+}
+.product-pos-container .product-item .card-body {
+    margin: 0;
+    padding: 0;
+    border-radius: 8px 8px 0 0 !important;
+    border-bottom: none !important;
+}
+.product-pos-container .card-footer {
+    position: relative;
+    border-radius: 0 0 8px 8px !important;
+    border-top: none;
+}
+.card-footer.configuration-options {
+    width: 100% !important;
+    padding: 6px 0 2px 0 !important;
+}
+.product-pos-container .card-footer button.el-button--primary.el-button--small {
+    padding: 7.5px 10px;
+}
+.product-pos-container .card-footer .edit-price {
+    position: absolute;
+    transform: translate(3px, -3px);
+    opacity: 0;
+}
+.product-pos-container .card-footer:hover .edit-price {
+    opacity: 1;
+}
+.product-pos-container .card.product-item {
+    margin-bottom: 12px;
+    height: 100%;
+}
+.payment-btn{
+    width: 100%;
+    border-radius: 8px;
+}
+.order-list{
+    border-left: 1px solid var(--black-highlight);
+}
+.pos-payment {
+    flex-direction: row-reverse;
+}
+
+.pos-payment ~ .page-header,
+.pos .page-header + .pos-payment {
+    display: block;
+}
+
+.pos .page-header + .pos-payment ~ .page-header {
+    display: none !important;
+}
+
+.pos.payment-active .page-header {
+    display: none !important;
+}
+
+@media only screen and (min-width: 768px) {
+    html.fixed .pos.payment-active .inner-wrapper,
+    html.fixed .pos-payment .inner-wrapper,
+    .pos-payment .inner-wrapper,
+    body.fixed .inner-wrapper:has(.pos-payment),
+    .inner-wrapper:has(.pos-payment) {
+        padding-top: 60px !important;
+    }
+    
+    body:has(.pos-payment) .inner-wrapper {
+        padding-top: 60px !important;
+    }
+}
+
+.h-60{
+    height: 60% !important;
+}
+.h-40{
+    height: 40% !important;
 }
 html:not(.sidebar-light) ul.nav-main li.nav-expanded > a{
     background-color: var(--black-bg-dark);
@@ -2854,7 +2927,9 @@ html.dark .bg-white{
 }
 html.dark .pos .product-item .card-body,
 html.dark .product-item .card-body, html.dark .product-item .card-footer,
-html.dark .pos .border-bottom {
+html.dark .pos .border-bottom,
+html.dark .pos-product-row,
+html.dark .order-list{
     border-color: var(--black-border-dark) !important;
 }
 html.dark .pos .border-bottom {
@@ -3090,6 +3165,9 @@ html.dark .card-actions .card-action:hover{
 }
 html.dark ul.nav-main li a{
     margin: 2px 10px;
+}
+html.dark .product-item .card-footer{
+    border-width: 0 1px 1px 1px !important;
 }
 @media only screen and (min-width: 768px) {
     html.fixed .content-body {

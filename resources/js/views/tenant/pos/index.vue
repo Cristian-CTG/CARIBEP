@@ -1,6 +1,6 @@
 <template>
-<div>
-    <header class="page-header pr-0">
+<div class="pos" :class="{ 'payment-active': is_payment }">
+    <header class="page-header pr-0" v-show="!is_payment">
         <!-- <h2 class="text-sm">POS</h2>
       <div class="right-wrapper pull-right">
         <h2 class="text-sm pr-5">T/C 3.321</h2>
@@ -19,14 +19,14 @@
                 </template>
             </div>
             <div class="col-md-4">
-                <h2> <button type="button" @click="place = 'cat'" class="btn btn-custom btn-sm  mt-2 mr-2"><i class="fa fa-border-all"></i></button> </h2>
-                <h2> <button type="button" :disabled="place == 'cat2'" @click="setView" class="btn btn-custom btn-sm  mt-2 mr-2"><i class="fa fa-bars"></i></button> </h2>
-                <h2> <button type="button" :disabled="place== 'cat'" @click="back()" class="btn btn-custom btn-sm  mt-2 mr-2"><i class="fa fa-undo"></i></button> </h2>
+                <h2> <button type="button" @click="place = 'cat'" class="btn btn-custom btn-sm"><i class="fa fa-border-all"></i></button> </h2>
+                <h2> <button type="button" :disabled="place == 'cat2'" @click="setView" class="btn btn-custom btn-sm"><i class="fa fa-bars"></i></button> </h2>
+                <h2> <button type="button" :disabled="place== 'cat'" @click="back()" class="btn btn-custom btn-sm"><i class="fa fa-undo"></i></button> </h2>
             </div>
-            <div class="col-md-2">
-                <div class="right-wrapper">
+            <div class="col-md-2 d-flex align-items-center justify-content-end">
+                <div class="right-wrapper mr-2">
                     <!-- <h2 class="text-sm pr-5">T/C  {{form.exchange_rate_sale}}</h2> -->
-                    <h2 class="text-sm  pull-right">{{user.name}}</h2>
+                    <p class="pull-right m-0">{{user.name}}</p>
                 </div>
             </div>
         </div>
@@ -63,9 +63,9 @@
                     </div>
                 </div>
 
-                <div v-if="place == 'prod' || place == 'cat2'" class="row pos-items">
-                    <div v-for="(item,index) in items" v-bind:class="classObjectCol" :key="index">
-                        <section class="card ">
+                <div v-if="place == 'prod' || place == 'cat2'" class="product-pos-container" :class="gridLayoutClass">
+                    <div v-for="(item,index) in items" :key="index">
+                        <section class="card product-item">
                             <div class="card-body pointer px-2 pt-2" @click="clickAddItem(item,index)">
                                 <el-tooltip class="item" effect="dark" :content="item.name" placement="bottom-end">
                                     <p class="font-weight-semibold mb-0 truncate-text">
@@ -83,22 +83,22 @@
                                     </template>
                                 </p>
                             </div>
-                            <div class="card-footer pointer text-center bg-primary">
+                            <div class="card-footer pointer text-center">
                                 <template v-if="!item.edit_unit_price">
-                                    <h5 class="font-weight-semibold text-right text-white">
+                                    <h5 class="font-weight-semibold text-center">                                        
+                                        {{currency.symbol}} 
+                                        <template v-if="!advanced_configuration.item_tax_included">
+                                            {{ getFormatDecimal(item.sale_unit_price) }}
+                                        </template>
+                                        <template v-else>
+                                            {{ getFormatDecimal(item.sale_unit_price_with_tax) }}
+                                        </template>
                                         <button
                                             type="button"
-                                            class="btn btn-xs btn-primary-pos"
+                                            class="btn btn-xs btn-primary-pos edit-price"
                                             @click="clickOpenInputEditUP(index)">
-                                            <span style="font-size:16px;">&#9998;</span>
+                                            <span>&#9998;</span>
                                         </button>
-                                        {{currency.symbol}} 
-                                        <span v-if="!advanced_configuration.item_tax_included">
-                                            {{ getFormatDecimal(item.sale_unit_price) }}
-                                        </span>
-                                        <span v-else>
-                                            {{ getFormatDecimal(item.sale_unit_price_with_tax) }}
-                                        </span>
                                     </h5>
                                 </template>
                                 <template v-else>
@@ -109,13 +109,13 @@
                                         size="mini"
                                     >
                                         <el-button slot="append" icon="el-icon-check" type="primary" @click="clickEditUnitPriceItem(index)"></el-button>
-                                        <el-button slot="append" icon="el-icon-close" type="danger" @click="clickCancelUnitPriceItem(index)"></el-button>
+                                        <el-button class="second-buton btn-close-pos" slot="append" icon="el-icon-close" @click="clickCancelUnitPriceItem(index)"></el-button>
                                     </el-input>
                                 </template>
                             </div>
 
-                            <div v-if="configuration.options_pos" class=" card-footer  bg-primary btn-group flex-wrap" style="width:100% !important; padding:0 !important; ">
-                                <el-row style="width:100%">
+                            <div v-if="configuration.options_pos" class="card-footer btn-group flex-wrap configuration-options">
+                                <el-row style="width:100%; gap: 5px;"">
                                     <el-col :span="6">
                                         <el-tooltip class="item" effect="dark" content="Visualizar stock" placement="bottom-end">
                                             <button type="button" style="width:100% !important;" class="btn btn-xs btn-primary-pos" @click="clickWarehouseDetail(item)">
@@ -218,36 +218,10 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6 bg-white m-0 p-0" style="height: calc(100vh - 110px)">
-                <div class="h-75 bg-light" style="overflow-y: auto">
-                    <div class="row py-3 border-bottom m-0 p-0">
-                        <div class="col-8">
-                            <el-select ref="select_person" v-model="form.customer_id" filterable placeholder="Cliente" @change="changeCustomer" @keyup.native="keyupCustomer" @keyup.enter.native="keyupEnterCustomer">
-                                <el-option v-for="option in all_customers" :key="option.id" :label="option.description" :value="option.id"></el-option>
-                            </el-select>
-                        </div>
-                        <div class="col-4">
-                            <div class="btn-group d-flex" role="group">
-                                <a class="btn btn-sm btn-default w-100" @click.prevent="showDialogNewPerson = true">
-                                    <i class="fas fa-plus fa-wf"></i>
-                                </a>
-                                <a class="btn btn-sm btn-default w-100" @click="clickDeleteCustomer">
-                                    <i class="fas fa-trash fa-wf"></i>
-                                </a>
-                                <!-- <a class="btn btn-sm btn-default w-100" @click="selectCurrencyType"> -->
-                                <!-- <template v-if="form.currency_id == 'PEN'">
-                        <strong>S/</strong>
-                      </template>
-                      <template v-else>
-                        <strong>$</strong>
-                      </template> -->
-                                <!-- <i class="fa fa-usd" aria-hidden="true"></i> -->
-                                <!-- </a> -->
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row py-1 border-bottom m-0 p-0">
-                        <div class="col-12">
+            <div class="col-lg-4 col-md-6 bg-white m-0 p-0 order-list" style="height: calc(100vh - 110px)">
+                <div class="pt-1" style="overflow-y: auto; height: 60%;">                    
+                    <div class="row py-1 m-0 p-0">
+                        <div class="col-12 px-2">
                             <!-- Responsive tabla SOLO en móvil -->
                             <table v-show="isMobile" class="table table-sm table-borderless mb-0 table-pos-products">
                                 <tr v-for="(item,index) in form.items" :key="index" class="pos-product-row">
@@ -270,8 +244,8 @@
                                         <div class="row-secondary">
                                             <el-input v-model="item.sale_unit_price_with_tax" class="input-price input-text-right" @input="clickAddItem(item,index,true)" :readonly="item.item.calculate_quantity"></el-input>
                                             <el-input v-model="item.total" @input="calculateQuantity(index)" class="input-total input-text-right" :readonly="!item.item.calculate_quantity"></el-input>
-                                            <a class="btn btn-sm btn-default btn-trash" @click="clickDeleteItem(index)">
-                                                <i class="fas fa-trash fa-wf"></i>
+                                            <a class="btn btn-sm btn-default btn-trash text-danger" @click="clickDeleteItem(index)">
+                                                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash text-danger"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
                                             </a>
                                         </div>
                                     </td>
@@ -372,20 +346,46 @@
                         </div>
                     </div>
                 </div>
-                <div class="h-25 bg-light" style="overflow-y: auto">
-                    <div class="row border-top bg-light m-0 p-0 h-50 d-flex align-items-right pr-3 pt-2">
+                <div class="bg-light border-top-dashed" style="overflow-y: auto; height: 40%;">
+                    <div class="row py-3 border-bottom m-0 p-0">
+                        <div class="col-8">
+                            <el-select ref="select_person" v-model="form.customer_id" filterable placeholder="Cliente" @change="changeCustomer" @keyup.native="keyupCustomer" @keyup.enter.native="keyupEnterCustomer">
+                                <el-option v-for="option in all_customers" :key="option.id" :label="option.description" :value="option.id"></el-option>
+                            </el-select>
+                        </div>
+                        <div class="col-4">
+                            <div class="btn-group d-flex" role="group">
+                                <a class="btn btn-sm btn-default w-100" @click.prevent="showDialogNewPerson = true">
+                                    <i class="fas fa-plus fa-wf"></i>
+                                </a>
+                                <a class="btn btn-sm btn-default w-100" @click="clickDeleteCustomer">
+                                    <i class="fas fa-trash fa-wf"></i>
+                                </a>
+                                <!-- <a class="btn btn-sm btn-default w-100" @click="selectCurrencyType"> -->
+                                <!-- <template v-if="form.currency_id == 'PEN'">
+                        <strong>S/</strong>
+                      </template>
+                      <template v-else>
+                        <strong>$</strong>
+                      </template> -->
+                                <!-- <i class="fa fa-usd" aria-hidden="true"></i> -->
+                                <!-- </a> -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row bg-light m-0 p-0 h-50 d-flex align-items-right pr-3 pt-2 h-auto">
 
                         <div class="col-md-12" style="display: flex; flex-direction: column; align-items: flex-end;">
                             <table>
                                 <tr class="font-weight-semibold  m-0" v-if="form.sale > 0">
                                     <td class="font-weight-semibold">SUBTOTAL</td>
                                     <td class="font-weight-semibold">:</td>
-                                    <td class="text-right text-blue">{{ formatCurrencyCOP(form.sale) }}</td>
+                                    <td class="text-right">{{ formatCurrencyCOP(form.sale) }}</td>
                                 </tr>
                                 <tr class="font-weight-semibold  m-0" v-if="form.total_discount > 0">
                                     <td class="font-weight-semibold">TOTAL DESCUENTO (-)</td>
                                     <td class="font-weight-semibold">:</td>
-                                    <td class="text-right text-blue">{{ formatCurrencyCOP(form.total_discount) }}</td>
+                                    <td class="text-right">{{ formatCurrencyCOP(form.total_discount) }}</td>
                                 </tr>
                                 <template v-for="(tax, index) in form.taxes">
                                     <tr v-if="((tax.total > 0) && (!tax.is_retention))" :key="index" class="font-weight-semibold  m-0">
@@ -393,25 +393,33 @@
                                             {{tax.name}}[+]
                                         </td>
                                         <td class="font-weight-semibold">:</td>
-                                        <td class="text-right text-blue">{{ formatCurrencyCOP(tax.total) }}</td>
+                                        <td class="text-right">{{ formatCurrencyCOP(tax.total) }}</td>
                                     </tr>
                                 </template>
                                 <tr class="font-weight-semibold  m-0" v-if="form.subtotal > 0">
                                     <td class="font-weight-semibold">TOTAL VENTA</td>
                                     <td class="font-weight-semibold">:</td>
-                                    <td class="text-right text-blue">{{ formatCurrencyCOP(form.subtotal) }}</td>
+                                    <td class="text-right">{{ formatCurrencyCOP(form.subtotal) }}</td>
                                 </tr>
                             </table>
                         </div>
                     </div>
-                    <div class="row text-white m-0 p-0 h-50 d-flex align-items-center" @click="clickPayment" v-bind:class="[form.total > 0 ? 'bg-info pointer' : 'bg-dark']">
-                        <div class="col-6 text-center h5">
+                    <div class="px-3 h-25 mt-2">
+                        <button
+                        type="button"
+                        class="row text-white m-0 p-0 h-100 d-flex align-items-center border-0 payment-btn"
+                        @click="clickPayment"
+                        :disabled="form.total <= 0"
+                        :class="[form.total > 0 ? 'btn-warning pointer' : 'bg-dark']"
+                    >
+                        <div class="col-6 text-center h5 m-0 p-0 text-white">
                             <i class="fa fa-chevron-circle-right"></i>
                             <span class="font-weight-semibold">PAGO</span>
                         </div>
-                        <div class="col-6 text-center">
-                            <h5 class="font-weight-semibold h5">{{ formatCurrencyCOP(form.total) }}</h5>
+                        <div class="col-6 text-center m-0 p-0 text-white">
+                            <h5 class="font-weight-semibold h5 m-0 text-white">{{ formatCurrencyCOP(form.total) }}</h5>
                         </div>
+                    </button>
                     </div>
                 </div>
             </div>
@@ -535,6 +543,30 @@
   white-space: normal !important;
 }
 
+.product-pos-container {
+    display: grid;
+}
+
+.product-pos-container.default {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: 1rem;
+}
+
+.product-pos-container.comfortable {
+    grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+    gap: 0.9rem;
+}
+
+.product-pos-container.compact {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.5rem;
+}
+
+.product-pos-container.stacked {
+    grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+    gap: 0.25rem;
+}
+
 /* --- INICIO: Responsive para listado de items --- */
 @media (max-width: 1000px) {
   .row.pos-items > div[class^="col-"], 
@@ -553,7 +585,7 @@
   /* Estilos para la tabla de productos seleccionados en modo responsive */
   .table-pos-products .pos-product-row {
     display: block;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px dashed var(--black-highlight);
     margin-bottom: 2px;
     padding-bottom: 2px;
   }
@@ -753,41 +785,38 @@ export default {
     },
 
     computed: {
-        classObjectCol() {
-
-            let cols = this.configuration.colums_grid_item
-
-            let clase = 'c3'
+        gridLayoutClass() {
+            let cols = this.configuration?.colums_grid_item || "4"
+            
+            // Asegurar que sea string para la comparación
+            cols = String(cols)
+            
+            console.log('Grid layout cols:', cols) // Debug temporal
+            
             switch (cols) {
-                case 2:
-                    clase = '6'
-
-                    break;
-                case 3:
-                    clase = '4'
-
-                    break;
-                case 4:
-                    clase = '3'
-
-                    break;
-                case 5:
-                    clase = '2'
-
-                    break;
-                case 6:
-                    clase = '2'
-                    break;
+                case "3":
+                    return 'default'
+                case "4":
+                    return 'comfortable'
+                case "5":
+                    return 'compact'
+                case "6":
+                    return 'stacked'
                 default:
-
-            }
-            return {
-                [`col-md-${clase}`]: true
+                    return 'default'
             }
         },
         hideProductImage() {
             return this.windowWidth < 600;
         },
+    },
+    watch: {
+        'configuration.colums_grid_item': {
+            handler(newVal, oldVal) {
+                console.log('Configuration changed:', oldVal, '->', newVal) // Debug temporal
+            },
+            deep: true
+        }
     },
     methods: {
         getQueryParameters() {
