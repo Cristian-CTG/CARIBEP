@@ -31,7 +31,7 @@
                 <h3 class="my-0">Listado de Asientos Contables</h3>
             </div> -->
             <div class="card-body">
-                <data-table :resource="resource" ref="dataTable">
+                <data-table :resource="resource" ref="dataTable" :journal-prefixes="journalPrefixes">
                     <tr slot="heading">
                         <!-- <th>#</th> -->
                         <th>Fecha</th>
@@ -70,6 +70,10 @@
                                 @click.prevent="clickDetail(row.id)">
                                 Detalle
                             </button>
+                            <button v-if="row.status === 'posted'" class="btn btn-xs btn-primary"
+                                @click.prevent="clickPdf(row.id)">
+                                PDF
+                            </button>
                         </td>
                     </tr>
                 </data-table>
@@ -81,6 +85,7 @@
         <journal-entry-detail
             :showDialog.sync="showDialogDetail"
             :recordId="recordId"
+            :journal-prefixes="journalPrefixes"
             >
         </journal-entry-detail>
     </div>
@@ -102,7 +107,11 @@ export default {
             resource: "accounting/journal/entries",
             recordId: null,
             isAdmin: true, // Esto debería venir desde el backend con la sesión
+            journalPrefixes: []
         };
+    },
+    created() {
+        this.loadJournalPrefixes();
     },
     methods: {
         clickCreate(recordId = null) {
@@ -140,6 +149,14 @@ export default {
             this.recordId = recordId;
             this.showDialogDetail = true;
         },
+        async loadJournalPrefixes() {
+            await this.$http.get("/accounting/journal/prefixes").then((response) => {
+                this.journalPrefixes = response.data;
+            });
+        },
+        clickPdf(recordId) {
+            window.open(`/accounting/journal/entries/pdf/${recordId}`, '_blank');
+        }
     },
 };
 </script>

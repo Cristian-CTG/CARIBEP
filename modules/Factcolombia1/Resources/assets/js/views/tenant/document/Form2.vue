@@ -826,7 +826,9 @@ export default {
             // Configura el ítem para la edición
             row.indexi = index;
             this.recordItem = row;
-            this.showDialogAddItem = true;
+            this.$nextTick(() => {
+                this.showDialogAddItem = true;
+            });
         },
         clickEditUser(row, index) {
             row.indexi = index

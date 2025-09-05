@@ -357,6 +357,25 @@
                 this.form.warehouse_id = warehouse_id
             })
         },
+        watch: {
+            show_purchase_order_number(val) {
+                if (!val) {
+                    this.form.purchase_order_number = '';
+                }
+            },
+            recordItem: {
+                handler(newVal) {
+                    if (newVal) {
+                        this.initForm();
+                        // Copia los datos de newVal a this.form según tu lógica actual
+                        this.form = { ...this.form, ...newVal };
+                        // Si necesitas lógica adicional, ponla aquí
+                    }
+                },
+                immediate: true,
+                deep: true
+            }
+        },
         methods: {
             async getTables() {
                 await this.$http.get(`/${this.resource}/item/tables`).then(response => {
@@ -452,6 +471,7 @@
                     IdLoteSelected: null,
                     discount_type: 'amount',
                     discount_percentage: 0,
+                    purchase_order_number: '',
                 };
                 this.activePanel = 0;
                 this.total_item = 0;
@@ -460,7 +480,7 @@
                 this.tax_included_in_price = true;
             },
             async create() {
-                this.getTables()
+                await this.getTables()
                 this.titleDialog = (this.recordItem) ? ' Editar Producto o Servicio' : ' Agregar Producto o Servicio';
                 this.titleAction = (this.recordItem) ? ' Editar' : ' Agregar';
                 // let operation_type = await _.find(this.operation_types, {id: this.operationTypeId})
@@ -472,6 +492,8 @@
                     this.form.quantity = this.recordItem.quantity
                     this.form.notes = this.recordItem.notes
                     this.form.price = this.recordItem.price
+                    this.form.purchase_order_number = this.recordItem.purchase_order_number || '';
+                    this.show_purchase_order_number = !!this.recordItem.purchase_order_number;
                     if(this.recordItem.discount_type === 'percentage') {
                         this.form.discount_type = this.recordItem.discount_type
                         this.form.discount = this.recordItem.discount_percentage
@@ -487,12 +509,14 @@
                     this.calculateQuantity()
                 }else{
                     this.isUpdateWarehouseId = null
+                    this.form.purchase_order_number = '';
+                    this.show_purchase_order_number = false;
                 }
                 // Si el item ya tiene purchase_order_number, mostrar el campo y setear el valor
-                this.show_purchase_order_number = !!(this.recordItem && this.recordItem.purchase_order_number);
-                if (this.show_purchase_order_number && this.recordItem) {
-                    this.form.purchase_order_number = this.recordItem.purchase_order_number;
-                }
+                // this.show_purchase_order_number = !!(this.recordItem && this.recordItem.purchase_order_number);
+                // if (this.show_purchase_order_number && this.recordItem) {
+                //     this.form.purchase_order_number = this.recordItem.purchase_order_number;
+                // }
             },
             close() {
                 this.initForm()

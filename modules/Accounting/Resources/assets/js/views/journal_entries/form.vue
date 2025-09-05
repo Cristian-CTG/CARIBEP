@@ -17,7 +17,7 @@
                                 <a href="#" @click.prevent="clickAddPrefix">[+ Nuevo]</a>
                             </label>
                             <el-select v-model="form.journal_prefix_id" placeholder="Seleccionar">
-                                <el-option v-for="prefix in prefixes" :key="prefix.id" :label="prefix.description+ ' - ' + prefix.prefix"
+                                <el-option v-for="prefix in filteredJournalPrefixes" :key="prefix.id" :label="prefix.description+ ' - ' + prefix.prefix"
                                     :value="prefix.id"></el-option>
                             </el-select>
                         </div>
@@ -99,14 +99,13 @@ import JournalEntryPrefix from "./partials/prefix.vue";
 
 export default {
     components: { JournalEntryPrefix },
-    props: ["showDialog", "recordId"],
+    props: ["showDialog", "recordId", "journalPrefixes"],
     data() {
         return {
             loading_submit: false,
             titleDialog: null,
             resource: "accounting/journal/entries",
             form: {},
-            prefixes: [],
             accounts: [],
             showDialogPrefix: false,
             loadingAccounts: false
@@ -114,8 +113,13 @@ export default {
     },
     created() {
         this.initForm();
-        this.loadPrefixes();
+        // this.loadPrefixes();
         this.loadAccounts();
+    },
+    computed: {
+        filteredJournalPrefixes() {
+            return this.journalPrefixes.filter(p => p.modifiable === 1);
+        }
     },
     methods: {
         initForm() {
@@ -126,11 +130,11 @@ export default {
                 details: [],
             };
         },
-        async loadPrefixes() {
-            await this.$http.get("/accounting/journal/prefixes").then((response) => {
-                this.prefixes = response.data;
-            });
-        },
+        // async loadPrefixes() {
+        //     await this.$http.get("/accounting/journal/prefixes").then((response) => {
+        //         this.prefixes = response.data;
+        //     });
+        // },
         async loadAccounts(query = null) {
             this.loadingAccounts = true;
 

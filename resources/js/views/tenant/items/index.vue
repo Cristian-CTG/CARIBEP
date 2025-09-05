@@ -36,7 +36,8 @@
                         <th>Nombre</th>
                         <th>Descripción</th>
                         <!-- <th>Cód. SUNAT</th> -->
-                        <th  class="text-left">Stock</th>
+                        <th class="text-left">Stock (Actual)</th> 
+                        <th  class="text-left">Stock (Total)</th>
                         <th  class="text-right">P.Unitario (Venta)</th>
                         <th v-if="typeUser != 'seller'" class="text-right">P.Unitario (Compra)</th>
                         <!-- <th class="text-center">Tiene Igv</th> -->
@@ -56,6 +57,10 @@
                             <td>{{ row.unit_type_id }}</td>
                             <td>{{ row.name }}</td>
                             <td>{{ row.description }}</td>
+                        <!-- <td>{{ row.item_code }}</td> -->
+                            <td>
+                                {{ formatStock(row.stock) }}
+                            </td>
                             <td>
                                 <div v-if="config.product_only_location == true">
                                     {{ row.stock }}
@@ -68,7 +73,7 @@
                                 </div>
                             </td>
                             <td class="text-right">{{ getFormatDecimal(row.sale_unit_price) }}</td>
-                            <td class="text-right">{{ getFormatDecimal(row.purchase_unit_price) }}</td>
+                            <td class="text-right" v-if="typeUser != 'seller'">{{ getFormatDecimal(row.purchase_unit_price) }}</td>
                             <td class="text-right">
                                 <template v-if="typeUser === 'admin'">
                                     <el-dropdown trigger="click">
@@ -182,6 +187,10 @@
             })
         },
         methods: {
+            formatStock(value) {
+                if (value == null) return '0.00'
+                return parseFloat(value).toFixed(2)
+            },
             duplicate(id)
             {
                 this.$http.post(`${this.resource}/duplicate`, {id})

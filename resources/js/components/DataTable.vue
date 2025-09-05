@@ -2,101 +2,105 @@
     <div>
         <div class="row">
             <div class="col-md-12 col-lg-12 col-xl-12">
-                <div class="row" v-if="applyFilter">
-                    <div class="col-lg-3 col-md-3 col-sm-12 pb-2">
-                        <div class="d-flex">
-                            <div style="width:100px">
-                                Filtrar por:
-                            </div>
-                            <el-select v-model="search.column" placeholder="Select" @change="changeClearInput">
-                                <el-option v-for="(label, key) in columns" :key="key" :value="key" :label="label"></el-option>
-                            </el-select>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-4 col-sm-12 pb-2">
-                        <template v-if="search.column=='date_of_issue'">
-                            <div class="d-flex">
-                                <el-select 
-                                    v-model="filterType" 
-                                    placeholder="Tipo de filtro" 
-                                    style="width: 50%; margin-right: 8px;">
-                                    <el-option label="Por mes" value="month"></el-option>
-                                    <el-option label="Por fecha" value="date"></el-option>
-                                    <el-option label="Entre fechas" value="range" v-if="extraFilters"></el-option>
-                                </el-select>
-                                
-                                <template v-if="filterType === 'month'">
-                                    <el-date-picker
-                                        v-model="search.value"
-                                        type="month"
-                                        style="width: calc(100% - 130px)"
-                                        placeholder="Seleccione mes"
-                                        value-format="yyyy-MM"
-                                        @change="getRecords">
-                                    </el-date-picker>
-                                </template>
-                                <template v-else-if="filterType === 'date'">
-                                    <el-date-picker
-                                        v-model="search.value"
-                                        type="date"
-                                        style="width: calc(100% - 130px)"
-                                        placeholder="Seleccione fecha"
-                                        value-format="yyyy-MM-dd"
-                                        :clearable="true"
-                                        :editable="false"
-                                        @change="onDateFieldChange('value', $event)">
-                                    </el-date-picker>
-                                </template>
-                                <template v-else-if="filterType === 'range'">
-                                    <template v-if="extraFilters">
-                                        <el-date-picker
-                                            v-model="search.fecha_inicio"
-                                            type="date"
-                                            style="width: calc(50% - 65px);margin-right: 8px;"
-                                            placeholder="Fecha inicio"
-                                            value-format="yyyy-MM-dd"
-                                            :clearable="true"
-                                            :editable="false"
-                                            @change="onDateFieldChange('fecha_inicio', $event)">
-                                        </el-date-picker>
-                                        <el-date-picker
-                                            v-model="search.fecha_fin"
-                                            type="date"
-                                            style="width: calc(50% - 65px)"
-                                            placeholder="Fecha fin"
-                                            value-format="yyyy-MM-dd"
-                                            :clearable="true"
-                                            :editable="false"
-                                            @change="onDateFieldChange('fecha_fin', $event)">
-                                        </el-date-picker>
-                                    </template>
-                                </template>
-                            </div>
-                        </template>
-                        <template v-else>
-                            <el-input 
-                                placeholder="Buscar"
-                                v-model="search.value"
-                                style="width: 100%;"
-                                prefix-icon="el-icon-search"
-                                @input="getRecords">
-                            </el-input>
-                        </template>
-                    </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 pb-2" v-if="extraFilters">
+                <!-- Botón para mostrar/ocultar todos los filtros -->
+                <template v-if="extraFilters">
+                    <div class="d-flex mb-2" style="align-items: flex-start;">
                         <el-button 
-                            @click="toggleExtraFilters" 
+                            @click="toggleFilters" 
                             type="primary" 
                             plain 
                             icon="el-icon-setting"
                             size="mini"
-                            style="margin-left: 10px;">
-                            {{ showExtraFilters ? 'Ocultar filtros adicionales' : 'Mostrar filtros adicionales' }}
+                            style="margin-right: 10px;">
+                            {{ showFilters ? 'Ocultar filtros' : 'Mostrar filtros' }}
                         </el-button>
                     </div>
-                </div>
-                <template v-if="search.column=='date_of_issue'">
-                    <template v-if="extraFilters && showExtraFilters" >
+                </template>
+                <!-- Todos los filtros se muestran/ocultan con showFilters -->
+                <div v-if="showFilters">
+                    <div class="row" v-if="applyFilter">
+                        <div class="col-lg-3 col-md-3 col-sm-12 pb-2">
+                            <div class="d-flex">
+                                <div style="width:100px">
+                                    Filtrar por:
+                                </div>
+                                <el-select v-model="search.column" placeholder="Select" @change="changeClearInput">
+                                    <el-option v-for="(label, key) in columns" :key="key" :value="key" :label="label"></el-option>
+                                </el-select>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-12 pb-2">
+                            <template v-if="search.column=='date_of_issue'">
+                                <div class="d-flex">
+                                    <el-select 
+                                        v-model="filterType" 
+                                        placeholder="Tipo de filtro" 
+                                        style="width: 50%; margin-right: 8px;">
+                                        <el-option label="Por mes" value="month"></el-option>
+                                        <el-option label="Por fecha" value="date"></el-option>
+                                        <el-option label="Entre fechas" value="range" v-if="extraFilters"></el-option>
+                                    </el-select>
+                                    
+                                    <template v-if="filterType === 'month'">
+                                        <el-date-picker
+                                            v-model="search.value"
+                                            type="month"
+                                            style="width: calc(100% - 130px)"
+                                            placeholder="Seleccione mes"
+                                            value-format="yyyy-MM"
+                                            @change="getRecords">
+                                        </el-date-picker>
+                                    </template>
+                                    <template v-else-if="filterType === 'date'">
+                                        <el-date-picker
+                                            v-model="search.value"
+                                            type="date"
+                                            style="width: calc(100% - 130px)"
+                                            placeholder="Seleccione fecha"
+                                            value-format="yyyy-MM-dd"
+                                            :clearable="true"
+                                            :editable="false"
+                                            @change="onDateFieldChange('value', $event)">
+                                        </el-date-picker>
+                                    </template>
+                                    <template v-else-if="filterType === 'range'">
+                                        <template v-if="extraFilters">
+                                            <el-date-picker
+                                                v-model="search.fecha_inicio"
+                                                type="date"
+                                                style="width: calc(50% - 65px);margin-right: 8px;"
+                                                placeholder="Fecha inicio"
+                                                value-format="yyyy-MM-dd"
+                                                :clearable="true"
+                                                :editable="false"
+                                                @change="onDateFieldChange('fecha_inicio', $event)">
+                                            </el-date-picker>
+                                            <el-date-picker
+                                                v-model="search.fecha_fin"
+                                                type="date"
+                                                style="width: calc(50% - 65px)"
+                                                placeholder="Fecha fin"
+                                                value-format="yyyy-MM-dd"
+                                                :clearable="true"
+                                                :editable="false"
+                                                @change="onDateFieldChange('fecha_fin', $event)">
+                                            </el-date-picker>
+                                        </template>
+                                    </template>
+                                </div>
+                            </template>
+                            <template v-else>
+                                <el-input 
+                                    placeholder="Buscar"
+                                    v-model="search.value"
+                                    style="width: 100%;"
+                                    prefix-icon="el-icon-search"
+                                    @input="getRecords">
+                                </el-input>
+                            </template>
+                        </div>
+                    </div>
+                    <template v-if="search.column=='date_of_issue' && extraFilters">
                         <div class="row" v-if="applyFilter">
                             <div class="col-lg-3 col-md-3 col-sm-12 pb-2">
                                 <div class="d-flex">
@@ -201,8 +205,7 @@
                                         style="width:100%;">
                                         <el-option
                                             v-for="state in states"
-                                            :key="state.id"
-                                            :label="state.name"
+                                            :key="state.id"                                            :label="state.name"
                                             :value="state.id"
                                         ></el-option>
                                     </el-select>
@@ -210,7 +213,7 @@
                             </div> -->
                         </div>
                     </template>
-                </template>
+                </div>
             </div>
 
             <div class="col-md-12">
@@ -278,7 +281,7 @@
                 selectedCustomer: null,
                 states: [],
                 selectedState: null,
-                showExtraFilters: false
+                showFilters: true
             }
         },
         computed: {
@@ -318,22 +321,28 @@
 
         },
         methods: {
-            toggleExtraFilters() {
-                this.showExtraFilters = !this.showExtraFilters;
-                if (!this.showExtraFilters) {
-                    // Limpiar filtros extra al ocultar
-                    this.selectedResolution = null;
-                    this.selectedCustomer = null;
-                    this.comprobanteSearch = '';
-                    this.selectedState = null;
-                    this.search.fecha_inicio = '';
-                    this.search.fecha_fin = '';
-                    this.getRecords();
-                }
+            toggleFilters() {
+                this.showFilters = !this.showFilters;
+                // if (!this.showFilters) {
+                //     // Limpiar filtros al ocultar
+                //     this.selectedResolution = null;
+                //     this.selectedCustomer = null;
+                //     this.comprobanteSearch = '';
+                //     this.selectedState = null;
+                //     this.search.fecha_inicio = '';
+                //     this.search.fecha_fin = '';
+                //     this.filterType = 'month';
+                //     // Establecer mes actual
+                //     const date = new Date();
+                //     const year = date.getFullYear();
+                //     const month = String(date.getMonth() + 1).padStart(2, '0');
+                //     this.search.value = `${year}-${month}`;
+                //     this.getRecords();
+                // }
             },
-            // onComprobanteSearch() {
-            //     this.getRecords();
-            // },
+            onComprobanteSearch() {
+                this.getRecords();
+            },
             async fetchCustomers() {
                 const res = await this.$http.get(`/${this.resource}/customers-list`);
                 this.customers = res.data;

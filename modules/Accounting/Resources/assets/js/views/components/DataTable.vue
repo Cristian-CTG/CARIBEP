@@ -4,23 +4,21 @@
             <div class="col-md-12 col-lg-12 col-xl-12 ">
                 <div class="row" v-if="applyFilter">
                     <div class="col-lg-4 col-md-4 col-sm-12 pb-2">
-                        <div class="d-flex">
-                            <div style="width:100px">
-                                Filtrar por:
-                            </div>
-                            <el-select v-model="search.column"  placeholder="Select" @change="changeClearInput">
-                                <el-option v-for="(label, key) in columns" :key="key" :value="key" :label="label"></el-option>
-                            </el-select>
-                        </div>
+                        <label class="control-label">Filtrar por:</label>
+                        <el-select v-model="search.column"  placeholder="Select" @change="changeClearInput">
+                            <el-option v-for="(label, key) in columns" :key="key" :value="key" :label="label"></el-option>
+                        </el-select>
                     </div>
                     <div class="col-lg-3 col-md-4 col-sm-12 pb-2">
-                        <template v-if="search.column=='date' || search.column=='date_of_due' || search.column=='date_of_payment' || search.column=='delivery_date'">
+                        <label class="control-label">{{columns[search.column]}}:</label>
+                        <template v-if="search.column=='date' || search.column=='daterange'">
                             <el-date-picker
                                 v-model="search.value"
-                                type="date"
+                                :type="search.column"
                                 style="width: 100%;"
                                 placeholder="Buscar"
                                 value-format="yyyy-MM-dd"
+                                range-separator="-"
                                 @change="getRecords">
                             </el-date-picker>
                         </template>
@@ -32,6 +30,22 @@
                                 @input="getRecords">
                             </el-input>
                         </template>
+                    </div>
+                    <div class="col-lg-4 col-md-4 ">
+                        <div class="form-group">
+                            <label class="control-label">Tipo comprobante</label>
+                            <el-select v-model="search.journal_prefix_id" @change="getRecords" popper-class="el-select-journal_prefix" filterable clearable>
+                                <el-option v-for="option in journalPrefixes" :key="option.id" :value="option.id" :label="option.description"></el-option>
+                            </el-select>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4 ">
+                        <div class="form-group">
+                            <label class="control-label">Estado</label>
+                            <el-select v-model="search.status" @change="getRecords" popper-class="el-select-journal_prefix" filterable clearable>
+                                <el-option v-for="option in statuses" :key="option.id" :value="option.id" :label="option.name"></el-option>
+                            </el-select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -72,17 +86,28 @@
                 type: Boolean,
                 default: true,
                 required: false
-            }
+            },
+            journalPrefixes: {
+                type: Array,
+                default: () => [],
+                required: false
+            },
         },
         data () {
             return {
                 search: {
                     column: null,
-                    value: null
+                    value: null,
+                    journal_prefix_id: null,
                 },
                 columns: [],
                 records: [],
-                pagination: {}
+                pagination: {},
+                statuses: [
+                    { id: 'rejected', name: 'Rechazado' },
+                    { id: 'draft', name: 'Borrador' },
+                    { id: 'posted', name: 'Aprobado' },
+                ]
             }
         },
         computed: {
@@ -114,16 +139,21 @@
                 });
             },
             getQueryParameters() {
+                let searchParams = { ...this.search };
+                // Si es un rango de fechas, convierte el array en string
+                if (searchParams.column === 'daterange' && Array.isArray(searchParams.value)) {
+                    searchParams.value = searchParams.value.join('_');
+                }
                 return queryString.stringify({
                     page: this.pagination.current_page,
                     limit: this.limit,
-                    ...this.search
-                })
+                    ...searchParams
+                });
             },
             changeClearInput(){
                 this.search.value = ''
                 this.getRecords()
-            }
+            },
         }
     }
 </script>

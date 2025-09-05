@@ -41,6 +41,7 @@ if($hostname) {
             Route::apiResource('journal/entries', 'JournalEntryController')->names([
                 'index'   => 'tenant.accounting.journal.entries.index',
             ]);
+            Route::get('journal/entries/pdf/{id}', 'JournalEntryController@getPdf');
             Route::put('journal/entries/{id}/request-approval', 'JournalEntryController@requestApproval');
             Route::put('journal/entries/{id}/approve', 'JournalEntryController@approve');
             Route::put('journal/entries/{id}/reject', 'JournalEntryController@reject');

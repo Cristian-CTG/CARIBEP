@@ -16,12 +16,12 @@ class JournalPrefixController extends Controller
 {
     public function index()
     {
-        return JournalPrefix::where('modifiable',1)->get();
+        return JournalPrefix::all();
     }
 
     public function store(Request $request)
     {
-        
+
         $request->validate([
             'prefix' => 'required|string',
             'description' => 'required|string',
@@ -33,7 +33,7 @@ class JournalPrefixController extends Controller
         if($prefixFound){
             return response()->json(['message' => 'Prefijo ya existe']);
         }
-        
+
         return JournalPrefix::create($request->all());
     }
 
