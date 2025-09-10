@@ -50,24 +50,16 @@ class PosController extends Controller
     {
         $cash = Cash::where([['user_id', auth()->user()->id],['state', true]])->first();
 
-        // Validación de caja temporalmente deshabilitada
-        // if(!$cash) return redirect()->route('tenant.cash.index');
-        // if(!$cash->resolution_id) return redirect()->route('tenant.cash.index');
+        if(!$cash) return redirect()->route('tenant.cash.index');
+
+        if(!$cash->resolution_id) return redirect()->route('tenant.cash.index');
 
         /*$configuration_pos_document = ConfigurationPos::first();
         if(!$configuration_pos_document) return redirect()->route('tenant.pos.configuration');*/
 
         $configuration = Configuration::first();
-        
-        // Solo asignar configuration_pos si existe una caja
-        if($cash && $cash->resolution_id) {
-            $configuration_pos = ConfigurationPos::where('id', $cash->resolution_id)->firstOrFail();
-            $configuration->configuration_pos = $configuration_pos;
-        } else {
-            // Si no hay caja, usar la primera configuración disponible o crear una por defecto
-            $configuration_pos = ConfigurationPos::first();
-            $configuration->configuration_pos = $configuration_pos;
-        }
+        $configuration_pos = ConfigurationPos::where('id', $cash->resolution_id)->firstOrFail();
+        $configuration->configuration_pos = $configuration_pos;
 
         $company = Company::select('soap_type_id')->first();
         $soap_company  = $company->soap_type_id;
@@ -157,8 +149,7 @@ class PosController extends Controller
     {
         $cash = Cash::where([['user_id', auth()->user()->id],['state', true]])->first();
 
-        // Validación de caja temporalmente deshabilitada
-        // if(!$cash) return redirect()->route('tenant.cash.index');
+        if(!$cash) return redirect()->route('tenant.cash.index');
 
         return view('tenant.pos.index_full');
     }

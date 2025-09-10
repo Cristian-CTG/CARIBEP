@@ -137,9 +137,9 @@
                 <td class="celda">{{ $customer ? $customer->name : ($row['customer_name'] ?? '') }}</td>
                 @php
                     $email = $customer ? $customer->email : ($row['customer_email'] ?? '');
-                    $email_with_breaks = str_replace(['@', '.', '-', '_'], ['<wbr>@', '<wbr>.', '<wbr>-', '<wbr>_'], e($email));
+                    $email_formatted = str_replace('@', '<br>@', e($email));
                 @endphp
-                <td class="celda">{!! $email_with_breaks !!}</td>
+                <td class="celda correo-cell">{!! $email_formatted !!}</td>
                 <td class="celda">{{ $customer ? $customer->telephone : ($row['customer_telephone'] ?? '') }}</td>
                 <td class="celda">{{ $customer ? $customer->address : ($row['customer_address'] ?? '') }}</td>
                 <td class="celda text-right-td">{{ number_format(floatval(str_replace(',', '', $row['total_exempt'])) * $multiplier, 2, '.', '') }}</td>
