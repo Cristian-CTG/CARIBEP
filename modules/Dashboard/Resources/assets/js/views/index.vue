@@ -51,7 +51,7 @@
           <div class="card-body py-2">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h4 class="card-title">Mi Consumo Electrónico</h4>
+                <h4 class="card-title">Mi Plan</h4>
                 <div v-if="!electronicConsumption || !electronicConsumption.plan_name || electronicConsumption.plan_name === 'Sin plan'" class="alert alert-danger mb-0 py-2">
                   No tiene un plan asignado, comuníquese con su administrador.
                 </div>

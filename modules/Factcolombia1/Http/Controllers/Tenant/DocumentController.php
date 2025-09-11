@@ -198,7 +198,7 @@ class DocumentController extends Controller
         $resolutions = TypeDocument::whereNotNull('resolution_number')
             ->where('resolution_date_end', '>', now())
             ->orderBy('description')
-            ->get(['id', 'description']);
+            ->get(['id', 'description', 'prefix']);
 
         return response()->json($resolutions);
     }

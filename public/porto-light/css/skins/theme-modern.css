@@ -2630,7 +2630,8 @@ html.dark .header .logo-container .topbar-links:hover {
 html.dark h1, html.dark .h1, html.dark h2, html.dark .h2, html.dark h3, html.dark .h3, html.dark h4, html.dark .h4, html.dark h5, html.dark .h5, html.dark h6, html.dark .h6 {
     color: var(--black-light);
 }
-html.dark .card.card-featured-left .card-body {
+html.dark .card.card-featured-left .card-body,
+html.dark .card-body .invoice {
     border: 1px solid var(--black-border-dark) !important;
 }
 html.dark .card-body {
