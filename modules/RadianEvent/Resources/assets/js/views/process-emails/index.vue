@@ -17,7 +17,7 @@
                 <h3 class="my-0">Correos procesados</h3>
             </div> -->
             <div class="card-body">
-
+                
                 <data-table :resource="resource">
                     <tr slot="heading">
                         <!-- <th>#</th> -->
@@ -51,10 +51,10 @@
                     </tr>
                 </data-table>
             </div>
-
+            
             <detail-form :showDialog.sync="showDialog"
                             :recordId="recordId"></detail-form>
-
+                            
             <search-form :showDialog.sync="showDialogSearch"></search-form>
         </div>
     </div>
@@ -84,7 +84,7 @@
                 this.showDialogSearch = true
 
                 // this.loading = true
-
+                
                 // await this.$http.get(`/co-radian-events/search-imap-emails`)
                 //     .then(response => {
 

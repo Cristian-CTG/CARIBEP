@@ -31,7 +31,7 @@
                         <th>Proveedor</th>
                         <th>Estado</th>
                         <th>Número</th>
-                        <th>Productos</th>
+                        <th>Productos</th> 
                         <th class="text-center">Moneda</th>
                         <th v-if="columns.total_free.visible"  class="text-right">T.Gratuita</th>
                         <th v-if="columns.total_unaffected.visible" class="text-right">T.Inafecta</th>
@@ -41,7 +41,7 @@
                         <!-- <th v-if="columns.total_perception.visible" >Percepcion</th> -->
                         <th class="text-right">Total</th>
                         <th class="text-right">Acciones</th>
-                    </tr>
+                    <tr>
                     <tr slot-scope="{ index, row }">
                         <td>{{ index }}</td>
                         <td class="text-center">{{ row.date_of_issue }}</td>
@@ -88,10 +88,10 @@
                     </tr>
                 </data-table>
             </div>
-
+ 
         </div>
 
-
+         
     </div>
 </template>
 
@@ -147,7 +147,7 @@
         },
         created() {
         },
-        methods: {
+        methods: { 
             clickDownload(download) {
                 window.open(download, '_blank');
             },

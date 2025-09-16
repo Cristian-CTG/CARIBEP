@@ -27,7 +27,7 @@
                         <th>Saldo</th>
                         <th class="text-center">Ver</th>
                         <th class="text-right">Acciones</th>
-                    </tr>
+                    <tr>
                     <tr slot-scope="{ index, row }" >
                         <td>{{ index }}</td>
                         <td>{{ row.customer_name }}<br/><small v-text="row.customer_number"></small></td>
@@ -44,7 +44,7 @@
                         </td>
 
                         <td class="text-right">
-
+                            
                             <button type="button" class="btn waves-effect waves-light btn-xs btn-info" @click.prevent="clickCreate(row.id)" >Editar</button>
                             <template v-if="typeUser === 'admin'">
                                 <button type="button" class="btn waves-effect waves-light btn-xs btn-danger" @click.prevent="clickDelete(row.id)">Eliminar</button>
@@ -57,7 +57,7 @@
 
             <technical-services-form :showDialog.sync="showDialog"
                           :recordId="recordId"></technical-services-form>
-
+ 
         </div>
     </div>
 </template>
@@ -90,7 +90,7 @@
             clickCreate(recordId = null) {
                 this.recordId = recordId
                 this.showDialog = true
-            },
+            }, 
             clickDelete(id) {
                 this.destroy(`/${this.resource}/${id}`).then(() =>
                     this.$eventHub.$emit('reloadData')

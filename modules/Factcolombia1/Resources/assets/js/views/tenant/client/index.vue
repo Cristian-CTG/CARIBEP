@@ -24,7 +24,7 @@
                         <th>Número</th>
                         <th>Nombre</th>
                         <th class="text-right">Acciones</th>
-                    </tr>
+                    <tr>
                     <tr slot-scope="{ index, row }">
                         <td>{{ index }}</td>
                         <td>{{ row.type_identity_document_name }}</td>

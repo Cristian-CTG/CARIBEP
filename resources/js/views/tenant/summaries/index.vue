@@ -25,7 +25,7 @@
                         <th>Ticket</th>
                         <th class="text-center">Descargas</th>
                         <th class="text-right">Acciones</th>
-                    </tr>
+                    <tr>
                     <tr slot-scope="{ index, row }" >
                         <td>{{ index  }}</td>
                         <td class="text-center">{{ row.date_of_issue }}</td>
@@ -36,7 +36,7 @@
                         <td class="text-center">
                             <button type="button" class="btn waves-effect waves-light btn-xs btn-info"
                                     @click.prevent="clickDownload(row.download_xml)"
-                                    v-if="row.has_xml">XML</button>
+                                    v-if="row.has_xml">XML</button> 
                             <button type="button" class="btn waves-effect waves-light btn-xs btn-info"
                                     @click.prevent="clickDownload(row.download_cdr)"
                                     v-if="row.has_cdr">CDR</button>
@@ -53,7 +53,7 @@
                     </tr>
                 </data-table>
             </div>
-
+            
             <summary-form :showDialog.sync="showDialog"
                         :external="false"></summary-form>
         </div>
@@ -80,7 +80,7 @@
         created() {
 
         },
-        methods: {
+        methods: { 
             clickCreate() {
                 this.showDialog = true
             },
@@ -88,7 +88,7 @@
                 this.$http.get(`/${this.resource}/status/${id}`)
                     .then(response => {
                         if (response.data.success) {
-                            this.$eventHub.$emit('reloadData')
+                            this.$eventHub.$emit('reloadData') 
                             this.$message.success(response.data.message)
                         } else {
                             this.$message.error(response.data.message)

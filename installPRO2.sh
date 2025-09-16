@@ -2,7 +2,7 @@
 
 HOST=${1:-'dominio'}
 #parametros opcionales
-PROYECT=${2:-'https://gitlab.buho.la/facturalatam/co-facturadorpro3.git'}
+PROYECT=${2:-'https://gitlab.com/rash07/facturadorpro2-co.git'}
 SERVICE_NUMBER=${3:-'1'}
 PATH_INSTALL=$(echo $HOME)
 DIR=$(echo $PROYECT | rev | cut -d'/' -f1 | rev | cut -d '.' -f1)$SERVICE_NUMBER
@@ -251,7 +251,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@$HOST',
             'password' => bcrypt('$ADMIN_PASSWORD'),
         ]);
-
+ 
 
         DB::table('plan_documents')->insert([
             ['id' => 1, 'description' => 'Facturas, boletas, notas de débito y crédito, resúmenes y anulaciones' ],

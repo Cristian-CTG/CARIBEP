@@ -25,7 +25,7 @@
                         <th class="text-center">Valor de ventas</th>
                         <th class="text-center">Costo de producto</th>
                         <th class="text-center">Unidad valorizada</th>
-                    </tr>
+                    <tr>
                     <tr slot-scope="{ index, row }">
                         <td>{{ index }}</td>
                         <td>{{ row.item_description }}</td>

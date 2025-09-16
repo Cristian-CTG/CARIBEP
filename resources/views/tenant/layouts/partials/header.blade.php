@@ -209,7 +209,7 @@
 <div id="supportBackdrop" class="support-backdrop" onclick="toggleSupportSidebar()"></div>
 
 
-@push('scripts')
+
 <script>
 function toggleSupportSidebar() {
     const sidebar = document.getElementById('supportSidebar');
@@ -243,4 +243,3 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('fullscreenchange', updateIcon);
 });
 </script>
-@endpush

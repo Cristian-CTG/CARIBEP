@@ -1,31 +1,31 @@
-# **Facturador PRO 3**
+# **Facturador PRO 2**
 
-### Instalación de PRO3 (con api incluido)
+### Instalación de PRO2 (con api incluido)
 
  Linux - Docker - SSL opcional <br>
-* [ajustes necesarios de dominio](https://git.buho.la/facturalatam/co-facturadorpro3/-/snippets/26#dominio) <br>
-* [pasos para ejecución de script](https://git.buho.la/facturalatam/co-facturadorpro3/-/snippets/26#pasos) <br>
-* [script para ubuntu 20](https://git.buho.la/facturalatam/co-facturadorpro3/-/snippets/26#L1) <br>
-* [script para ubuntu 22](https://git.buho.la/facturalatam/co-facturadorpro3/-/snippets/26#L1) <br>
+* [ajustes necesarios de dominio](https://git.buho.la/facturalatam/co-facturadorpro2/-/snippets/26#dominio) <br>
+* [pasos para ejecución de script](https://git.buho.la/facturalatam/co-facturadorpro2/-/snippets/26#pasos) <br>
+* [script para ubuntu 20](https://git.buho.la/facturalatam/co-facturadorpro2/-/snippets/26#L1) <br>
+* [script para ubuntu 22](https://git.buho.la/facturalatam/co-facturadorpro2/-/snippets/26#L1) <br>
 
-### Instalación de PRO3 (sin api incluido)
+### Instalación de PRO2 (sin api incluido)
 
 * Linux - Ubuntu 20 - Docker - SSL opcional<br>
-[ver pasos y script](https://git.buho.la/facturalatam/co-facturadorpro3/-/snippets/2 "ver")
-[Video Aquí](* "ver")
+[ver pasos y script](https://git.buho.la/facturalatam/co-facturadorpro2/-/snippets/2 "ver")
+[Video Aquí](https://www.youtube.com/watch?v=X8b5DwlWnao "ver")
 
 * Windows - Laragon - entorno local<br>
-[ver pasos](https://git.buho.la/facturalatam/co-facturadorpro3/-/snippets/5#instalacion-de-entorno "ver")
-[Video Aquí](* "ver")
+[ver pasos](https://git.buho.la/facturalatam/co-facturadorpro2/-/snippets/5#instalacion-de-entorno "ver")
+[Video Aquí](https://www.youtube.com/watch?v=kNaDz0BC4Qo "ver")
 
 ### Configuración, Habilitación y producción
 
-[Video Aquí](* "ver")
+[Video Aquí](https://www.youtube.com/watch?v=LOfMM3V2FNY&t=192s "ver")
 
 
 ### Nómina electrónica
 
-[Video Aquí](* "ver")
+[Video Aquí](https://www.youtube.com/watch?v=rnYVQfChvGs "ver")
 
 
 ### Recepción de documentos (RADIAN)
@@ -34,21 +34,21 @@
 [Guía](https://docs.google.com/document/d/1qhaT5vuxkW1GuNqGk_LDp3MTVPc_Qna8pjYadam2LtU/edit?usp=sharing "Clic")<br>
 
 * Recepción de facturas desde Correo Electrónico + Eventos DIAN + Documento soporte<br>
-[ver](* "Clic")<br>
+[ver](https://www.youtube.com/watch?v=ihmxJFKfAtI "Clic")<br>
 
 
 
 ### Actualización del PRO 2
 
 * Linux - Ubuntu 20 -Docker<br>
-[ver pasos](https://git.buho.la/facturalatam/co-facturadorpro3/-/blob/master/proceso_de_actualizacion_docker.md "ver")
+[ver pasos](https://git.buho.la/facturalatam/co-facturadorpro2/-/blob/master/proceso_de_actualizacion_docker.md "ver")
 * Windows - Laragon - entorno local<br>
-[ver pasos](https://git.buho.la/facturalatam/co-facturadorpro3/-/snippets/5#user-content-pasos-para-actualizar "ver")
+[ver pasos](https://git.buho.la/facturalatam/co-facturadorpro2/-/snippets/5#user-content-pasos-para-actualizar "ver")
 
 ### Actualización del SSL
 
 * Docker<br>
-[ver pasos y script](https://git.buho.la/facturalatam/co-facturadorpro3/-/snippets/1 "ver")
+[ver pasos y script](https://git.buho.la/facturalatam/co-facturadorpro2/-/snippets/1 "ver")
 
 
 
@@ -78,7 +78,7 @@ Acceso red local - laragon: [Guía](https://docs.google.com/document/d/13kOE5N5L
 
 ### Impresión directa con QzTray
 
-Ver los pasos en la [wiki](https://git.buho.la/facturalatam/co-facturadorpro3/-/wikis/qztray-instalacion) <br>
+Ver los pasos en la [wiki](https://git.buho.la/facturalatam/co-facturadorpro2/-/wikis/qztray-instalacion) <br>
 
 ### APP Android
 

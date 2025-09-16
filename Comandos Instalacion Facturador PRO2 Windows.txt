@@ -4,7 +4,7 @@
 	* API Instalada
 	* node 14
 
-- git clone https://git.buho.la/facturalatam/co-facturadorpro3.git facturadorpro2
+- git clone https://git.buho.la/facturalatam/co-facturadorpro2.git facturadorpro2
 - cd facturadorpro2
 - cp .env.example .env (Modificar los parametros necesarios)
 - rm composer.lock

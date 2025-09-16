@@ -41,7 +41,7 @@
                         <th class="text-right" v-if="columns.total_taxed.visible">T.Gravado</th>
                         <th class="text-right" v-if="columns.total_igv.visible">T.Igv</th>
                         <th class="text-right">Total</th>
-                    </tr>
+                    <tr>
                     <tr slot-scope="{ index, row }" :class="{ anulate_color : row.state_type_id == '11' }">
                         <td>{{ index }}</td>
                         <td class="text-center" >{{ row.delivery_date }}</td>
@@ -61,12 +61,12 @@
                         <td class="text-right" v-if="columns.total_taxed.visible">{{ row.total_taxed }}</td>
                         <td class="text-right" v-if="columns.total_igv.visible">{{ row.total_igv }}</td>
                         <td class="text-right">{{ row.total }}</td>
-
+                         
 
                     </tr>
                 </data-table>
             </div>
-
+ 
         </div>
     </div>
 </template>
@@ -113,13 +113,13 @@
                     total_igv: {
                         title: 'T.IGV',
                         visible: false
-                    }
+                    } 
                 }
             }
         },
         async created() {
         },
-        methods: {
+        methods: { 
         }
     }
 </script>

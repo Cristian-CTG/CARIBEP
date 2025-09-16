@@ -16,6 +16,9 @@
             </div>
         </div>
         <div class="card mb-0">
+            <div class="card-header bg-info">
+                <h3 class="my-0">Listado de productos</h3>
+            </div>
             <div class="card-body">
                 <data-table :resource="resource" :loading="loadDataTable">
                     <tr slot="heading" width="100%">
@@ -26,7 +29,7 @@
                         <th  class="text-right">P.Unitario</th>
                         <th class="text-center">Impuesto</th>
                         <th class="text-right">Acciones</th>
-                    </tr>
+                    <tr>
                     <tr slot-scope="{ index, row }">
                         <td>{{ index }}</td>
                         <td>{{ row.name }}</td>

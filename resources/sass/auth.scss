@@ -1,8 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
-
-$text-color: #042a42;
-$blue: #042a42;
-$font: 'Roboto', sans-serif;
+$text-color: #5e5873;
+$blue: #8347e5;
+$montserrat: "Montserrat", sans-serif;
 .auth {
     display: flex;
     align-items: center;
@@ -22,8 +20,8 @@ $font: 'Roboto', sans-serif;
     h5,
     h6 {
         color: $text-color;
-        font-family: $font;
-        font-weight: 400;
+        font-family: $montserrat;
+        font-weight: 500;
     }
     a {
         color: $blue;
@@ -36,25 +34,6 @@ $font: 'Roboto', sans-serif;
     .form-group {
         margin-bottom: 1rem;
         position: relative;
-
-        label {
-            font-size: 11px;
-            background: #f6f6f6;
-            display: block;
-            position: relative;
-            transform: translateY(10px);
-            z-index: 1;
-            border: 1px solid #ebebeb;
-            border-bottom: none;
-            border-radius: 8px 8px 0 0;
-            padding-left: 12px;
-        }
-
-        .form-control {
-            border-radius: 8px;
-            border-color: #ebebeb;
-            background: #f6f6f6;
-        }
     }
     p {
         font-size: 15px;
@@ -95,7 +74,7 @@ $font: 'Roboto', sans-serif;
 }
 .auth__image {
     flex: 1;
-    background-color: #fff;
+    background-color: #f8f8f8;
     height: 100%;
     position: relative;
     background-position: center;
@@ -104,7 +83,7 @@ $font: 'Roboto', sans-serif;
 }
 .auth__form {
     height: 100%;
-    width: 42%;
+    width: 33%;
     background-color: #fff;
     padding: 4rem;
     display: flex;
@@ -115,23 +94,18 @@ $font: 'Roboto', sans-serif;
     }
 }
 .auth__title {
-    font-size: 2rem;
+    font-size: 1.5rem;
     color: $text-color;
     line-height: 1.3;
-    font-weight: 400;
+    font-weight: 600;
     margin-bottom: 2rem;
+    text-transform: uppercase;
 }
 .btn-signin {
     background-color: $blue;
-    font-family: $font;
+    font-family: $montserrat;
+    font-weight: 600;
     color: #fff;
-    padding: 1rem;
-    margin-top: 25px;
-    border-radius: 8px;
-
-    &:hover{
-        opacity: 0.9;
-    }
 }
 .auth__logo {
     position: absolute;

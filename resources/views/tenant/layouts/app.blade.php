@@ -24,9 +24,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="googlebot" content="noindex">
-    <meta name="robots" content="noindex">
+
+    {{--    <title>{{ config('app.name', 'Facturación Electrónica') }}</title>--}}
     <title>Facturación Electrónica</title>
 
     <!-- Scripts -->
@@ -70,8 +72,7 @@
 
     <link rel="stylesheet" href="{{ asset('porto-light/css/theme.css') }}" />
     <link rel="stylesheet" href="{{ asset('porto-light/css/custom.css') }}" />
-    <link rel="stylesheet" href="{{ asset('porto-light/css/skins/default.css') }}" />
-    {{-- <link rel="stylesheet" href="{{ asset('porto-light/css/skins/theme-modern.css')}}" /> --}}
+    <link rel="stylesheet" href="{{ asset('porto-light/css/skins/theme-modern.css')}}" />
 
     @if (file_exists(public_path('theme/custom_styles.css')))
         <link rel="stylesheet" href="{{ asset('theme/custom_styles.css') }}" />

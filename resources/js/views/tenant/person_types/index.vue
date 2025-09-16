@@ -20,7 +20,7 @@
                         <th>Descripción</th>
                         <th>Fecha registro</th>
                         <th class="text-right">Acciones</th>
-                    </tr>
+                    <tr>
                     <tr slot-scope="{ index, row }">
                         <td>{{ index }}</td>
                         <td>{{ row.description }}</td>
@@ -37,7 +37,7 @@
 
             <person-types-form :showDialog.sync="showDialog"
                           :recordId="recordId" ></person-types-form>
-
+ 
         </div>
     </div>
 </template>

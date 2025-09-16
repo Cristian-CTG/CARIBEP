@@ -5,14 +5,10 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <meta name="googlebot" content="noindex">
-        <meta name="robots" content="noindex">
         {{--    <title>{{ config('app.name', 'Facturación Electrónica') }}</title>--}}
         <title>{{ $vc_company->trade_name }}</title>
 
         <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800|Shadows+Into+Light" rel="stylesheet" type="text/css">
-        <link rel="preconnect" href="https://fonts.gstatic.com">
-        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
 
         <link rel="stylesheet" href="{{ asset('porto-light/vendor/bootstrap/css/bootstrap.css') }}" />
         <link rel="stylesheet" href="{{ asset('porto-light/vendor/animate/animate.css') }}" />

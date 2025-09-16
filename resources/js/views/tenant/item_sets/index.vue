@@ -29,7 +29,7 @@
                         <!-- <th  class="text-left">Stock</th> -->
                         <th  class="text-right">P.Unitario (Venta)</th>
                         <th class="text-right">Acciones</th>
-                    </tr>
+                    <tr>
                     <tr slot-scope="{ index, row }">
                         <!-- <td>{{ index }}</td> -->
                         <td>{{ row.internal_id }}</td>
@@ -40,8 +40,8 @@
                             <template v-if="typeUser=='seller' && row.unit_type_id !='ZZ'">{{ row.stock }}</template>
                             <template v-else-if="typeUser!='seller'&& row.unit_type_id !='ZZ'">
                                 <button type="button" class="btn waves-effect waves-light btn-xs btn-info" @click.prevent="clickWarehouseDetail(row.warehouses)"><i class="fa fa-search"></i></button>
-                            </template>
-
+                            </template> 
+                            
                         </td> -->
                         <td class="text-right">{{ row.sale_unit_price | numberFormat }}</td>
                         <td class="text-right">
@@ -59,7 +59,7 @@
 
             <items-import :showDialog.sync="showImportDialog"></items-import>
 
-            <warehouses-detail
+            <warehouses-detail 
                 :showDialog.sync="showWarehousesDetail"
                 :warehouses="warehousesDetail">
             </warehouses-detail>
