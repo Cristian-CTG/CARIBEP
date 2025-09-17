@@ -99,8 +99,8 @@
                         <!-- <td class="text-right">{{ row.total_exportation }}</td> -->
                         <td v-if="columns.total_perception.visible" class="text-right">{{ row.total_perception ? row.total_perception : 0 | numberFormat }}</td>
                         <td class="text-right">{{ row.total | numberFormat }}</td>
-                        <td class="text-center">
-                            <el-dropdown trigger="click">
+                        <td class="text-right">
+                            <el-dropdown trigger="click" @command="handleDropdownCommand">
                                 <el-button size="mini" type="secondary" class="btn btn-default btn-sm btn-dropdown-toggle">
                                     <i class="fas fa-ellipsis-h"></i>
                                 </el-button>
@@ -109,34 +109,31 @@
                                 
                                     <el-dropdown-item 
                                         v-if="row.state_type_id != '11'" 
-                                        :href="`/${resource}/edit/${row.id}`"
-                                        tag="a">
+                                        :command="{action: 'edit', id: row.id}">
                                         Editar
                                     </el-dropdown-item>
                                 
                                     <el-dropdown-item 
                                         v-if="row.state_type_id != '11' && !['07', '08'].includes(String(row.document_type_id))" 
-                                        :href="`/${resource}/note/${row.id}`"
-                                        tag="a">
+                                        :command="{action: 'note', id: row.id}">
                                         Nota
                                     </el-dropdown-item>
                                 
                                     <el-dropdown-item 
-                                        :href="`/${resource}/pdf/${row.id}`" 
-                                        target="_blank"
-                                        tag="a">
+                                        :command="{action: 'pdf', id: row.id}">
                                         PDF
                                     </el-dropdown-item>                            
                                 
                                     <el-dropdown-item 
                                         v-if="row.state_type_id != '11'" 
-                                        @click.native="clickAnulate(row.id)">
+                                        :command="{action: 'anulate', id: row.id}">
                                         Anular
                                     </el-dropdown-item>
                                 
                                     <el-dropdown-item 
                                         v-if="row.state_type_id == '11'" 
-                                        @click.native="clickDelete(row.id)">
+                                        :command="{action: 'delete', id: row.id}"
+                                        class="text-danger">
                                         Eliminar
                                     </el-dropdown-item>
                                 
@@ -260,6 +257,27 @@
             },
              clickImport() {
                 this.showImportDialog = true
+            },
+            handleDropdownCommand(command) {
+                switch (command.action) {
+                    case 'edit':
+                        window.location.href = `/${this.resource}/edit/${command.id}`;
+                        break;
+                    case 'note':
+                        window.location.href = `/${this.resource}/note/${command.id}`;
+                        break;
+                    case 'pdf':
+                        window.open(`/${this.resource}/pdf/${command.id}`, '_blank');
+                        break;
+                    case 'anulate':
+                        this.clickAnulate(command.id);
+                        break;
+                    case 'delete':
+                        this.clickDelete(command.id);
+                        break;
+                    default:
+                        break;
+                }
             },
             getCurrentMonth() {
                 const date = new Date();

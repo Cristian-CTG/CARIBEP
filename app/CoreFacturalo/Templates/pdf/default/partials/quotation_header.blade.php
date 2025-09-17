@@ -13,7 +13,7 @@
 
 <table class="full-width">
     <tr>
-        @if($filename_logo != "")
+        @if(!empty($filename_logo) && file_exists($filename_logo))
             <td width="20%">
                 <div class="company_logo_box">
                     <img src="data:{{mime_content_type($filename_logo)}};base64, {{base64_encode(file_get_contents($filename_logo))}}" alt="{{$company->name}}" class="company_logo" style="max-width: 150px;">
