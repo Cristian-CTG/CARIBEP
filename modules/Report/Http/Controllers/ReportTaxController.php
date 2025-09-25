@@ -180,15 +180,17 @@ class ReportTaxController extends Controller
         $company = Company::first();
         $establishment = ($request->establishment_id) ? Establishment::findOrFail($request->establishment_id) : auth()->user()->establishment;
 
+        $date_start = $request->date_start;
+        $date_end = $request->date_end;
         //$taxesAll = collect();
 
         $records = DocumentPos::select('id', 'date_of_issue', 'total', 'subtotal')->whereBetween('date_of_issue', [
-                Carbon::parse($request->date_start)->startOfDay(),
-                Carbon::parse($request->date_end)->endOfDay()
+                Carbon::parse($date_start)->startOfDay(),
+                Carbon::parse($date_end)->endOfDay()
             ])
             ->get();
 
-        $records = DocumentPos::select('id', 'date_of_issue', 'total', 'subtotal')->get();
+        // $records = DocumentPos::select('id', 'date_of_issue', 'total', 'subtotal')->get();
 
         $items = collect( DocumentPosItem::whereIn('document_pos_id', $records->pluck('id'))->get() );
 
@@ -201,7 +203,7 @@ class ReportTaxController extends Controller
 
        // $taxTitles = $taxesAll->unique('id');
 
-        $pdf = PDF::loadView('report::tax.report_pos_pdf', compact("company", "establishment", 'total_sale', 'items', 'total_sale_base'));
+        $pdf = PDF::loadView('report::tax.report_pos_pdf', compact("company", "establishment", 'total_sale', 'items', 'total_sale_base', 'date_start', 'date_end'));
 
         $filename = 'Informe_Fiscal_'.date('YmdHis');
 
