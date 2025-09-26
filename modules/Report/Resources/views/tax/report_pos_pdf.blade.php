@@ -69,7 +69,7 @@
                         <p><strong>Empresa: </strong>{{$company->name}}</p>
                     </td>
                     <td>
-                        <p><strong>Fecha: </strong>{{date('Y-m-d')}}</p>
+                        <p><strong>Fechas: </strong>{{ $date_start }} al {{ $date_end }}</p>
                     </td>
                 </tr>
                 <tr>

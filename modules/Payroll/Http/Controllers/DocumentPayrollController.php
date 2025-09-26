@@ -63,6 +63,17 @@ class DocumentPayrollController extends Controller
 
     public function tables()
     {
+        $establishment_id = auth()->user()->establishment_id;
+        $resolutions = TypeDocument::select('id','prefix', 'resolution_number', 'from', 'to', 'description', 'resolution_date_end', 'show_in_establishments', 'establishment_ids')
+        ->where('code', 9)
+        ->where(function($query) use ($establishment_id) {
+            $query->where('show_in_establishments', 'all')
+                ->orWhere(function($q) use ($establishment_id) {
+                    $q->where('show_in_establishments', 'custom')
+                        ->whereJsonContains('establishment_ids', $establishment_id);
+                });
+        })
+        ->get();
         return [
             'workers' => $this->table('workers'),
             'payroll_periods' => PayrollPeriod::get(),
@@ -71,7 +82,7 @@ class DocumentPayrollController extends Controller
             'type_law_deductions' => TypeLawDeductions::whereTypeLawDeductionsWorker()->get(),
             'advanced_configuration' => AdvancedConfiguration::first(),
             // 'type_documents' => TypeDocument::get(),
-            'resolutions' => TypeDocument::select('id','prefix', 'resolution_number')->where('code', 9)->get()
+            'resolutions' => $resolutions
         ];
     }
 

@@ -48,6 +48,39 @@
                 </el-input>
                 <small class="text-muted">Puede ingresar varios correos separados por punto y coma (;)</small>
                 <small class="form-control-feedback" v-if="errors.customer_email" v-text="errors.customer_email[0]"></small>
+                <div class="mt-2" v-if="form.additional_emails && form.additional_emails.length">
+                    <el-button
+                        type="primary"
+                        icon="el-icon-plus"
+                        size="mini"
+                        class="mt-2"
+                        @click="showAdditionalEmails = !showAdditionalEmails"
+                    >
+                        {{ showAdditionalEmails ? 'Ocultar correos adicionales' : 'Mostrar correos adicionales' }}
+                    </el-button>
+                </div>
+                <el-card
+                    v-if="showAdditionalEmails && form.additional_emails && form.additional_emails.length"
+                    class="mt-2"
+                    shadow="never"
+                    style="background: #f8fafc; border: 1px solid #e3e3e3;"
+                >
+                    <label>Correos adicionales del cliente:</label>
+                    <div>
+                        <el-tag
+                            v-for="(email, idx) in form.additional_emails"
+                            :key="email"
+                            type="info"
+                            class="email-tag"
+                            style="margin-right: 6px; margin-bottom: 6px; cursor:pointer;"
+                            @click="addEmailToInput(email)"
+                        >
+                            {{ email }}
+                            <i class="el-icon-plus" style="margin-left:6px;"></i>
+                        </el-tag>
+                    </div>
+                    <small class="text-muted">Haz clic en un correo para añadirlo al campo de envío.</small>
+                </el-card>
             </div>
         </div>
         <!-- <div class="row mt-3">
@@ -88,6 +121,7 @@
                 resource: 'co-documents',
                 errors: {},
                 form: {},
+                showAdditionalEmails: false,
                 company: {},
                 locked_emission:{},
                 loadingWhatsapp: false,
@@ -108,6 +142,18 @@
             this.loadApiConfig();
         },
         methods: {
+            addEmailToInput(email) {
+                if (!this.form.customer_email) {
+                    this.form.customer_email = email;
+                } else {
+                    // Evita duplicados y respeta el formato con ;
+                    let emails = this.form.customer_email.split(';').map(e => e.trim()).filter(e => e);
+                    if (!emails.includes(email)) {
+                        emails.push(email);
+                        this.form.customer_email = emails.join('; ');
+                    }
+                }
+            },
             clickDownload(download) {
                 this.$http.get(`/${this.resource}/downloadFile/${this.downloadFilename(download)}`).then((response) => {
 
@@ -164,9 +210,15 @@
                         this.getPdfAsBase64(this.form.download_pdf)
                     ]);
 
+                    // Personaliza el mensaje aquí
+                    const message = 
+                        `Hola ${this.form.customer_name || ''},\n` +
+                        `Adjunto su ${this.form.type_document_name || 'documento'} número ${this.form.number_full} ` +
+                        `por un valor de $${this.form.total || ''}.`;
+
                     const payload = {
                         number: this.form.whatsapp_number,
-                        message: `Documento: ${this.form.number_full}`,
+                        message: message,
                         pdf_base64: pdfBase64,
                         filename: `documento_${this.form.number_full}.pdf`
                     };
@@ -214,12 +266,16 @@
                     response_api_message: null,
                     download_pdf: null,
                     download_xml: null,
+                    whatsapp_number: null,
                 };
             },
             async create() {
-                await this.$http.get(`/${this.resource}/record/${this.recordId}`).then(response => {
-                    this.form = response.data.data;
+                await this.$http.get(`/${this.resource}/record/${this.recordId}`).then(async response => {
+                    Object.assign(this.form, response.data.data);
                     this.titleDialog = 'Comprobante: '+this.form.number_full;
+                    if (this.form.contact_phone) {
+                        this.form.whatsapp_number = this.form.contact_phone;
+                    }
                 });
 
             },

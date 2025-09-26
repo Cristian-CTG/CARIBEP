@@ -408,9 +408,10 @@ class ItemController extends Controller
                 $import = new ItemsImport();
                 $import->import($request->file('file'), null, Excel::XLSX);
                 $data = $import->getData();
+                $msg = "Importación completada. Registrados: {$data['registered']}, omitidos: {$data['skipped']}.";
                 return [
                     'success' => true,
-                    'message' =>  __('app.actions.upload.success'),
+                    'message' =>  $msg,
                     'data' => $data
                 ];
             } catch (Exception $e) {

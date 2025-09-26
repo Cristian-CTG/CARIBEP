@@ -28,6 +28,7 @@ class PersonResource extends JsonResource
             'address' => $this->address,
             'telephone' => $this->telephone,
             'email' => $this->email,
+            'additional_emails' => $this->additional_emails ?? [],
             'perception_agent' => (bool) $this->perception_agent,
             'percentage_perception' => $this->percentage_perception,
             'type_obligation_id' => $this->type_obligation_id,

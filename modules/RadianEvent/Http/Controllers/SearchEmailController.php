@@ -141,7 +141,7 @@ class SearchEmailController extends Controller
                                     {
                                         $data = $send_request_to_api['data'];
                                         $data['xml'] = $xml_file['filename'];
-                                        $data['pdf'] = $pdf_file['filename'];
+                                        $data['pdf'] = $pdf_file ? $pdf_file['filename'] : null;
 
                                         $this->updateEmailReadingDetail($email_reading_detail, [
                                             'success' => true,
@@ -152,7 +152,9 @@ class SearchEmailController extends Controller
                                         $email_reading_detail->received_document()->create($data);
 
                                         //subir archivo
-                                        $this->uploadFile($pdf_file['filename'], $pdf_file['content']);
+                                        if($pdf_file && !empty($pdf_file['filename'])) {
+                                            $this->uploadFile($pdf_file['filename'], $pdf_file['content']);
+                                        }
                                         $this->uploadFile($xml_file['filename'], $xml_file['content']);
 
                                     }
@@ -333,6 +335,10 @@ class SearchEmailController extends Controller
      */
     private function uploadFile($filename, $content, $folder = 'radian_reception_documents')
     {
+        if (empty($filename) || $filename === '.' || $filename === '..') {
+            // No guardar si el nombre es inválido
+            return;
+        }
         Storage::disk('tenant')->put($folder.DIRECTORY_SEPARATOR.$filename, $content);
     }
 

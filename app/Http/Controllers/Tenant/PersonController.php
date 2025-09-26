@@ -105,11 +105,21 @@ class PersonController extends Controller
 
         $id = $request->input('id');
         $person = Person::firstOrNew(['id' => $id]);
+        $input = $request->all();
+        // Normaliza el campo de correos adicionales
+        if (isset($input['additional_emails']) && is_array($input['additional_emails'])) {
+            $input['additional_emails'] = array_filter($input['additional_emails'], function($email) {
+                return filter_var($email, FILTER_VALIDATE_EMAIL);
+            });
+        } else {
+            $input['additional_emails'] = [];
+        }
+
         $person->fill($request->all());
         $person->save();
 
         $person->addresses()->delete();
-        $addresses = $request->input('addresses');
+        $addresses = $request->input('addresses', []);
         foreach ($addresses as $row)
         {
             $person->addresses()->updateOrCreate( ['id' => $row['id']], $row);

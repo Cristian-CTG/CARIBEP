@@ -157,23 +157,34 @@ class PosController extends Controller
     public function search_items(Request $request)
     {
         $configuration =  Configuration::first();
-        $items = Item::where('name','like',  '%' . $request->input_item . '%')
-                    ->orWhere('description','like',  '%' . $request->input_item . '%')
-                    ->orWhere('internal_id','like',  '%' . $request->input_item . '%')
-                    ->orWhereHas('category', function($query) use($request) {
-                        $query->where('name', 'like', '%' . $request->input_item . '%');
-                    })
-                    ->orWhereHas('brand', function($query) use($request) {
-                        $query->where('name', 'like', '%' . $request->input_item . '%');
-                    })
-                    ->whereWarehouse()
-                    ->whereIsActive()
-                    ->when($request->has('cat') && $request->cat != '', function ($query) use ($request) {
-                        $query->where('category_id', $request->cat);
-                    })
-                    ->orderByDesc('is_favorite')
-                    ->orderBy('internal_id')
-                    ->paginate(50);
+
+        $query = Item::query();
+
+        if ($request->has('barcode_only') && $request->barcode_only) {
+            // Solo buscar por código de barras
+            $query->where('internal_id', 'like', '%' . $request->input_item . '%');
+        } else {
+            // Búsqueda general (como está actualmente)
+            $query->where('name','like',  '%' . $request->input_item . '%')
+                ->orWhere('description','like',  '%' . $request->input_item . '%')
+                ->orWhere('internal_id','like',  '%' . $request->input_item . '%')
+                ->orWhereHas('category', function($query) use($request) {
+                    $query->where('name', 'like', '%' . $request->input_item . '%');
+                })
+                ->orWhereHas('brand', function($query) use($request) {
+                    $query->where('name', 'like', '%' . $request->input_item . '%');
+                });
+        }
+
+        $query->whereWarehouse()
+            ->whereIsActive()
+            ->when($request->has('cat') && $request->cat != '', function ($query) use ($request) {
+                $query->where('category_id', $request->cat);
+            })
+            ->orderByDesc('is_favorite')
+            ->orderBy('internal_id');
+
+        $items = $query->paginate(50);
 
         return new PosCollection($items, $configuration);
     }
@@ -299,6 +310,7 @@ class PosController extends Controller
                                     'image_url' => ($row->image !== 'imagen-no-disponible.jpg') ? asset('storage'.DIRECTORY_SEPARATOR.'uploads'.DIRECTORY_SEPARATOR.'items'.DIRECTORY_SEPARATOR.$row->image) : asset("/logo/{$row->image}"),
                                     'warehouses' => collect($row->warehouses)->transform(function($row) {
                                         return [
+                                            'warehouse_id' => $row->warehouse_id,
                                             'warehouse_description' => $row->warehouse->description,
                                             'stock' => $row->stock,
                                         ];

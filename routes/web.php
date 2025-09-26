@@ -290,6 +290,12 @@ if ($hostname) {
             Route::post('unit_types', 'Tenant\UnitTypeController@store');
             Route::delete('unit_types/{code}', 'Tenant\UnitTypeController@destroy');
 
+            // Unidades Colombia
+            Route::get('type_units/records', 'Tenant\TypeUnitController@records');
+            Route::get('type_units/record/{id}', 'Tenant\TypeUnitController@record');
+            Route::post('type_units', 'Tenant\TypeUnitController@store');
+            Route::delete('type_units/{id}', 'Tenant\TypeUnitController@destroy');
+
             //Detractions
             Route::get('detraction_types/records', 'Tenant\DetractionTypeController@records');
             Route::get('detraction_types/tables', 'Tenant\DetractionTypeController@tables');

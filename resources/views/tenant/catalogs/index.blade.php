@@ -17,7 +17,7 @@
             <tenant-banks-index :type-user="{{json_encode(Auth::user()->type)}}" ></tenant-banks-index>
 
 
-            {{-- <tenant-unit_types-index :type-user="{{json_encode(Auth::user()->type)}}" ></tenant-unit_types-index> --}}
+            <tenant-unit_types-index :type-user="{{json_encode(Auth::user()->type)}}" ></tenant-unit_types-index>
 
             {{-- <tenant-detraction_types-index :type-user="{{json_encode(Auth::user()->type)}}" ></tenant-detraction_types-index> --}}
         </div>
