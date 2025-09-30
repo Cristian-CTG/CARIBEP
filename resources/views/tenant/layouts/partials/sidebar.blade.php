@@ -350,13 +350,31 @@
                             </ul>
                         </li>
                         @endif
-                        {{-- Clientes standalone menu moved here from Catalogos --}}
-                        @if(in_array('documents', $vc_modules) && auth()->user()->type != 'integrator')
-                        <li class="{{ ($path[0] === 'persons' && $path[1] === 'customers')?'nav-active':'' }}">
-                            <a class="nav-link" href="{{route('tenant.persons.index', ['type' => 'customers'])}}">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-users"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"></path></svg>
-                                <span>Clientes</span>
+                        {{-- Nuevo menú Contactos con clientes y proveedores --}}
+                        @if(auth()->user()->type != 'integrator' && (in_array('documents', $vc_modules) || in_array('purchases', $vc_modules)))
+                        <li class="nav-parent
+                            {{ ($path[0] === 'persons' && in_array($path[1], ['customers', 'suppliers'])) ? 'nav-active nav-expanded' : '' }}
+                            ">
+                            <a class="nav-link" href="#">
+                                <svg  xmlns="http://www.w3.org/2000/svg"  width="20"  height="20"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-address-book"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 6v12a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2z" /><path d="M10 16h6" /><path d="M13 11m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M4 8h3" /><path d="M4 12h3" /><path d="M4 16h3" /></svg>
+                                <span>Contactos</span>
                             </a>
+                            <ul class="nav nav-children">
+                                @if(in_array('purchases', $vc_modules))
+                                <li class="{{ ($path[0] === 'persons' && $path[1] === 'suppliers') ? 'nav-active' : '' }}">
+                                    <a class="nav-link" href="{{route('tenant.persons.index', ['type' => 'suppliers'])}}">
+                                        Proveedores
+                                    </a>
+                                </li>
+                                @endif
+                                @if(in_array('documents', $vc_modules))
+                                <li class="{{ ($path[0] === 'persons' && $path[1] === 'customers') ? 'nav-active' : '' }}">
+                                    <a class="nav-link" href="{{route('tenant.persons.index', ['type' => 'customers'])}}">
+                                        Clientes
+                                    </a>
+                                </li>
+                                @endif
+                            </ul>
                         </li>
                         @endif
 
@@ -454,7 +472,6 @@
                         <li class="
                             nav-parent
                             {{ ($path[0] === 'purchases')?'nav-active nav-expanded':'' }}
-                            {{ ($path[0] === 'persons' && $path[1] === 'suppliers')?'nav-active nav-expanded':'' }}
                             {{ ($path[0] === 'expenses')?'nav-active nav-expanded':'' }}
                             {{ ($path[0] === 'purchase-quotations')?'nav-active nav-expanded':'' }}
                             {{ ($path[0] === 'purchase-orders')?'nav-active nav-expanded':'' }}
@@ -497,26 +514,10 @@
                                     </a>
                                 </li>
 
-                                <li class="nav-parent
-                                    {{ ($path[0] === 'persons' && $path[1] === 'suppliers')?'nav-active nav-expanded':'' }}
-                                    {{ ($path[0] === 'purchase-quotations')?'nav-active nav-expanded':'' }}
-                                    ">
-                                    <a class="nav-link" href="#">
-                                        Proveedores
+                                <li class="{{ ($path[0] === 'purchase-quotations')?'nav-active':'' }}">
+                                    <a class="nav-link" href="{{route('tenant.purchase-quotations.index')}}">
+                                        Solicitar cotización
                                     </a>
-                                    <ul class="nav nav-children">
-
-                                        <li class="{{ ($path[0] === 'persons' && $path[1] === 'suppliers')?'nav-active':'' }}">
-                                            <a class="nav-link" href="{{route('tenant.persons.index', ['type' => 'suppliers'])}}">
-                                                Listado
-                                            </a>
-                                        </li>
-                                        <li class="{{ ($path[0] === 'purchase-quotations')?'nav-active':'' }}">
-                                            <a class="nav-link" href="{{route('tenant.purchase-quotations.index')}}">
-                                                Solicitar cotización
-                                            </a>
-                                        </li>
-                                    </ul>
                                 </li>
 
                                 {{-- documento de soporte --}}
