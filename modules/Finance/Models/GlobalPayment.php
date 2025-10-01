@@ -14,6 +14,7 @@ use App\Models\Tenant\{
     PurchasePayment,
     DocumentPosPayment
 };
+use Modules\Purchase\Models\SupportDocumentPayment;
 use Modules\Sale\Models\ContractPayment;
 use Modules\Sale\Models\RemissionPayment;
 
@@ -67,6 +68,12 @@ class GlobalPayment extends ModelTenant
         return $this->belongsTo(PurchasePayment::class, 'payment_id')
                     ->wherePaymentType(PurchasePayment::class);
     } 
+
+    public function sup_payment()
+    {
+        return $this->belongsTo(SupportDocumentPayment::class, 'payment_id')
+                    ->wherePaymentType(SupportDocumentPayment::class);
+    }
 
     public function quo_payment()
     {
@@ -128,6 +135,7 @@ class GlobalPayment extends ModelTenant
             IncomePayment::class => 'income',
             RemissionPayment::class => 'remission',
             DocumentPosPayment::class => 'document_pos',
+            SupportDocumentPayment::class => 'support_document',
         ];
 
         return $instance_type[$this->payment_type];
@@ -166,6 +174,9 @@ class GlobalPayment extends ModelTenant
             case 'document_pos':
                 $description = 'DOCUMENTO POS';
                 break;
+            case 'support_document':
+                $description = 'DOCUMENTO DE SOPORTE';
+                break;
              
         } 
 
@@ -195,7 +206,13 @@ class GlobalPayment extends ModelTenant
             case 'income':
                 $person['name'] = $record->customer;
                 $person['number'] = '';
-        } 
+            case 'support_document':
+                if ($record && isset($record->supplier)) {
+                    $person['name'] = $record->supplier->name ?? '';
+                    $person['number'] = $record->supplier->number ?? '';
+                }
+                break;
+        }
 
         return (object) $person;
     }
@@ -232,6 +249,13 @@ class GlobalPayment extends ModelTenant
                             $p->whereStateTypeAccepted()->whereTypeUser()->where('currency_id', $params->currency_id);
                         });
 
+                })
+                ->OrWhereHas('sup_payment', function($q) use($params){
+                    $q->whereBetween('date_of_payment', [$params->date_start, $params->date_end])
+                        ->whereHas('associated_record_payment', function($p) use($params){
+                            $p->whereStateTypeAccepted()->whereTypeUser()->where('currency_id', $params->currency_id);
+                        });
+                
                 })
                 ->OrWhereHas('quo_payment', function($q) use($params){
                     $q->whereBetween('date_of_payment', [$params->date_start, $params->date_end])

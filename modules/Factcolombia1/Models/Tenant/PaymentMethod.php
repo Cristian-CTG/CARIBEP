@@ -11,6 +11,7 @@ use Modules\Finance\Models\IncomePayment;
 use Modules\Sale\Models\ContractPayment;
 use Modules\Sale\Models\QuotationPayment;
 use Modules\Sale\Models\RemissionPayment;
+use Modules\Purchase\Models\SupportDocumentPayment;
 
 class PaymentMethod extends Model
 {
@@ -35,6 +36,11 @@ class PaymentMethod extends Model
     public function purchase_payments()
     {
         return $this->hasMany(PurchasePayment::class, 'payment_method_id');
+    }
+
+    public function support_document_payments()
+    {
+        return $this->hasMany(SupportDocumentPayment::class, 'payment_method_id');
     }
 
     public function quotation_payments()
@@ -79,6 +85,12 @@ class PaymentMethod extends Model
                 });
             },
             'purchase_payments' => function($q) use($params){
+                $q->whereBetween('date_of_payment', [$params->date_start, $params->date_end])
+                ->whereHas('associated_record_payment', function($p) use($params){
+                    $p->whereStateTypeAccepted()->whereTypeUser()->where('currency_id', $params->currency_id);
+                });
+            },
+            'support_document_payments' => function($q) use($params){
                 $q->whereBetween('date_of_payment', [$params->date_start, $params->date_end])
                 ->whereHas('associated_record_payment', function($p) use($params){
                     $p->whereStateTypeAccepted()->whereTypeUser()->where('currency_id', $params->currency_id);

@@ -13,6 +13,7 @@ use App\Models\Tenant\{
     PurchasePayment,
     DocumentPosPayment
 };
+use Modules\Purchase\Models\SupportDocumentPayment;
 use Modules\Sale\Models\QuotationPayment;
 use Modules\Sale\Models\ContractPayment;
 use Modules\Finance\Models\IncomePayment;
@@ -101,7 +102,10 @@ trait FinanceTrait
             $document = $model->purchase;
         } elseif ($model instanceof DocumentPayment) {
             $document = $model->document;
-        }
+        } 
+        // elseif ($model instanceof SupportDocumentPayment) {
+        //     $document = $model->support_document;
+        // }
 
         if ($document && $document->payment_form_id == 2) {
             $this->generateJournalEntry($model, $document, $destination);
@@ -197,6 +201,18 @@ trait FinanceTrait
                 'reference_field' => 'purchase_id',
             ];
         }
+
+        // if ($model instanceof SupportDocumentPayment) {
+        //     return [
+        //         'prefix_id' => 4, //Cual es el prefijo?
+        //         'debit' => 0,
+        //         'credit' => $model->payment,
+        //         'counter_account_id' => $accountPayable->id,
+        //         'counter_debit' => $model->payment,
+        //         'counter_credit' => 0,
+        //         'reference_field' => 'support_document_id',
+        //     ];
+        // }
 
         // Aquí puedes agregar nuevos tipos, por ejemplo:
         /*

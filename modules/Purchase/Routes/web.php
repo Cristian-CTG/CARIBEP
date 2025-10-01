@@ -23,6 +23,14 @@ if($current_hostname) {
 
             });
 
+            Route::prefix('support-document-payments')->group(function () {
+                Route::get('/records/{support_document_id}', 'SupportDocumentPaymentController@records');
+                Route::get('/support-document/{support_document_id}', 'SupportDocumentPaymentController@support_document');
+                Route::get('/tables', 'SupportDocumentPaymentController@tables');
+                Route::post('', 'SupportDocumentPaymentController@store');
+                Route::delete('/{support_document_payment}', 'SupportDocumentPaymentController@destroy');
+            });
+
             Route::prefix('support-document-adjust-notes')->group(function () {
 
                 Route::get('create/{support_document_id}', 'SupportDocumentAdjustNoteController@create');
