@@ -56,6 +56,7 @@ class SupportDocument extends ModelTenant
         'subtotal',
         'total_discount',
         'total',
+        'total_canceled',
 
         'acknowledgment_received',
         'cufe',

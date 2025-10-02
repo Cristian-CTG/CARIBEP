@@ -301,9 +301,9 @@ class GlobalPayment extends ModelTenant
         $row = $this;
         $document_type = '';
 
-        if($row->payment->associated_record_payment->document_type)
+        if($row->payment->associated_record_payment->document_type || $row->payment->associated_record_payment->type_document)
         {
-            $document_type = $row->payment->associated_record_payment->document_type->description ?? $row->payment->associated_record_payment->document_type->name;
+            $document_type = $row->payment->associated_record_payment->document_type->description ?? $row->payment->associated_record_payment->type_document->name;
         }
         elseif($row->instance_type === 'document_pos')
         {

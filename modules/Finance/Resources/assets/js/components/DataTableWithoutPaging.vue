@@ -105,6 +105,7 @@
                                 <td class="text-center"> {{formatNumber(totals.t_income)}}</td>
                                 <td class="text-center">{{formatNumber(calculateTotalIncome(totals))}}</td>
                                 <td class="text-center"> {{formatNumber(totals.t_purchases)}}</td>
+                                <td class="text-center"> {{formatNumber(totals.t_support_documents)}}</td>
                                 <td class="text-center"> {{formatNumber(totals.t_expenses)}}</td>
                                 <td class="text-center">{{formatNumber(calculateTotalExpense(totals))}}</td>
                             </tr>
@@ -266,8 +267,9 @@
             },
             calculateTotalExpense(row) {
                 const purchase = row.t_purchases !== '-' ? parseFloat(row.t_purchases) : 0;
+                const support = row.t_support_documents !== '-' ? parseFloat(row.t_support_documents) : 0;
                 const expense = row.t_expenses !== '-' ? parseFloat(row.t_expenses) : 0;
-                return (purchase + expense).toFixed(2);
+                return (purchase + support + expense).toFixed(2);
             },
             formatNumber(value) {
                 if (value === '-') return value;

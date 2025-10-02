@@ -16,6 +16,7 @@
                             <th class="text-center"> <strong>Cotización</strong></th>
                             <!-- <th class="text-center"> <strong>Contrato</strong></th> -->
                             <th class="text-center"> <strong>Ingresos</strong></th>
+                            <th class="text-center"><strong>Documento de Soporte</strong></th>
                             <th class="text-center"> <strong>Compras</strong></th>
                             <th class="text-center"> <strong>Gastos</strong></th>
                             <th class="text-center"> <strong>Saldo</strong></th>
@@ -30,6 +31,7 @@
                             <td class="text-center">{{formatNumber(row.quotation_payment)}}</td>
                             <!-- <td class="text-center">{{row.contract_payment}}</td> -->
                             <td class="text-center">{{formatNumber(row.income_payment)}}</td>
+                            <td class="text-center">{{formatNumber(row.support_document_payment)}}</td>
                             <td class="text-center">{{formatNumber(row.purchase_payment)}}</td>
                             <td class="text-center">{{formatNumber(row.expense_payment)}}</td>
                             <td class="text-center">{{formatNumber(row.balance)}}</td> 

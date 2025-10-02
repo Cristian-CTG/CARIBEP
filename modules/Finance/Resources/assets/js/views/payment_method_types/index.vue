@@ -18,6 +18,7 @@
                             <th class="text-center"><strong>Ingresos</strong></th>
                             <th class="text-center"><strong>Total Ingresos</strong></th>
                             <th class="text-center"><strong>Compras</strong></th>
+                            <th class="text-center"><strong>Documento de Soporte</strong></th>
                             <th class="text-center"><strong>Gastos</strong></th>
                             <!-- <th class="text-center"> <strong>Saldo</strong></th> -->
                             <th class="text-center"><strong>Total Egresos</strong></th>
@@ -34,6 +35,7 @@
                             <td class="text-center">{{ formatNumber(row.income_payment) }}</td>
                             <td class="text-center">{{ formatNumber(calculateTotalIncome(row)) }}</td>
                             <td class="text-center">{{ formatNumber(row.purchase_payment) }}</td>
+                            <td class="text-center">{{ formatNumber(row.support_document_payment) }}</td>
                             <td class="text-center">{{ formatNumber(row.expense_payment) }}</td>
                             <!-- <td class="text-center">{{row.balance}}</td>  -->
                             <td class="text-center">{{ formatNumber(calculateTotalExpense(row)) }}</td>
@@ -71,8 +73,9 @@
             },
             calculateTotalExpense(row) {
                 const purchase = row.purchase_payment !== '-' ? parseFloat(row.purchase_payment) : 0;
+                const support = row.support_document_payment !== '-' ? parseFloat(row.support_document_payment) : 0;
                 const expense = row.expense_payment !== '-' ? parseFloat(row.expense_payment) : 0;
-                return (purchase + expense).toFixed(2);
+                return (purchase + support + expense).toFixed(2);
             },
             formatNumber(value) {
                 if (value === '-') return value;
