@@ -47,8 +47,18 @@ class DocumentPayrollAdjustNoteController extends Controller
  
     public function tables($type_payroll_adjust_note_id)
     {
+        $establishment_id = auth()->user()->establishment_id;
 
-        $resolutions = TypeDocument::select('id', 'prefix', 'resolution_number')->where('code', DocumentPayroll::ADJUST_NOTE_TYPE_DOCUMENT_ID)->get();
+        $resolutions = TypeDocument::select('id', 'prefix', 'resolution_number', 'show_in_establishments', 'establishment_ids')
+            ->where('code', DocumentPayroll::ADJUST_NOTE_TYPE_DOCUMENT_ID)
+            ->where(function($query) use ($establishment_id) {
+                $query->where('show_in_establishments', 'all')
+                    ->orWhere(function($q) use ($establishment_id) {
+                        $q->where('show_in_establishments', 'custom')
+                            ->whereJsonContains('establishment_ids', $establishment_id);
+                    });
+            })
+            ->get();
 
         // nomina eliminacion
         if($type_payroll_adjust_note_id == DocumentPayrollAdjustNote::ADJUST_NOTE_ELIMINATION_ID)

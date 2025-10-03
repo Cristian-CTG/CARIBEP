@@ -755,6 +755,7 @@ class DocumentController extends Controller
             if ($request->filled('foot_note')) {
                 $service_invoice['foot_note'] = $request->foot_note;
             }
+            $service_invoice['is_tirilla2'] = $request->input('is_tirilla2', false);
             // if ($request->filled('notes')) {
             //     $service_invoice['notes'] = $request->notes;
             // }
@@ -1236,6 +1237,7 @@ class DocumentController extends Controller
             $service_invoice = $request->service_invoice;
 
             $service_invoice['number'] = $correlative_api;
+            $service_invoice['is_tirilla2'] = $request->input('is_tirilla2', false);
             $service_invoice['prefix'] = $request->prefix;
             $service_invoice['resolution_number'] = $request->resolution_number;
             $service_invoice['head_note'] = "V I S T A   P R E E L I M I N A R  --  V I S T A   P R E E L I M I N A R  --  V I S T A   P R E E L I M I N A R  --  V I S T A   P R E E L I M I N A R";
@@ -1404,6 +1406,7 @@ class DocumentController extends Controller
             $note_service['tarifaica'] = $datoscompany->ica_rate;
             $note_service['actividadeconomica'] = $datoscompany->economic_activity_code;
             $note_service['notes'] = $request->observation;
+            $note_service['is_tirilla2'] = $request->input('is_tirilla2', false);
             $sucursal = \App\Models\Tenant\Establishment::where('id', auth()->user()->establishment_id)->first();
 
             if(file_exists(storage_path('sendmail.api')))
@@ -2732,6 +2735,7 @@ class DocumentController extends Controller
             $service_invoice['time'] = date('H:i:s');
             $service_invoice['payment_form']['payment_form_id'] = $request->payment_form_id;
             $service_invoice['payment_form']['payment_method_id'] = $request->payment_method_id;
+            $service_invoice['is_tirilla2'] = $request->input('is_tirilla2', false);
             if($request->payment_form_id == '1')
                 $service_invoice['payment_form']['payment_due_date'] = date('Y-m-d');
             else

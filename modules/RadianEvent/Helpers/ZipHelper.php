@@ -16,8 +16,8 @@ class ZipHelper
         $output = [];
         if (true === $zip->open($temp) && $zip->numFiles > 0) {
             $output = iterator_to_array($this->getFiles($zip, $filter));
+            $zip->close();
         }
-        $zip->close();
         unlink($temp);
 
         return $output;

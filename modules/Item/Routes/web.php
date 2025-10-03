@@ -29,6 +29,8 @@ if($hostname) {
             Route::delete('incentives/{incentive}', 'IncentiveController@destroy');
 
             Route::get('items/barcode/{item}', 'ItemController@generateBarcode');
+            Route::get('items/barcodes', 'ItemController@generateBarcodes');
+            Route::get('items/barcode-label/{item}', 'ItemController@showBarcodeLabel');
 
             Route::post('items/import/item-price-lists', 'ItemController@importItemPriceLists');
 

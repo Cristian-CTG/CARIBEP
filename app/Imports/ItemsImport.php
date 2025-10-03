@@ -23,35 +23,42 @@ class ItemsImport implements ToCollection
     {
         $total = count($rows);
         $registered = 0;
+        $skipped = 0;
         unset($rows[0]);
         foreach ($rows as $row)
         {
+            // Rellenar la fila hasta 14 columnas con valores vacíos
+            $row = array_pad($row->toArray(), 14, '');
+
             $name = $row[0];
             $item_type_id = '01';
             $internal_id = ($row[1])?:null;
             $unit_type_id = $row[2];
-            $currency_type_id = $row[3];
+            $currency_type_id = isset($row[3]) && $row[3] !== '' ? $row[3] : 170;
             $sale_unit_price = $row[4];
             $tax_id = $row[5];
             $purchase_unit_price = ($row[6])?:0;
-            $purchase_tax_id = ($row[7])?:null;
-            $stock = $row[8];
-            $stock_min = $row[9];
+            $purchase_tax_id = ($row[7])?:1;
+            $stock = (isset($row[8]) && trim($row[8]) !== '') ? $row[8] : 0;
+            $stock_min = (isset($row[9]) && trim($row[9]) !== '') ? $row[9] : 1;
             $category_name = $row[10];
             $brand_name = $row[11];
             $color_name = $row[12];
             $size_name = $row[13];
-            if($internal_id) {
-                $item = Item::where('internal_id', $internal_id)->first();
-            } else {
-                $item = null;
+
+            // Validar campos obligatorios
+            if (empty($name) || empty($unit_type_id) || empty($sale_unit_price) || empty($tax_id) || empty($internal_id) || floatval($sale_unit_price) <= 0) {
+                $skipped++;
+                continue;
             }
 
+            $item = Item::where('internal_id', $internal_id)->first();
+
             if(!$item) {
-                $category = Category::updateOrCreate(['name' => $category_name]);
-                $brand = Brand::updateOrCreate(['name' => $brand_name]);
-                $color = Color::updateOrCreate(['name' => $color_name]);
-                $size = Size::updateOrCreate(['name' => $size_name]);
+                $category = !empty($category_name) ? Category::updateOrCreate(['name' => $category_name]) : null;
+                $brand = !empty($brand_name) ? Brand::updateOrCreate(['name' => $brand_name]) : null;
+                $color = !empty($color_name) ? Color::updateOrCreate(['name' => $color_name]) : null;
+                $size = !empty($size_name) ? Size::updateOrCreate(['name' => $size_name]) : null;
 
                 Item::create([
                     'name' => $name,
@@ -65,13 +72,13 @@ class ItemsImport implements ToCollection
                     'purchase_tax_id' => $purchase_tax_id,
                     'stock' => $stock,
                     'stock_min' => $stock_min,
-                    'category_id' => $category->id,
-                    'brand_id' => $brand->id,
-                    'color_id' => $color->id,
-                    'size_id' => $size->id,
+                    'category_id' => $category ? $category->id : null,
+                    'brand_id' => $brand ? $brand->id : null,
+                    'color_id' => $color ? $color->id : null,
+                    'size_id' => $size ? $size->id : null,
                 ]);
                 $registered += 1;
-            }else{
+            } else {
                 $item->update([
                     'name' => $name,
                     'item_type_id' => $item_type_id,
@@ -87,7 +94,7 @@ class ItemsImport implements ToCollection
                 $registered += 1;
             }
         }
-        $this->data = compact('total', 'registered');
+        $this->data = compact('total', 'registered', 'skipped');
     }
 
     public function getData()

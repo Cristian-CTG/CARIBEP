@@ -45,8 +45,8 @@ class TaxReportService
         $tax = Tax::where('code', '02')->first(); //impuesto al consumo
         if(!$tax)
         {
-            throw new Exception("Tax IMPUESTO AL CONSUMO no encontrado");
-            //return 0;
+            // throw new Exception("Tax IMPUESTO AL CONSUMO no encontrado");
+            return 0;
         }
         $sum = collect($items)->where('tax_id', $tax->id )->sum('total');
 

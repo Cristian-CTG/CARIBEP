@@ -72,9 +72,19 @@
             <div class="col-lg-8 col-md-6 px-4 pt-3 hyo">
 
                 <template v-if="!search_item_by_barcode">
-                    <el-input v-show="place  == 'prod' || place == 'cat2'" placeholder="Buscar productos" size="medium" v-model="input_item" @input="searchItems" autofocus class="m-bottom">
+                    <el-autocomplete
+                        v-show="place  == 'prod' || place == 'cat2'"
+                        v-model="input_item"
+                        :fetch-suggestions="querySearchAsync"
+                        placeholder="Buscar productos"
+                        size="medium"
+                        @select="handleSelectProduct"
+                        class="m-bottom"
+                        :trigger-on-focus="false"
+                        autofocus
+                    >
                         <el-button slot="append" icon="el-icon-plus" @click.prevent="showDialogNewItem = true"></el-button>
-                    </el-input>
+                    </el-autocomplete>
                 </template>
                 <template v-else>
                     <el-input v-show="place  == 'prod' || place == 'cat2'" placeholder="Buscar productos" size="medium" v-model="input_item" @change="searchItemsBarcode" autofocus class="m-bottom">
@@ -928,6 +938,64 @@ export default {
         }
     },
     methods: {
+        async onBarcodeChange() {
+            if (this.search_item_by_barcode) {
+                // Forzar búsqueda antes de intentar agregar
+                this.loading = true;
+                try {
+                    let url = `/${this.resource}/search_items?input_item=${encodeURIComponent(this.input_item.trim())}`;
+                    if (this.category_selected) {
+                        url += `&cat=${encodeURIComponent(this.category_selected)}`;
+                    }
+                    url += `&barcode_only=1`;
+                    const response = await this.$http.get(url);
+                    this.items = response.data.data;
+                    this.pagination = response.data.meta;
+                    this.pagination.per_page = parseInt(response.data.meta.per_page);
+                    this.pagination.total = response.data.meta.total;
+
+                    if (this.items.length === 1) {
+                        await this.clickAddItem(this.items[0], 0);
+                        this.input_item = ""; // Limpia el input después de agregar
+                    }
+                } catch (e) {
+                    this.items = [];
+                }
+                this.loading = false;
+            }
+        },
+        async querySearchAsync(queryString, cb) {
+            if (!queryString || queryString.length < 1) {
+                return cb([]);
+            }
+            try {
+                let url = `/${this.resource}/search_items?input_item=${encodeURIComponent(queryString)}`;
+                if (this.category_selected) {
+                    url += `&cat=${encodeURIComponent(this.category_selected)}`;
+                }
+                const response = await this.$http.get(url);
+                let results = [];
+                response.data.data.forEach(item => {
+                    let stock = '';
+                    if (item.warehouses && Array.isArray(item.warehouses)) {
+                        const wh = item.warehouses.find(w => w.warehouse_id == this.establishment.id || w.id == this.establishment.id);
+                        stock = wh ? wh.stock : 0;
+                    }
+                    results.push({
+                        value: `${item.name} ${item.internal_id ? '(' + item.internal_id + ')' : ''} - ${this.getFormatDecimal(item.sale_unit_price)} ${this.currency.symbol} | Stock: ${stock}`,
+                        itemData: item
+                    });
+                });
+                cb(results);
+            } catch (e) {
+                cb([]);
+            }
+        },
+        handleSelectProduct(option) {
+            // Al seleccionar, agrega el producto
+            this.clickAddItem(option.itemData, 0);
+            this.input_item = '';
+        },
         async toggleFavorite(item) {
             this.loading = true;
             try {
@@ -1911,7 +1979,7 @@ export default {
             }
 
         },
-        async searchItemsBarcode() {
+        async searchItemsBarcode() { 
 
             // console.log(query)
             // console.log("in:" + this.input_item)
@@ -1919,7 +1987,7 @@ export default {
             if (this.input_item.length > 1) {
 
                 this.loading = true;
-                let parameters = `input_item=${this.input_item}`;
+                let parameters = `input_item=${this.input_item}&barcode_only=1`;
 
                 await this.$http.get(`/${this.resource}/search_items?${parameters}`)
                     .then(response => {
@@ -1955,6 +2023,7 @@ export default {
                     // console.log(this.items)
                     this.clickAddItem(this.items[0], 0);
                     this.filterItems();
+                    // this.cleanInput();
 
                 }
 

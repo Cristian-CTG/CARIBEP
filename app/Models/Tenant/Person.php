@@ -39,6 +39,7 @@ class Person extends ModelTenant
         // 'district_id',
         'address',
         'email',
+        'additional_emails', // <-- Agrega esto
         'telephone',
         'perception_agent',
         'type_obligation_id',
@@ -56,6 +57,10 @@ class Person extends ModelTenant
         'contact_name',
         'contact_phone',
         'postal_code',
+    ];
+
+    protected $casts = [
+        'additional_emails' => 'array',
     ];
 
     // protected static function boot()
@@ -174,6 +179,7 @@ class Person extends ModelTenant
             'identity_document_type_id' => $this->identity_document_type_id,
             'address' =>  $this->address,
             'email' =>  $this->email,
+            'additional_emails' => $this->additional_emails ?? [],
             'telephone' =>  $this->telephone,
             'type_person_id' => $this->type_person_id,
             'type_regime_id' => $this->type_regime_id,

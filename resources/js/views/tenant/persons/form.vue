@@ -153,7 +153,7 @@
 
                     <div class="row border-top mt-2">
                         <div class="col-12">
-                            <h4>Contacto</h4>
+                            <h4 class="contact-title">Contacto</h4>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group" >
@@ -166,6 +166,39 @@
                                 <label class="control-label">Teléfono</label>
                                 <el-input v-model="form.contact_phone"></el-input>
                             </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="control-label">Correos adicionales</label>
+                                <div class="input-group mb-2">
+                                    <el-input
+                                        v-model="temp_email"
+                                        placeholder="Ingrese correo adicional"
+                                        @keyup.enter.native="addAdditionalEmail"
+                                        size="small"
+                                        style="width: 70%;"
+                                    ></el-input>
+                                    <el-button
+                                        type="success"
+                                        icon="el-icon-plus"
+                                        @click="addAdditionalEmail"
+                                        :disabled="!validateEmail(temp_email) || additional_emails.includes(temp_email)"
+                                        size="small"
+                                        style="margin-left: 8px;"
+                                    >Agregar</el-button>
+                                </div>
+                                <div>
+                                    <el-tag
+                                        v-for="(email, index) in additional_emails"
+                                        :key="email"
+                                        closable
+                                        @close="removeAdditionalEmail(index)"
+                                        type="info"
+                                        class="email-tag"
+                                    >{{ email }}</el-tag>
+                                </div>
+                                <small class="text-muted d-block mt-2">Puedes agregar varios correos y quitarlos cuando desees.</small>
                         </div>
                     </div>
                 </div>
@@ -189,6 +222,35 @@ margin-top: 25px;
 .el-checkbox .el-checkbox__input {
     transform: scale(1.3); /* Ajusta el tamaño del checkbox */
 }
+.contact-title {
+    color: #222 !important; /* O el color que prefieras */
+}
+.el-tag.email-tag {
+    background-color: #e8f0fe;        /* Un azul más suave */
+    color: #0d47a1;                   /* Azul más oscuro para mejor contraste */
+    border: 1px solid #64b5f6;        /* Borde más suave */
+    font-size: 12px;                  /* Tamaño de fuente más legible */
+    font-weight: 500;                 /* Mejor presencia */
+    padding: 6px 14px;                /* Más espacio interno */
+    margin: 4px 6px 0 0;              /* Margen consistente entre tags */
+    border-radius: 20px;              /* Estilo pill/redondeado */
+    display: inline-flex;             /* Alinear mejor contenido + botón cerrar */
+    align-items: center;             /* Centrar verticalmente */
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.el-tag.email-tag .el-tag__close {
+    color: #0d47a1;                  /* Mismo color del texto */
+    font-weight: bold;
+    margin-left: 8px;                /* Espacio entre texto y X */
+    font-size: 14px;                 /* Tamaño adecuado */
+    transition: color 0.2s;
+}
+
+.el-tag.email-tag .el-tag__close:hover {
+    color: #c62828;                  /* Rojo fuerte al pasar el mouse */
+    cursor: pointer;
+}
 </style>
 
 <script>
@@ -201,6 +263,8 @@ export default {
             loading_submit: false,
             titleDialog: null,
             resource: 'persons',
+            additional_emails: [],
+            temp_email: '',
             errors: {},
             api_service_token: false,
             form: {},
@@ -248,6 +312,21 @@ export default {
         }
     },
     methods: {
+        addAdditionalEmail() {
+            const email = this.temp_email.trim();
+            if (email && this.validateEmail(email) && !this.additional_emails.includes(email)) {
+                this.additional_emails.push(email);
+                this.temp_email = '';
+            }
+        },
+        removeAdditionalEmail(index) {
+            this.additional_emails.splice(index, 1);
+        },
+        validateEmail(email) {
+            // Validación básica de email
+            const re = /\S+@\S+\.\S+/;
+            return re.test(email);
+        },
         async changeNumberIdentification() {
             if (this.form.number) {
                 this.loading_search = true
@@ -282,6 +361,8 @@ export default {
         },
         initForm() {
             this.errors = {};
+            this.additional_emails = [];
+            this.showAdditionalFields = false;
             this.$http.get('/companies/record').then(response => {
                 this.idIdentification = response.data.data.logo;
                 let address = null;
@@ -422,6 +503,7 @@ export default {
             if (this.recordId) {
                 this.$http.get(`/${this.resource}/record/${this.recordId}`).then(response => {
                     this.form = response.data.data;
+                    this.additional_emails = Array.isArray(this.form.additional_emails) ? this.form.additional_emails : [];
                     this.departmentss(true);
                     this.citiess(true);
                 });
@@ -450,6 +532,9 @@ export default {
                 this.form.code = this.form.number;
                 this.form.contact_phone = null;
                 this.form.contact_name = null;
+                this.form.additional_emails = [];
+            } else {
+                this.form.additional_emails = this.additional_emails; // <-- Solo guarda si está activo
             }
 
             this.loading_submit = true

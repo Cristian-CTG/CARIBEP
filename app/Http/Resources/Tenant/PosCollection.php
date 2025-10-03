@@ -57,6 +57,7 @@ class PosCollection extends ResourceCollection
                 }),
                 'warehouses' => collect($row->warehouses)->transform(function ($row) {
                     return [
+                        'warehouse_id' => $row->warehouse_id,
                         'warehouse_description' => $row->warehouse->description,
                         'stock' => $row->stock,
                     ];

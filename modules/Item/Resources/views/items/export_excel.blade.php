@@ -22,8 +22,12 @@
                                 <th class="">Codigo Tipo de Impuesto Venta</th>
                                 <th class="">Precio Unitario Compra</th>
                                 <th class="">Codigo Tipo de Impuesto Compra</th>
+                                <th class="">Stock</th>
+                                <th class="">Stock Mínimo</th>
                                 <th class="">Categoria</th>
                                 <th class="">Marca</th>
+                                <th class="">Color</th>
+                                <th class="">Talla</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -37,8 +41,12 @@
                                 <td>{{$value->tax_id}}</td>
                                 <td>{{$value->purchase_unit_price}}</td>
                                 <td>{{$value->purchase_tax_id}}</td>
+                                <td>{{$value->stock}}</td>
+                                <td>{{$value->stock_min}}</td>
                                 <td>{{optional($value->category)->name}}</td>
                                 <td>{{optional($value->brand)->name}}</td>
+                                <td>{{optional($value->color)->name}}</td>
+                                <td>{{optional($value->size)->name}}</td>
                             </tr>
                             @endforeach
                         </tbody>

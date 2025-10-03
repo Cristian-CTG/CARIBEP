@@ -21,7 +21,7 @@
             <tenant-payment-method-types-index :type-user="{{json_encode(Auth::user()->type)}}" ></tenant-payment-method-types-index>
             <tenant-income-reasons-index :type-user="{{json_encode(Auth::user()->type)}}" ></tenant-income-reasons-index>
 
-            {{-- <tenant-unit_types-index :type-user="{{json_encode(Auth::user()->type)}}" ></tenant-unit_types-index> --}}
+            <tenant-unit_types-index :type-user="{{json_encode(Auth::user()->type)}}" ></tenant-unit_types-index>
 
             {{-- <tenant-detraction_types-index :type-user="{{json_encode(Auth::user()->type)}}" ></tenant-detraction_types-index> --}}
         </div>

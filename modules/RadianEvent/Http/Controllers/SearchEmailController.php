@@ -97,72 +97,76 @@ class SearchEmailController extends Controller
                         if ($zip_found) {
                             $extract_zip = (new ZipHelper())->extractZip($zip_content);
 
-                            if(count($extract_zip) === 2) // se valida si tiene 2 archivos, xml y pdf
-                            {
-                                if(str_contains($extract_zip[0]['filename'], '.xml')) {
+                            $xml_file = null;
+                            $pdf_file = null;
 
-                                    $xml_filename = $extract_zip[0]['filename'];
-                                    $xml_content = $extract_zip[0]['content'];
-
-                                    $pdf_filename = $extract_zip[1]['filename'];
-                                    $pdf_content = $extract_zip[1]['content'];
-                                } else {
-                                    $xml_filename = $extract_zip[1]['filename'];
-                                    $xml_content = $extract_zip[1]['content'];
-
-                                    $pdf_filename = $extract_zip[0]['filename'];
-                                    $pdf_content = $extract_zip[0]['content'];
+                            foreach ($extract_zip as $file) {
+                                if (str_ends_with(strtolower($file['filename']), '.xml')) {
+                                    $xml_file = $file;
                                 }
-
-                                if(str_contains($xml_filename, '.xml') && str_contains($pdf_filename, '.pdf'))
-                                {
-                                    // verificar si existe el xml
-                                    $exist_received_document = ReceivedDocument::select('id')->where('xml', $xml_filename)->first();
-
-                                    if(!$exist_received_document)
-                                    {
-                                        // enviar api para parsear xml y obtener data
-                                        $send_request_to_api = $this->sendXmlToApi($xml_content);
-
-                                        // registrar en bd
-                                        $email_reading_detail = $this->saveEmailReadingDetail($email_reading, $mail);
-
-                                        // Si no es documento a crédito, actualizamos el detalle y continuamos con el siguiente
-                                        if(isset($send_request_to_api['skip_document'])) {
-                                            $this->updateEmailReadingDetail($email_reading_detail, $send_request_to_api);
-                                            continue;
-                                        }
-
-                                        if($send_request_to_api['success'])
-                                        {
-                                            $data = $send_request_to_api['data'];
-                                            $data['xml'] = $xml_filename;
-                                            $data['pdf'] = $pdf_filename;
-
-                                            $this->updateEmailReadingDetail($email_reading_detail, [
-                                                'success' => true,
-                                                'response_api' => $data
-                                            ]);
-
-                                            //insertar detalle
-                                            $email_reading_detail->received_document()->create($data);
-
-                                            //subir archivo
-                                            $this->uploadFile($pdf_filename, $pdf_content);
-                                            $this->uploadFile($xml_filename, $xml_content);
-
-                                        }
-                                        else
-                                        {
-                                            $this->updateEmailReadingDetail($email_reading_detail, [
-                                                'success' => false,
-                                                'response_api' => $send_request_to_api
-                                            ]);
-
-                                        }
-                                    }
+                                if (str_ends_with(strtolower($file['filename']), '.pdf')) {
+                                    $pdf_file = $file;
                                 }
                             }
+                                if (!$xml_file) {
+                                    $email_reading_detail = $this->saveEmailReadingDetail($email_reading, $mail);
+                                    $this->updateEmailReadingDetail($email_reading_detail, [
+                                        'success' => false,
+                                        'response_api' => [
+                                            'success' => false,
+                                            'message' => 'El archivo ZIP no contiene un archivo XML.',
+                                        ]
+                                    ]);
+                                    continue;
+                                }
+
+                                // verificar si existe el xml
+                                $exist_received_document = ReceivedDocument::select('id')->where('xml', $xml_file['filename'])->first();
+
+                                if(!$exist_received_document)
+                                {
+                                    // enviar api para parsear xml y obtener data
+                                    $send_request_to_api = $this->sendXmlToApi($xml_file['content']);
+
+                                    // registrar en bd
+                                    $email_reading_detail = $this->saveEmailReadingDetail($email_reading, $mail);
+
+                                    // Si no es documento a crédito, actualizamos el detalle y continuamos con el siguiente
+                                    if(isset($send_request_to_api['skip_document'])) {
+                                        $this->updateEmailReadingDetail($email_reading_detail, $send_request_to_api);
+                                        continue;
+                                    }
+
+                                    if($send_request_to_api['success'])
+                                    {
+                                        $data = $send_request_to_api['data'];
+                                        $data['xml'] = $xml_file['filename'];
+                                        $data['pdf'] = $pdf_file ? $pdf_file['filename'] : null;
+
+                                        $this->updateEmailReadingDetail($email_reading_detail, [
+                                            'success' => true,
+                                            'response_api' => $data
+                                        ]);
+
+                                        //insertar detalle
+                                        $email_reading_detail->received_document()->create($data);
+
+                                        //subir archivo
+                                        if($pdf_file && !empty($pdf_file['filename'])) {
+                                            $this->uploadFile($pdf_file['filename'], $pdf_file['content']);
+                                        }
+                                        $this->uploadFile($xml_file['filename'], $xml_file['content']);
+
+                                    }
+                                    else
+                                    {
+                                        $this->updateEmailReadingDetail($email_reading_detail, [
+                                            'success' => false,
+                                            'response_api' => $send_request_to_api
+                                        ]);
+                                    }
+                                }
+                            
                         }
                     }
                 }
@@ -331,6 +335,10 @@ class SearchEmailController extends Controller
      */
     private function uploadFile($filename, $content, $folder = 'radian_reception_documents')
     {
+        if (empty($filename) || $filename === '.' || $filename === '..') {
+            // No guardar si el nombre es inválido
+            return;
+        }
         Storage::disk('tenant')->put($folder.DIRECTORY_SEPARATOR.$filename, $content);
     }
 
