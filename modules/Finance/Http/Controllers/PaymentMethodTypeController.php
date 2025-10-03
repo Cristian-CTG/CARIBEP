@@ -18,7 +18,7 @@ use App\Models\Tenant\Establishment;
 use Carbon\Carbon;
 use Modules\Expense\Models\ExpenseMethodType;
 use App\Models\Tenant\Configuration;
-
+use Modules\Factcolombia1\Models\Tenant\PaymentMethod;
 
 class PaymentMethodTypeController extends Controller
 { 
@@ -62,15 +62,18 @@ class PaymentMethodTypeController extends Controller
         ];
         
         $payment_method_types = PaymentMethodType::whereFilterPayments($params)->get();
+        $payment_methods = PaymentMethod::whereFilterPayments($params)->get();
         // $expense_method_types = ExpenseMethodType::whereFilterPayments($params)->get();
 
         $records_by_pmt = $this->getRecordsByPaymentMethodTypes($payment_method_types);
+        $records_by_pm = $this->getRecordsByPaymentMethods($payment_methods);
         // $records_by_emt = $this->getRecordsByExpenseMethodTypes($expense_method_types);
         // $totals = $this->getTotalsPaymentMethodType($records_by_pmt, $records_by_emt);
-        $totals = $this->getTotalsPaymentMethodType($records_by_pmt, collect([]));
+        $records = $records_by_pmt->merge($records_by_pm)->values();
+        $totals = $this->getTotalsPaymentMethodType($records, collect([]));
 
         return [
-            'records' => $records_by_pmt, // Removed merge with $records_by_emt
+            'records' => $records,
             'totals' => $totals
         ];
         

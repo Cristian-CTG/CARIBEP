@@ -30,9 +30,7 @@
             <div class="card-body">
                 <data-table :resource="resource" ref="dataTable">
                     <tr slot="heading" width="100%">
-<<<<<<< HEAD
                         <th>ID</th>
-=======
                         <th v-if="selectingBarcodes">
                             <el-checkbox
                                 class="hide-label-checkbox"
@@ -42,7 +40,6 @@
                             ></el-checkbox>
                         </th>
                         <th>#</th>
->>>>>>> master
                         <th>Cód. Interno</th>
                         <th>Unidad</th>
                         <th>Nombre</th>
@@ -54,7 +51,6 @@
                         <th v-if="typeUser != 'seller'" class="text-right">P.Unitario (Compra)</th>
                         <!-- <th class="text-center">Tiene Igv</th> -->
                         <th class="text-right">Acciones</th>
-<<<<<<< HEAD
                         </tr>
                         <template slot-scope="{ index, row }">
                           <el-tooltip
@@ -66,18 +62,6 @@
                           >
                         <tr :class="{ disable_color : !row.active }">
                             <td>{{ row.id }}</td>
-=======
-                    </tr>
-                    <tr slot-scope="{ index, row }" :class="{ disable_color : !row.active}">
-                        <td v-if="selectingBarcodes">
-                            <el-checkbox
-                                class="hide-label-checkbox"
-                                v-model="selectedItems"
-                                :label="row.id"
-                            ></el-checkbox>
-                        </td>
-                            <td>{{ index }}</td>
->>>>>>> master
                             <td>{{ row.internal_id }}</td>
                             <td>{{ row.unit_type_id }}</td>
                             <td>{{ row.name }}</td>
@@ -97,7 +81,6 @@
                                     </template>
                                 </div>
                             </td>
-<<<<<<< HEAD
                             <td class="text-right">{{ row.sale_unit_price | numberFormat }}</td>
                             <td class="text-right" v-if="typeUser != 'seller'">{{ row.purchase_unit_price | numberFormat }}</td>
                             <td class="text-right">
@@ -153,24 +136,6 @@
                         </tr>
                       </el-tooltip>
                     </template>
-=======
-                        <td class="text-right">{{ row.sale_unit_price | numberFormat }}</td>
-                        <td class="text-right" v-if="typeUser != 'seller'">{{ row.purchase_unit_price | numberFormat }}</td>
-                        <!-- <td class="text-center">{{ row.has_igv_description }}</td> -->
-                        <td class="text-right">
-                            <template v-if="typeUser === 'admin'">
-                                <button type="button" class="btn waves-effect waves-light btn-xs btn-info" @click.prevent="clickCreate(row.id)">Editar</button>
-                                <button type="button" class="btn waves-effect waves-light btn-xs btn-danger" @click.prevent="clickDelete(row.id)">Eliminar</button>
-                                <button type="button" class="btn waves-effect waves-light btn-xs btn-warning" @click.prevent="duplicate(row.id)">Duplicar</button>
-                                <button type="button" class="btn waves-effect waves-light btn-xs btn-danger" @click.prevent="clickDisable(row.id)" v-if="row.active">Inhabilitar</button>
-                                <button type="button" class="btn waves-effect waves-light btn-xs btn-primary" @click.prevent="clickEnable(row.id)" v-else>Habilitar</button>
-                                <button type="button" class="btn waves-effect waves-light btn-xs btn-primary" @click.prevent="downloadBarcodePng(row)"><i class="fa fa-barcode"></i>Cod. Barras</button>
-                                <button type="button" class="btn waves-effect waves-light btn-xs btn-success" @click.prevent="clickBarcodeConfig(row)"><i class="fa fa-cog"></i>Etiqueta</button>
-                                <!-- <button type="button" class="btn waves-effect waves-light btn-xs btn-success" @click.prevent="previewBarcode(row)">Ver Etiqueta</button> -->
-                            </template>
-                        </td>
-                    </tr>
->>>>>>> master
                 </data-table>
                 <div class="mt-3 text-right">
                     <button

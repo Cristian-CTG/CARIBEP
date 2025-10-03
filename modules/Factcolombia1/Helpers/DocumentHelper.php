@@ -204,8 +204,20 @@ class DocumentHelper
         return $document;
     }
 
-    public function savePayments($document, $payments){
+    public function savePayments($document, $payments ,$request){
 
+        if ((empty($payments) || count($payments) == 0) && $request && $request->payment_form_id == 1) {
+            $payments = [[
+                'date_of_payment' => $request->date_issue,
+                'payment_method_id' => $request->payment_method_id,
+                'payment_method_type_id' => null,
+                'payment_destination_id' => 'cash',
+                'reference' => null,
+                'change' => null,
+                'payment' => $request->total,
+            ]];
+        }
+        
         if($payments){
 
             $total = $document->total;
@@ -263,6 +275,41 @@ class DocumentHelper
                 }
 
             }
+        }
+    }
+
+    public static function handlePaymentsOnCreditNote($document, $note_concept_id, $note_total)
+    {
+        $concepts_remove_all = [5, 6, 7, 8];
+        $concepts_recalculate = [3, 4];
+
+        if (in_array($note_concept_id, $concepts_remove_all)) {
+            foreach ($document->payments as $payment) {
+                $payment->delete();
+            }
+            $document->total_canceled = true;
+            $document->save();
+        } elseif (in_array($note_concept_id, $concepts_recalculate)) {
+            $original_total = $document->total;
+            $total_credit_notes = $document->creditNotes()->sum('total');
+            $saldo_pendiente = $original_total - $total_credit_notes;
+            $total_paid = $document->payments->sum('payment');
+
+            if ($total_paid > $saldo_pendiente) {
+                $excess = $total_paid - $saldo_pendiente;
+                foreach ($document->payments as $payment) {
+                    if ($excess <= 0) break;
+                    if ($payment->payment <= $excess) {
+                        $excess -= $payment->payment;
+                        $payment->delete();
+                    } else {
+                        $payment->payment -= $excess;
+                        $payment->save();
+                        $excess = 0;
+                    }
+                }
+            }
+            $document->save();
         }
     }
 

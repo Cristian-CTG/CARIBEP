@@ -22,7 +22,8 @@
                                 <template v-if="row.id">
                                     <td>PAGO-{{ row.id }}</td>
                                     <td>{{ row.date_of_payment }}</td>
-                                    <td>{{ row.payment_method_type_description }}</td>
+                                    <!-- <td>{{ row.payment_method_type_description }}</td> -->
+                                    <td>{{ row.payment_method_name || row.payment_method_type_description }}</td>
                                     <td>{{ row.destination_description }}</td>
                                     <td>{{ row.reference }}</td>
                                     <td class="text-center">
@@ -48,12 +49,20 @@
                                             <small class="form-control-feedback" v-if="row.errors.date_of_payment" v-text="row.errors.date_of_payment[0]"></small>
                                         </div>
                                     </td>
-                                    <td>
+                                    <!-- <td>
                                         <div class="form-group mb-0" :class="{'has-danger': row.errors.payment_method_type_id}">
                                             <el-select v-model="row.payment_method_type_id">
                                                 <el-option v-for="option in payment_method_types" :key="option.id" :value="option.id" :label="option.description"></el-option>
                                             </el-select>
                                             <small class="form-control-feedback" v-if="row.errors.payment_method_type_id" v-text="row.errors.payment_method_type_id[0]"></small>
+                                        </div>
+                                    </td> -->
+                                    <td>
+                                        <div class="form-group mb-0" :class="{'has-danger': row.errors.payment_method_id}">
+                                            <el-select v-model="row.payment_method_id">
+                                                <el-option v-for="option in payment_methods" :key="option.id" :value="option.id" :label="option.name"></el-option>
+                                            </el-select>
+                                            <small class="form-control-feedback" v-if="row.errors.payment_method_id" v-text="row.errors.payment_method_id[0]"></small>
                                         </div>
                                     </td>
                                     <td>
@@ -220,7 +229,7 @@
                 this.records.push({
                     id: null,
                     date_of_payment: moment().format('YYYY-MM-DD'),
-                    payment_method_type_id: null,
+                    payment_method_id: null,
                     payment_destination_id:null,
                     reference: null,
                     filename: null,
@@ -253,7 +262,8 @@
                     id: this.records[index].id,
                     sale_note_id: this.documentId,
                     date_of_payment: this.records[index].date_of_payment,
-                    payment_method_type_id: this.records[index].payment_method_type_id,
+                    payment_method_id: this.records[index].payment_method_id,
+                    // payment_method_type_id: this.records[index].payment_method_type_id,
                     payment_destination_id: this.records[index].payment_destination_id,
                     reference: this.records[index].reference,
                     filename: this.records[index].filename,

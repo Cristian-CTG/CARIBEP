@@ -471,7 +471,7 @@ export default {
             this.initForm()
             this.form.currency_id = (this.currencies.length > 0) ? 170 : null
             this.form.payment_form_id = (this.payment_forms.length > 0) ? this.payment_forms[0].id : null;
-            this.form.payment_method_id = (this.payment_methods.length > 0) ? this.payment_methods[0].id : null;
+            this.form.payment_method_id = (this.payment_methods.length > 0) ? this.payment_methods[9].id : null;
         },
         changeDateOfIssue() {
         },
@@ -630,6 +630,19 @@ export default {
                 return;
             }
             this.loading_submit = true
+            if (this.form.payment_form_id == 1) {
+                this.form.payments = [
+                    {
+                        date_of_payment: this.form.date_of_issue,
+                        payment_method_id: this.form.payment_method_id,
+                        payment_destination_id: 1,
+                        reference: null,
+                        payment: this.form.total
+                    }
+                ];
+            } else {
+                this.form.payments = [];
+            }
             this.$http.post(`/${this.resource}`, this.form).then(response => {
                 if (response.data.success) {
                     this.resetForm();

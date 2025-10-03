@@ -58,6 +58,7 @@
                                 <th class="">Ingresos</th>
                                 <th class="">Total Ingresos</th>
                                 <th class="">Compras</th>
+                                <th class="">Documento de Soporte</th>
                                 <th class="">Gastos</th>
                                 <th class="">Total Egresos</th>
                             </tr>
@@ -76,6 +77,7 @@
                                     <td class="celda">{{$value['income_payment']}}</td>
                                     <td class="celda">{{$value['total_income']}}</td>
                                     <td class="celda">{{$value['purchase_payment']}}</td>
+                                    <td class="celda">{{$value['support_document_payment'] }}</td>
                                     <td class="celda">{{$value['expense_payment']}}</td>
                                     <td class="celda">{{$value['total_expense']}}</td>
                                 </tr>
@@ -91,6 +93,7 @@
                                 <td class="celda">{{$records['totals']['t_income']}}</td>
                                 <td class="celda">{{$records['totals']['t_total_income']}}</td>
                                 <td class="celda">{{$records['totals']['t_purchases']}}</td>
+                                <td class="celda">{{$records['totals']['t_support_documents']}}</td>
                                 <td class="celda">{{$records['totals']['t_expenses']}}</td>
                                 <td class="celda">{{$records['totals']['t_total_expense']}}</td>
                             </tr> 

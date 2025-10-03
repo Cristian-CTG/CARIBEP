@@ -5,6 +5,7 @@ namespace Modules\Sale\Models;
 use Modules\Finance\Models\GlobalPayment;
 use App\Models\Tenant\PaymentMethodType;
 use App\Models\Tenant\ModelTenant;
+use Modules\Factcolombia1\Models\Tenant\PaymentMethod;
 
 class RemissionPayment extends ModelTenant
 {
@@ -19,6 +20,7 @@ class RemissionPayment extends ModelTenant
         'remission_id',
         'date_of_payment',
         'payment_method_type_id',
+        'payment_method_id',
         'reference',
         'change',
         'payment',
@@ -32,6 +34,22 @@ class RemissionPayment extends ModelTenant
     {
         return $this->belongsTo(PaymentMethodType::class);
     }
+
+    public function payment_method()
+    {
+        return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
+    }
+
+    public function getPaymentMethodNameAttribute()
+    {
+        if ($this->payment_method_id) {
+            return $this->payment_method ? $this->payment_method->name : null;
+        }
+        if ($this->payment_method_type_id) {
+            return $this->payment_method_type ? $this->payment_method_type->description : null;
+        }
+        return null;
+}
 
     public function global_payment()
     {
@@ -51,8 +69,9 @@ class RemissionPayment extends ModelTenant
             'remission_id' => $this->remission_id,
             'date_of_payment' => $this->date_of_payment->format('d/m/Y'),
             'payment_method_type_id' => $this->payment_method_type_id,
-            'payment_method_type_description' => $this->payment_method_type->description,
-            'destination_description' => ($this->global_payment) ? $this->global_payment->destination_description:null,
+            'payment_method_type_description' => $this->payment_method_type ? $this->payment_method_type->description : null,
+            'payment_method_name' => $this->payment_method_name,
+            'destination_description' => ($this->global_payment) ? $this->global_payment->destination_description : null,
             'reference' => $this->reference,
             'change' => $this->change,
             'payment' => $this->payment,

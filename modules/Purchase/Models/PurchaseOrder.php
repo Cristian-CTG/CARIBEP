@@ -14,6 +14,7 @@ use App\Models\Tenant\Catalogs\DocumentType;
 use Modules\Sale\Models\SaleOpportunity;
 use Modules\Factcolombia1\Models\Tenant\{
     Currency,
+    PaymentMethod,
 };
 
 class PurchaseOrder extends ModelTenant
@@ -51,6 +52,7 @@ class PurchaseOrder extends ModelTenant
         'upload_filename',
         'purchase_quotation_id',
         'payment_method_type_id',
+        'payment_method_id',
         'sale_opportunity_id',
         'notes',
         'currency_id',
@@ -89,6 +91,22 @@ class PurchaseOrder extends ModelTenant
     public function payment_method_type()
     {
         return $this->belongsTo(PaymentMethodType::class);
+    }
+
+    public function payment_method()
+    {
+        return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
+    }
+
+    public function getPaymentMethodNameAttribute()
+    {
+        if ($this->payment_method_id && $this->payment_method) {
+            return $this->payment_method->name;
+        }
+        if ($this->payment_method_type_id && $this->payment_method_type) {
+            return $this->payment_method_type->description;
+        }
+        return null;
     }
 
     public function soap_type()

@@ -63,6 +63,7 @@
                             </template>
 
                             <button type="button" class="btn waves-effect waves-light btn-xs btn-info" @click.prevent="clickOptions(row.id)">Opciones</button>
+                            <button type="button" class="btn waves-effect waves-light btn-xs btn-info" @click.prevent="clickSupportDocumentPayment(row.id)">Pagos</button>
 
                         </td>
                     </tr>
@@ -75,11 +76,18 @@
                 :showClose="true">
             </support-document-options>
 
+            <support-document-payments
+                :showDialog.sync="showDialogSupportDocumentPayments"
+                :recordId="recordId"
+                :showClose="true">
+            </support-document-payments>
+
         </div>
     </div>
 </template>
 <script>
 
+    import SupportDocumentPayments from './payments.vue'
     import SupportDocumentOptions from './partials/options.vue' 
     import DataTable from '@components/DataTableResource.vue'
     import {deletable} from '@mixins/deletable'
@@ -89,9 +97,11 @@
         components: { 
             DataTable, 
             SupportDocumentOptions, 
+            SupportDocumentPayments
         },
         data() {
             return {
+                showDialogSupportDocumentPayments: false,
                 showDialog: false,
                 resource: 'support-documents',
                 recordId: null,
@@ -110,7 +120,11 @@
             clickOptions(recordId) {
                 this.recordId = recordId
                 this.showDialogOptions = true
-            },  
+            },
+            clickSupportDocumentPayment(recordId) {
+                this.recordId = recordId
+                this.showDialogSupportDocumentPayments = true
+            },
             getCurrentMonth() {
                 const date = new Date();
                 const year = date.getFullYear();

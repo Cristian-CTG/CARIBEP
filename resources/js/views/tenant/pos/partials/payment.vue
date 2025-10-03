@@ -349,7 +349,7 @@
                                                 <label>{{index + 1}}.-</label>
                                             </div>
                                             <div class="col-lg-6" :key="pay.id">
-                                                <label>{{getDescriptionPaymentMethodType(pay.payment_method_type_id)}}</label>
+                                                <label>{{ getDescriptionPaymentMethod(pay.payment_method_id) }}</label>
                                             </div>
                                             <div class="col-lg-5" :key="pay.id">
                                                 <label><strong>{{currencyTypeActive.symbol}} {{
@@ -822,12 +822,19 @@
                 return (payment_method_type) ? payment_method_type.description:''
 
             },
+            getDescriptionPaymentMethod(id) {
+                let method = _.find(this.payment_methods, {'id': id})
+                return method ? method.name : ''
+            },
             changePaymentMethodType(){
                 let payment_method_type = _.find(this.payment_method_types,{'id':this.form_payment.payment_method_type_id})
                 this.has_card = payment_method_type.has_card
                 this.form_payment.card_brand_id = (payment_method_type.has_card) ? this.form_payment.card_brand_id:null
             },
             addRow(payments) {
+                payments.forEach(pay => {
+                    if (!pay.payment_destination_id) pay.payment_destination_id = 'cash'
+                })
 
                 this.form.payments = payments
                 let acum_payment = 0
@@ -847,61 +854,40 @@
                 this.enter_amount =  parseFloat(amount).toFixed(3) //+ parseFloat(amount)
                 this.inputAmount()
             },
-            setAmountCash(amount)
-            {
-
-                let row = _.last(this.payments, { 'payment_method_type_id' : '01' })
-                row.payment = parseFloat(row.payment) + parseFloat(amount)
-                // console.log(row.payment)
-
-                this.form.payments = this.payments
-                let acum_payment = 0
-
-                this.form.payments.forEach((item)=>{
-                    acum_payment += parseFloat(item.payment)
-                })
-
-                this.setAmount(acum_payment)
-
+            setAmountCash(amount) {
+                // Suma el monto al input "Ingrese monto"
+                this.enter_amount = parseFloat(this.enter_amount || 0) + parseFloat(amount)
+                this.enterAmount()
             },
-            async enterAmount(){
+            async enterAmount() {
+                // Solo actualizar el campo payment si hay un solo pago
+                if (this.form.payments.length === 1) {
+                    let r_item = await _.last(this.payments, { 'payment_method_type_id': '01' });
+                    if (r_item) {
+                        r_item.payment = parseFloat(this.form.total);
+                    }
 
-                let r_item = await _.last(this.payments, { 'payment_method_type_id' : '01' })
-                r_item.payment = await parseFloat(this.enter_amount)
-                // console.log(r_item.payment)
-
-                let ind = this.form.payments.length - 1
-                this.form.payments[ind].payment = parseFloat(this.enter_amount)
-                // this.setAmount(item.payment)
-
-                let acum_payment = 0
-
-                await this.form.payments.forEach((item)=>{
-                    acum_payment += parseFloat(item.payment)
-                })
-                // console.log(this.form.payments)
-
-                // this.amount = item.payment
-                this.amount = acum_payment
-                // this.amount = this.enter_amount
-                // console.log(this.amount)
-                this.difference = this.amount - this.form.total
-
-                if(isNaN(this.difference)) {
-                    this.button_payment = true
-                    this.difference = "-"
-                }else if(this.difference >=0){
-                    this.button_payment = false
-                    this.difference = this.amount - this.form.total
-                }else{
-                    this.button_payment = true
+                    let ind = this.form.payments.length - 1;
+                    if (this.form.payments[ind]) {
+                        this.form.payments[ind].payment = parseFloat(this.form.total);
+                    }
                 }
-                this.difference = _.round(this.difference,2)
 
-                this.$eventHub.$emit('eventSetFormPosLocalStorage', this.form)
+                this.amount = parseFloat(this.enter_amount) || 0;
+                this.difference = this.amount - parseFloat(this.form.total);
 
-                await this.lStoPayment()
+                if (isNaN(this.difference)) {
+                    this.button_payment = true;
+                    this.difference = "-";
+                } else if (this.difference >= 0) {
+                    this.button_payment = false;
+                } else {
+                    this.button_payment = true;
+                }
+                this.difference = _.round(this.difference, 2);
 
+                this.$eventHub.$emit('eventSetFormPosLocalStorage', this.form);
+                await this.lStoPayment();
             },
             getLocalStoragePayment(key, re_default = null){
 
@@ -1066,6 +1052,7 @@
                 // }
                 const items_final = this.form.items.concat(this.items_refund);
                 this.form.items = items_final
+                this.form.enter_amount = this.enter_amount
                 this.loading_submit = true
                 this.$http.post(`/${this.resource_documents}`, this.form).then(response => {
                     if (response.data.success == true) {
@@ -1368,9 +1355,11 @@
 
                 // Pago por defecto en 0
                 const defaultPayment = {
-                    payment_method_type_id: '01',
+                    payment_method_type_id: null,
+                    payment_method_id: 10,
                     payment: 0,
-                    date_of_payment: moment().format('YYYY-MM-DD')
+                    date_of_payment: moment().format('YYYY-MM-DD'),
+                    payment_destination_id: 'cash'
                 }
                 this.form.payments.push(defaultPayment)
                 this.payments.push(defaultPayment)

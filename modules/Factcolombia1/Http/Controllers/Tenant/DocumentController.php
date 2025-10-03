@@ -1067,7 +1067,7 @@ class DocumentController extends Controller
             }
 
             $this->document = DocumentHelper::createDocument($request, $nextConsecutive, $correlative_api, $this->company, $response, $response_status, $company->type_environment_id);
-            $payments = (new DocumentHelper())->savePayments($this->document, $request->payments);
+            (new DocumentHelper())->savePayments($this->document, $request->payments,$request);
 
             // Registrar asientos contables
             $this->registerAccountingSaleEntries($this->document);
@@ -1578,6 +1578,17 @@ class DocumentController extends Controller
                 'xml' => $this->getFileName(),
                 'cufe' => $response_model->cude
             ]);
+
+            if ($request->reference_id && $this->document->type_document_id == 3) {
+                $referenced_document = Document::find($request->reference_id);
+                if ($referenced_document) {
+                    DocumentHelper::handlePaymentsOnCreditNote(
+                        $referenced_document,
+                        $request->note_concept_id,
+                        $request->total
+                    );
+                }
+            }
 
             // Registrar asientos contables
             if($this->document->type_document_id == 3 ){
@@ -2894,7 +2905,7 @@ class DocumentController extends Controller
 
             $request->merge(['state_document_id' => $state_document_id]);
             $this->document = DocumentHelper::createDocument($request, $nextConsecutive, $correlative_api, $this->company, $response, $response_status, $company->type_environment_id);
-            $payments = (new DocumentHelper())->savePayments($this->document, $request->payments);
+            (new DocumentHelper())->savePayments($this->document, $request->payments,$request);
 
 
         }

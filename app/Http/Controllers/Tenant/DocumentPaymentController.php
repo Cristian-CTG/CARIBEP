@@ -10,6 +10,7 @@ use App\Models\Tenant\DocumentPayment;
 use App\Models\Tenant\PaymentMethodType;
 use Exception, Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade as PDF;
+use Modules\Factcolombia1\Models\Tenant\PaymentMethod;
 use Modules\Finance\Traits\FinanceTrait;
 use Modules\Finance\Traits\FilePaymentTrait;
 
@@ -28,7 +29,8 @@ class DocumentPaymentController extends Controller
     public function tables()
     {
         return [
-            'payment_method_types' => PaymentMethodType::all(),
+            'payment_method_types' => PaymentMethodType::all(), // antiguos
+            'payment_methods' => PaymentMethod::all(), // nuevos
             'payment_destinations' => $this->getPaymentDestinations()
         ];
     }
@@ -39,15 +41,16 @@ class DocumentPaymentController extends Controller
 
         $total_paid = collect($document->payments)->sum('payment');
         $total = $document->total;
-        $total_difference = round($total - $total_paid, 2);
+        $total_notas_credito = $document->creditNotes()->sum('total');
+        $total_difference = round($total - $total_notas_credito - $total_paid, 2);
 
         return [
             'number_full' => $document->number_full,
             'total_paid' => $total_paid,
             'total' => $total,
+            'total_notas_credito' => $total_notas_credito,
             'total_difference' => $total_difference
         ];
-
     }
 
     public function store(DocumentPaymentRequest $request)
@@ -60,6 +63,10 @@ class DocumentPaymentController extends Controller
 
             $record = DocumentPayment::firstOrNew(['id' => $id]);
             $record->fill($request->all());
+            // Si viene el nuevo método, úsalo y pon el antiguo en null
+            if ($request->filled('payment_method_id')) {
+                $record->payment_method_type_id = null;
+            }
             $record->save();
             $this->createGlobalPayment($record, $request->all());
             $this->saveFiles($record, $request, 'documents');
@@ -128,7 +135,8 @@ class DocumentPaymentController extends Controller
             return [
                 'id' => $row->id,
                 'date_of_payment' => $row->date_of_payment->format('d/m/Y'),
-                'payment_method_type_description' => $row->payment_method_type->description,
+                'payment_method_type_description' => $row->payment_method_type ? $row->payment_method_type->description : null,
+                'payment_method_name' => $row->payment_method_name,
                 'destination_description' => ($row->global_payment) ? $row->global_payment->destination_description:null,
                 'change' => $row->change,
                 'payment' => $row->payment,

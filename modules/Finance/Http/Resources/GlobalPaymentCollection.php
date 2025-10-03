@@ -24,7 +24,15 @@ class GlobalPaymentCollection extends ResourceCollection
                 'id' => $row->id, 
                 'destination_description' => $row->destination_description, 
                 'date_of_payment' => $row->payment->date_of_payment->format('Y-m-d'), 
-                'payment_method_type_description' => ($row->payment->payment_method_type) ? $row->payment->payment_method_type->description:$row->payment->expense_method_type->description, 
+                'payment_method_type_description' =>
+                    $row->payment->payment_method_type
+                        ? $row->payment->payment_method_type->description
+                        : (
+                            $row->payment->expense_method_type
+                                ? $row->payment->expense_method_type->description
+                                : null
+                        ),
+                'payment_method_name' => $row->payment->payment_method_name ?? null,
                 'reference' => $row->payment->reference, 
                 'total' => $row->payment->payment, 
                 'number_full' => $row->payment->associated_record_payment->number_full, 

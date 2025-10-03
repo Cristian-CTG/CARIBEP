@@ -18,7 +18,8 @@ class PurchasePaymentCollection extends ResourceCollection
             return [
                 'id' => $row->id,
                 'date_of_payment' => $row->date_of_payment->format('d/m/Y'),
-                'payment_method_type_description' => $row->payment_method_type->description,
+                'payment_method_type_description' => $row->payment_method_type ? $row->payment_method_type->description : null,
+                'payment_method_name' => $row->payment_method_name,
                 'destination_description' => ($row->global_payment) ? $row->global_payment->destination_description:null,
                 'reference' => $row->reference,
                 'filename' => ($row->payment_file) ? $row->payment_file->filename:null,

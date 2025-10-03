@@ -151,6 +151,13 @@ if($current_hostname) {
                 Route::get('/active', 'Tenant\SellerController@activeSellers');
             });
 
+            Route::prefix('co-payment-methods')->group(function () {
+                Route::get('/records', 'Tenant\PaymentMethodController@records');
+                Route::get('/record/{id}', 'Tenant\PaymentMethodController@record');
+                Route::post('', 'Tenant\PaymentMethodController@store');
+                Route::delete('/{id}', 'Tenant\PaymentMethodController@destroy');
+            });
+
         });
     });
 

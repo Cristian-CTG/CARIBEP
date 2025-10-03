@@ -457,6 +457,13 @@ class Document extends ModelTenant
         return $this->belongsTo(SaleNote::class, 'sale_note_id');
     }
 
+    public function hasNote()
+    {
+        return self::where('reference_id', $this->id)
+            ->whereIn('type_document_id', [4, 5])
+            ->exists();
+    }
+
     public function remission()
     {
         return $this->belongsTo(Remission::class,'remission_id');
@@ -743,6 +750,12 @@ class Document extends ModelTenant
     {
         // El total_discount es el descuento global
         return $this->generalApplyNumberFormat($this->total_discount ?? 0);
+    }
+
+    public function creditNotes()
+    {
+        return $this->hasMany(self::class, 'reference_id', 'id')
+            ->where('type_document_id', 3);
     }
 
     /**

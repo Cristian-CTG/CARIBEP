@@ -17,7 +17,7 @@
                             <tr v-for="(row, index) in form.payments" :key="index">
                                 <template v-if="row.id">
                                     <!-- <td>{{ row.date_of_payment }}</td> -->
-                                    <td>{{ row.payment_method_type_description }}</td>
+                                    <td>{{ row.payment_method_name ? row.payment_method_name : row.payment_method_type_description }}</td>
                                     <td>{{ row.destination_description }}</td>
                                     <td>{{ row.reference }}</td>
                                     <td>{{ row.payment }}</td> 

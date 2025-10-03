@@ -143,8 +143,11 @@
                                     <tr v-for="(row, index) in form.payments" :key="index">
                                         <td>
                                             <div class="form-group mb-2 mr-2">
-                                                <el-select v-model="row.payment_method_type_id" @change="changePaymentMethodType(true,index)">
+                                                <!-- <el-select v-model="row.payment_method_type_id" @change="changePaymentMethodType(true,index)">
                                                     <el-option v-for="option in payment_method_types" :key="option.id" :value="option.id" :label="option.description"></el-option>
+                                                </el-select> -->
+                                                <el-select v-model="row.payment_method_id">
+                                                    <el-option v-for="option in payment_methods" :key="option.id" :value="option.id" :label="option.name"></el-option>
                                                 </el-select>
                                             </div>
                                         </td>
@@ -416,6 +419,7 @@
                 dialogRetention: false,
                 retention_taxes: [],
                 recordItem: null,
+                payment_methods: [],
             }
         },
         async created() {
@@ -430,6 +434,7 @@
                     this.all_suppliers = response.data.suppliers
                     // this.discount_types = response.data.discount_types
                     this.payment_method_types = response.data.payment_method_types
+                    this.payment_methods = response.data.payment_methods
                     this.payment_destinations = response.data.payment_destinations
                     this.all_customers = response.data.customers
 
@@ -714,7 +719,8 @@
                     id: null,
                     purchase_id: null,
                     date_of_payment:  moment().format('YYYY-MM-DD'),
-                    payment_method_type_id: '01',
+                    payment_method_id: 10,
+                    payment_method_type_id: null,
                     reference: null,
                     payment_destination_id:'cash',
                     payment: 0,

@@ -27,7 +27,8 @@
                                 <template v-if="row.id">
                                     <td>PAGO-{{ row.id }}</td>
                                     <td>{{ row.date_of_payment }}</td>
-                                    <td>{{ row.payment_method_type_description }}</td>
+                                    <!-- <td>{{ row.payment_method_type_description }}</td> -->
+                                    <td>{{ row.payment_method_name || row.payment_method_type_description }}</td>
                                     <td>{{ row.destination_description }}</td>
                                     <td>{{ row.reference }}</td>
                                     <!-- <td>{{ row.filename }}</td> -->
@@ -56,8 +57,11 @@
                                     </td>
                                     <td>
                                         <div class="form-group mb-0" :class="{'has-danger': row.errors.payment_method_type_id}">
-                                            <el-select v-model="row.payment_method_type_id">
+                                            <!-- <el-select v-model="row.payment_method_type_id">
                                                 <el-option v-for="option in payment_method_types" :key="option.id" :value="option.id" :label="option.description"></el-option>
+                                            </el-select> -->
+                                            <el-select v-model="row.payment_method_id">
+                                                <el-option v-for="option in payment_methods" :key="option.id" :value="option.id" :label="option.name"></el-option>
                                             </el-select>
                                             <small class="form-control-feedback" v-if="row.errors.payment_method_type_id" v-text="row.errors.payment_method_type_id[0]"></small>
                                         </div>
@@ -122,9 +126,21 @@
                                 <td class="text-right">{{ document.total | numberFormat }}</td>
                                 <td></td>
                             </tr>
+                            <tr v-if="document.total_notas_credito && document.total_notas_credito > 0">
+                                <td colspan="6" class="text-right">NOTAS DE CRÉDITO</td>
+                                <td class="text-right">{{ document.total_notas_credito }}</td>
+                                <td></td>
+                            </tr>
+                            <tr v-if="document.total_notas_credito && document.total_notas_credito > 0">
+                                <td colspan="6" class="text-right">NOTAS DE CRÉDITO</td>
+                                <td class="text-right">{{ document.total_notas_credito }}</td>
+                                <td></td>
+                            </tr>
                             <tr>
                                 <td colspan="6" class="text-right">PENDIENTE DE PAGO</td>
-                                <td class="text-right">{{ document.total_difference | numberFormat }}</td>
+                                <td class="text-right">
+                                    {{ (parseFloat(document.total) - (parseFloat(document.total_notas_credito) || 0) - parseFloat(document.total_paid)).toFixed(2) }}
+                                </td>
                                 <td></td>
                             </tr>
                             </tfoot>
@@ -140,7 +156,7 @@
                                     <strong>PAGO-{{ row.id }}</strong>
                                     <span>{{ row.date_of_payment }}</span>
                                 </div>
-                                <div><b>Método:</b> {{ row.payment_method_type_description }}</div>
+                                <div><b>Método:</b> {{ row.payment_method_name || row.payment_method_type_description }}</div>
                                 <div><b>Destino:</b> {{ row.destination_description }}</div>
                                 <div><b>Referencia:</b> {{ row.reference }}</div>
                                 <div>
@@ -167,8 +183,11 @@
                                 </div>
                                 <div class="form-group mb-1" :class="{'has-danger': row.errors.payment_method_type_id}">
                                     <label>Método de pago</label>
-                                    <el-select v-model="row.payment_method_type_id">
+                                    <!-- <el-select v-model="row.payment_method_type_id">
                                         <el-option v-for="option in payment_method_types" :key="option.id" :value="option.id" :label="option.description"></el-option>
+                                    </el-select> -->
+                                    <el-select v-model="row.payment_method_id">
+                                        <el-option v-for="option in payment_methods" :key="option.id" :value="option.id" :label="option.name"></el-option>
                                     </el-select>
                                     <small class="form-control-feedback" v-if="row.errors.payment_method_type_id" v-text="row.errors.payment_method_type_id[0]"></small>
                                 </div>
@@ -221,7 +240,14 @@
                         <div class="card-body p-2">
                             <div class="d-flex justify-content-between"><b>TOTAL PAGADO</b> <span>{{ document.total_paid }}</span></div>
                             <div class="d-flex justify-content-between"><b>TOTAL A PAGAR</b> <span>{{ document.total }}</span></div>
-                            <div class="d-flex justify-content-between"><b>PENDIENTE DE PAGO</b> <span>{{ document.total_difference }}</span></div>
+                            <div class="d-flex justify-content-between" v-if="document.total_notas_credito && document.total_notas_credito > 0">
+                                <b>NOTAS DE CRÉDITO</b> <span>{{ document.total_notas_credito }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between"><b>PENDIENTE DE PAGO</b>
+                                <span>
+                                    {{ (parseFloat(document.total) - (parseFloat(document.total_notas_credito) || 0) - parseFloat(document.total_paid)).toFixed(2) }}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -279,6 +305,7 @@
                 showAddButton: true,
                 document: {},
                 index_file: null,
+                payment_methods: [],
             }
         },
         async created() {
@@ -286,6 +313,7 @@
             await this.$http.get(`/${this.resource}/tables`)
                 .then(response => {
                     this.payment_method_types = response.data.payment_method_types;
+                    this.payment_methods = response.data.payment_methods;
                     this.payment_destinations = response.data.payment_destinations
                     //this.initDocumentTypes()
                 })
@@ -347,7 +375,8 @@
                 this.records.push({
                     id: null,
                     date_of_payment: moment().format('YYYY-MM-DD'),
-                    payment_method_type_id: null,
+                    payment_method_id: null,
+                    // payment_method_type_id: null,
                     payment_destination_id:null,
                     reference: null,
                     filename: null,
@@ -372,7 +401,8 @@
                     id: this.records[index].id,
                     document_id: this.documentId,
                     date_of_payment: this.records[index].date_of_payment,
-                    payment_method_type_id: this.records[index].payment_method_type_id,
+                    payment_method_id: this.records[index].payment_method_id,
+                    // payment_method_type_id: this.records[index].payment_method_type_id,
                     payment_destination_id: this.records[index].payment_destination_id,
                     reference: this.records[index].reference,
                     filename: this.records[index].filename,

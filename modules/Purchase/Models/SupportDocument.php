@@ -8,6 +8,7 @@ use App\Models\Tenant\{
     User,
     Person,
 };
+use App\Models\Tenant\Catalogs\CurrencyType;
 use Modules\Factcolombia1\Models\Tenant\{
     TypeDocument,
     StateDocument,
@@ -55,6 +56,7 @@ class SupportDocument extends ModelTenant
         'subtotal',
         'total_discount',
         'total',
+        'total_canceled',
 
         'acknowledgment_received',
         'cufe',
@@ -147,6 +149,15 @@ class SupportDocument extends ModelTenant
         return $this->prefix.'-'.$this->number;
     }
     
+    public function currency_type()
+    {
+        return $this->belongsTo(CurrencyType::class, 'currency_type_id');
+    }
+
+    public function getCurrencyTypeIdAttribute()
+    {
+        return $this->currency->name;
+    }
      
     /**
      * Retorna el codigo del tipo de documento para enviar a la api
@@ -181,6 +192,11 @@ class SupportDocument extends ModelTenant
     public function adjust_notes()
     {
         return $this->hasMany(SupportDocumentAdjustNote::class, 'affected_support_document_id');
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(SupportDocumentPayment::class);
     }
     
     /**
@@ -308,6 +324,18 @@ class SupportDocument extends ModelTenant
         }
 
         return $adjust_notes;
+    }
+
+    public function scopeWhereStateTypeAccepted($query)
+    {
+        // Puedes poner la lógica que necesites, o dejarlo vacío para compatibilidad
+        return $query->whereIn('state_document_id', [1, 2, 3, 4, 5]);
+    }
+
+    public function scopeWhereTypeUser($query)
+    {
+        $user = auth()->user();
+        return ($user->type == 'seller') ? $query->where('user_id', $user->id) : null;
     }
 
 }

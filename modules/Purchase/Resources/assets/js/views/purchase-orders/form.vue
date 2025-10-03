@@ -68,7 +68,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-lg-4">
+                            <!-- <div class="col-lg-4">
                                 <div class="form-group" :class="{'has-danger': errors.payment_method_type_id}">
                                     <label class="control-label">
                                         Forma de pago
@@ -77,6 +77,15 @@
                                         <el-option v-for="option in payment_method_types" :key="option.id" :value="option.id" :label="option.description"></el-option>
                                     </el-select>
                                     <small class="form-control-feedback" v-if="errors.payment_method_type_id" v-text="errors.payment_method_type_id[0]"></small>
+                                </div>
+                            </div> -->
+                            <div class="col-lg-4">
+                                <div class="form-group" :class="{'has-danger': errors.payment_method_id}">
+                                    <label class="control-label">Forma de pago</label>
+                                    <el-select v-model="form.payment_method_id" filterable>
+                                        <el-option v-for="option in payment_methods" :key="option.id" :value="option.id" :label="option.name"></el-option>
+                                    </el-select>
+                                    <small class="form-control-feedback" v-if="errors.payment_method_id" v-text="errors.payment_method_id[0]"></small>
                                 </div>
                             </div>
                             <div class="col-lg-12">
@@ -350,6 +359,7 @@
                 retention_selected: null,
                 dialogRetention: false,
                 retention_taxes: [],
+                payment_methods: [],
             }
         },
         async created() {
@@ -363,6 +373,7 @@
                     this.establishment = response.data.establishment
                     this.suppliers = response.data.suppliers
                     this.payment_method_types = response.data.payment_method_types
+                    this.payment_methods = response.data.payment_methods
                     this.company = response.data.company
 
 
@@ -639,7 +650,7 @@
             },
             changePaymentMethodType(flag_submit = true){
                 let payment_method_type = _.find(this.payment_method_types, {'id':this.form.payment_method_type_id})
-                if(payment_method_type.number_days){
+                if(payment_method_type && payment_method_type.number_days){
                     this.form.date_of_issue =  moment().add(payment_method_type.number_days,'days').format('YYYY-MM-DD');
                     this.changeDateOfIssue()
                 }else{
@@ -691,7 +702,8 @@
                     date_of_issue: moment().format('YYYY-MM-DD'),
                     time_of_issue: moment().format('HH:mm:ss'),
                     supplier_id: null,
-                    payment_method_type_id:'01',
+                    payment_method_type_id:null,
+                    payment_method_id: 10,
                     currency_id: null,
                     purchase_order: null,
                     exchange_rate_sale: 0,

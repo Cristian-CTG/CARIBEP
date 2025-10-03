@@ -13,6 +13,7 @@ use App\Models\Tenant\{
     PurchasePayment,
     DocumentPosPayment
 };
+use Modules\Purchase\Models\SupportDocumentPayment;
 use Modules\Sale\Models\QuotationPayment;
 use Modules\Sale\Models\ContractPayment;
 use Modules\Finance\Models\IncomePayment;
@@ -101,7 +102,10 @@ trait FinanceTrait
             $document = $model->purchase;
         } elseif ($model instanceof DocumentPayment) {
             $document = $model->document;
-        }
+        } 
+        // elseif ($model instanceof SupportDocumentPayment) {
+        //     $document = $model->support_document;
+        // }
 
         if ($document && $document->payment_form_id == 2) {
             $this->generateJournalEntry($model, $document, $destination);
@@ -198,6 +202,18 @@ trait FinanceTrait
             ];
         }
 
+        // if ($model instanceof SupportDocumentPayment) {
+        //     return [
+        //         'prefix_id' => 4, //Cual es el prefijo?
+        //         'debit' => 0,
+        //         'credit' => $model->payment,
+        //         'counter_account_id' => $accountPayable->id,
+        //         'counter_debit' => $model->payment,
+        //         'counter_credit' => 0,
+        //         'reference_field' => 'support_document_id',
+        //     ];
+        // }
+
         // Aquí puedes agregar nuevos tipos, por ejemplo:
         /*
         if ($model instanceof CreditNotePayment) {
@@ -251,6 +267,7 @@ trait FinanceTrait
             // ['id'=> ContractPayment::class, 'description' => 'CONTRATO'],
             ['id'=> IncomePayment::class, 'description' => 'INGRESO'],
             ['id'=> RemissionPayment::class, 'description' => 'REMISIÓN'],
+            ['id'=> SupportDocumentPayment::class, 'description' => 'DOCUMENTO DE SOPORTE'],
         ];
     }
 
@@ -305,6 +322,7 @@ trait FinanceTrait
         $expense_payment = $this->getSumPayment($cash, ExpensePayment::class);
         // $sale_note_payment = $this->getSumPayment($cash, SaleNotePayment::class);
         $purchase_payment = $this->getSumPayment($cash, PurchasePayment::class);
+        $support_document_payment = $this->getSumPayment($cash, SupportDocumentPayment::class);
         $quotation_payment = $this->getSumPayment($cash, QuotationPayment::class);
         $contract_payment = $this->getSumPayment($cash, ContractPayment::class);
         $income_payment = $this->getSumPayment($cash, IncomePayment::class);
@@ -312,7 +330,7 @@ trait FinanceTrait
         $document_pos_payment = $this->getSumPayment($cash, DocumentPosPayment::class);
 
         $entry = $document_payment + $quotation_payment + $contract_payment + $income_payment + $remission_payment + $document_pos_payment;
-        $egress = $expense_payment + $purchase_payment;
+        $egress = $expense_payment + $purchase_payment + $support_document_payment;
 
         $balance = $entry - $egress;
 
@@ -327,6 +345,7 @@ trait FinanceTrait
             'income_payment' => number_format($income_payment,2, ".", ""),
             'document_payment' => number_format($document_payment,2, ".", ""),
             'purchase_payment' => number_format($purchase_payment,2, ".", ""),
+            'support_document_payment' => number_format($support_document_payment,2, ".", ""),
             'remission_payment' => number_format($remission_payment,2, ".", ""),
             'document_pos_payment' => number_format($document_pos_payment,2, ".", ""),
             'balance' => number_format($balance,2, ".", "")
@@ -345,6 +364,7 @@ trait FinanceTrait
             $expense_payment = $this->getSumPayment($row->global_destination, ExpensePayment::class);
             // $sale_note_payment = $this->getSumPayment($row->global_destination, SaleNotePayment::class);
             $purchase_payment = $this->getSumPayment($row->global_destination, PurchasePayment::class);
+            $support_document_payment = $this->getSumPayment($row->global_destination, SupportDocumentPayment::class);
             $quotation_payment = $this->getSumPayment($row->global_destination, QuotationPayment::class);
             $contract_payment = $this->getSumPayment($row->global_destination, ContractPayment::class);
             $income_payment = $this->getSumPayment($row->global_destination, IncomePayment::class);
@@ -352,7 +372,7 @@ trait FinanceTrait
             $document_pos_payment = $this->getSumPayment($row->global_destination, DocumentPosPayment::class);
 
             $entry = $document_payment + $quotation_payment + $contract_payment + $income_payment + $remission_payment + $document_pos_payment;
-            $egress = $expense_payment + $purchase_payment;
+            $egress = $expense_payment + $purchase_payment + $support_document_payment;
             $balance = $entry - $egress;
 
             return [
@@ -365,6 +385,7 @@ trait FinanceTrait
                 'contract_payment' => number_format($contract_payment,2, ".", ""),
                 'document_payment' => number_format($document_payment,2, ".", ""),
                 'purchase_payment' => number_format($purchase_payment,2, ".", ""),
+                'support_document_payment' => number_format($support_document_payment,2, ".", ""),
                 'income_payment' => number_format($income_payment,2, ".", ""),
                 'remission_payment' => number_format($remission_payment,2, ".", ""),
                 'document_pos_payment' => number_format($document_pos_payment,2, ".", ""),
@@ -395,12 +416,11 @@ trait FinanceTrait
 
     public function getRecordsByPaymentMethodTypes($payment_method_types)
     {
-
-        $records = $payment_method_types->map(function($row){
-
+        return $payment_method_types->map(function($row){
             $document_payment = $this->getSumByPMT($row->document_payments);
             // $sale_note_payment = $this->getSumByPMT($row->sale_note_payments);
             $purchase_payment = $this->getSumByPMT($row->purchase_payments);
+            $support_document_payment = $this->getSumByPMT($row->support_document_payments);
             $quotation_payment = $this->getSumByPMT($row->quotation_payments);
             $contract_payment = $this->getSumByPMT($row->contract_payments);
             $income_payment = $this->getSumByPMT($row->income_payments);
@@ -413,6 +433,9 @@ trait FinanceTrait
             $pos = $document_pos_payment ?: 0;
             $inc = $income_payment ?: 0;
             $pur = $purchase_payment ?: 0;
+            $sup = $support_document_payment ?: 0;
+
+            $total = $doc + $rem + $pos + $inc + $pur + $quotation_payment + $contract_payment + $sup;
 
             return [
 
@@ -421,20 +444,72 @@ trait FinanceTrait
                 'expense_payment' => '-',
                 'document_payment' => number_format($doc, 2, ".", ""),
                 'purchase_payment' => number_format($pur, 2, ".", ""),
+                'support_document_payment' => number_format($sup, 2, ".", ""),
                 'quotation_payment' => number_format($quotation_payment, 2, ".", ""),
                 'contract_payment' => number_format($contract_payment, 2, ".", ""),
                 'income_payment' => number_format($inc, 2, ".", ""),
                 'remission_payment' => number_format($rem, 2, ".", ""),
                 'document_pos_payment' => number_format($pos, 2, ".", ""),
                 'total_income' => number_format($doc + $rem + $pos + $inc, 2, ".", ""),
-                'total_expense' => number_format($pur, 2, ".", "")
-            ];
-
-        });
-
-        return $records;
+                'total_expense' => number_format($pur + $sup, 2, ".", "")
+            ] + ['_total_payments' => $total];
+        })
+        ->filter(function($row){
+            return $row['_total_payments'] > 0;
+        })
+        ->map(function($row){
+            unset($row['_total_payments']);
+            return $row;
+        })
+        ->values();
     }
 
+    public function getRecordsByPaymentMethods($payment_methods)
+    {
+        return $payment_methods->map(function($pm){
+            $document_payment = $this->getSumByPMT($pm->document_payments);
+            $purchase_payment = $this->getSumByPMT($pm->purchase_payments);
+            $support_document_payment = $this->getSumByPMT($pm->support_document_payments);
+            $quotation_payment = $this->getSumByPMT($pm->quotation_payments);
+            $contract_payment = $this->getSumByPMT($pm->contract_payments);
+            $income_payment = $this->getSumByPMT($pm->income_payments);
+            $remission_payment = $this->getSumByPMT($pm->remission_payments);
+            $document_pos_payment = $this->getSumByPMT($pm->document_pos_payments);
+
+            $doc = $document_payment ?: 0;
+            $rem = $remission_payment ?: 0;
+            $pos = $document_pos_payment ?: 0;
+            $inc = $income_payment ?: 0;
+            $pur = $purchase_payment ?: 0;
+            $sup = $support_document_payment ?: 0;
+
+            $total = $doc + $rem + $pos + $inc + $pur + $quotation_payment + $contract_payment + $sup;
+
+            return [
+                'id' => $pm->id,
+                'description' => $pm->name,
+                'expense_payment' => '-',
+                'document_payment' => number_format($doc, 2, ".", ""),
+                'purchase_payment' => number_format($pur, 2, ".", ""),
+                'support_document_payment' => number_format($sup, 2, ".", ""),
+                'quotation_payment' => number_format($quotation_payment, 2, ".", ""),
+                'contract_payment' => number_format($contract_payment, 2, ".", ""),
+                'income_payment' => number_format($inc, 2, ".", ""),
+                'remission_payment' => number_format($rem, 2, ".", ""),
+                'document_pos_payment' => number_format($pos, 2, ".", ""),
+                'total_income' => number_format($doc + $rem + $pos + $inc, 2, ".", ""),
+                'total_expense' => number_format($pur + $sup, 2, ".", "")
+            ] + ['_total_payments' => $total];
+        })
+        ->filter(function($row){
+            return $row['_total_payments'] > 0;
+        })
+        ->map(function($row){
+            unset($row['_total_payments']);
+            return $row;
+        })
+        ->values();
+    }
 
     public function getRecordsByExpenseMethodTypes($expense_method_types)
     {
@@ -457,6 +532,7 @@ trait FinanceTrait
                 'contract_payment' => '-',
                 'income_payment' => '-',
                 'purchase_payment' => '-',
+                'support_document_payment' => '-',
                 'remission_payment' => '-',
                 'total_income' => '0.00',
                 'total_expense' => number_format($exp, 2, ".", "")
@@ -482,28 +558,25 @@ trait FinanceTrait
         $t_quotations = 0;
         $t_contracts = 0;
         $t_purchases = 0;
+        $t_support_documents = 0;
         $t_expenses = 0;
         $t_income = 0;
         $t_remissions = 0;
         $t_document_pos = 0;
 
         foreach ($records_by_pmt as $value) {
-
-            $t_documents += $value['document_payment'];
-            // $t_sale_notes += $value['sale_note_payment'];
-            $t_quotations += $value['quotation_payment'];
-            $t_contracts += $value['contract_payment'];
-            $t_purchases += $value['purchase_payment'];
-            $t_income += $value['income_payment'];
-            $t_remissions += $value['remission_payment'];
-            $t_document_pos += $value['document_pos_payment'];
-
+            $t_documents     += is_numeric($value['document_payment'])     ? $value['document_payment']     : 0;
+            $t_quotations    += is_numeric($value['quotation_payment'])    ? $value['quotation_payment']    : 0;
+            $t_contracts     += is_numeric($value['contract_payment'])     ? $value['contract_payment']     : 0;
+            $t_purchases     += is_numeric($value['purchase_payment'])     ? $value['purchase_payment']     : 0;
+            $t_support_documents += is_numeric($value['support_document_payment']) ? $value['support_document_payment'] : 0;
+            $t_income        += is_numeric($value['income_payment'])       ? $value['income_payment']       : 0;
+            $t_remissions    += is_numeric($value['remission_payment'])    ? $value['remission_payment']    : 0;
+            $t_document_pos  += is_numeric($value['document_pos_payment']) ? $value['document_pos_payment'] : 0;
         }
 
         foreach ($records_by_emt as $value) {
-
-            $t_expenses += $value['expense_payment'];
-
+            $t_expenses += is_numeric($value['expense_payment']) ? $value['expense_payment'] : 0;
         }
 
         return [
@@ -512,12 +585,13 @@ trait FinanceTrait
             't_quotations' => number_format($t_quotations,2, ".", ""),
             't_contracts' => number_format($t_contracts,2, ".", ""),
             't_purchases' => number_format($t_purchases,2, ".", ""),
+            't_support_documents' => number_format($t_support_documents,2, ".", ""),
             't_expenses' => number_format($t_expenses,2, ".", ""),
             't_income' => number_format($t_income,2, ".", ""),
             't_remissions' => number_format($t_remissions,2, ".", ""),
             't_document_pos' => number_format($t_document_pos,2, ".", ""),
             't_total_income' => number_format($t_documents + $t_remissions + $t_document_pos + $t_income, 2, ".", ""),
-            't_total_expense' => number_format($t_expenses + $t_purchases, 2, ".", "")
+            't_total_expense' => number_format($t_expenses + $t_purchases + $t_support_documents, 2, ".", "")
         ];
 
     }

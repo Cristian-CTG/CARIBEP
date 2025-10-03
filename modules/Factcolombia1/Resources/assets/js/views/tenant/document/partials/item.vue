@@ -511,7 +511,26 @@
                     let found = this.items.find(i => i.id == this.recordItem.item_id) ||
                                 this.all_items.find(i => i.id == this.recordItem.item_id);
 
-                    if (!found) {
+                    // Si no se encuentra localmente, buscar en la base de datos
+                    if (!found && this.recordItem.item_id) {
+                        try {
+                            const response = await this.$http.get(`/${this.resource}/search/item/${this.recordItem.item_id}`);
+                            if (response.data.items && response.data.items.length > 0) {
+                                found = response.data.items[0];
+                                // Agregarlo a los arrays locales para futuras búsquedas
+                                this.items.push(found);
+                                this.all_items.push(found);
+                                this.is_disabled_item = false;
+                                this.error_disabled_message = '';
+                            } else {
+                                this.is_disabled_item = true;
+                                this.error_disabled_message = 'El producto está deshabilitado y no puede ser editado.';
+                            }
+                        } catch (e) {
+                            this.is_disabled_item = true;
+                            this.error_disabled_message = 'Error al validar el producto. Intente de nuevo.';
+                        }
+                    } else if (!found) {
                         this.is_disabled_item = true
                         this.error_disabled_message = 'El producto está deshabilitado y no puede ser editado.'
                     }

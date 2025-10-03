@@ -15,7 +15,7 @@
                 <h3 class="my-0">Eventos RADIAN - Documentos recibidos</h3>
             </div> -->
             <div class="card-body">
-                <data-table :resource="resource">
+                <data-table :resource="resource" :showSendAllEvents="true" @send-all-events="sendAllEvents">
                     <tr slot="heading">
                         <!-- <th>#</th> -->
                         <th>Tipo Documento</th>
@@ -207,6 +207,21 @@
         created() {
         },
         methods: {
+            async sendAllEvents() {
+                this.loading = true
+                try {
+                    const response = await this.$http.post(`/${this.resource}/run-event`, { all_pending: true })
+                    if (response.data.success) {
+                        this.$message.success(response.data.message)
+                        this.$eventHub.$emit('reloadData')
+                    } else {
+                        this.$message.error(response.data.message)
+                    }
+                } catch (e) {
+                    this.$message.error('Error al procesar eventos masivos')
+                }
+                this.loading = false
+            },
             clickDownload(filename) {
                 window.open(`/radian/public-download/${filename}`, '_blank');
             },

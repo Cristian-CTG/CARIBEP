@@ -55,6 +55,62 @@ class RadianEventController extends Controller
 
     public function runEvent(Request $request)
     {
+        if ($request->has('all_pending') && $request->all_pending) {
+            $pendientes = ReceivedDocument::where(function($q){
+                $q->whereNull('rechazo')->orWhere('rechazo', 0);
+            })->get();
+
+            $procesados = 0;
+            $errores = 0;
+            $mensajes = [];
+
+            foreach ($pendientes as $doc) {
+                try {
+                    // 1. Acuse de Recibo (event_code = 1)
+                    if (empty($doc->acu_recibo) || $doc->acu_recibo == 0) {
+                        $req = new Request([
+                            'id' => $doc->id,
+                            'event_code' => '1'
+                        ]);
+                        $resp = $this->runEvent($req);
+                        if (!is_array($resp) || !isset($resp['success']) || !$resp['success']) {
+                            throw new \Exception('Error en Acuse de Recibo: ' . (is_array($resp) && isset($resp['message']) ? $resp['message'] : ''));
+                        }
+                    }
+                    // 2. Recepción de Bienes (event_code = 3)
+                    if (empty($doc->recepcion_bienes) || $doc->recepcion_bienes == 0) {
+                        $req = new Request([
+                            'id' => $doc->id,
+                            'event_code' => '3'
+                        ]);
+                        $resp = $this->runEvent($req);
+                        if (!is_array($resp) || !isset($resp['success']) || !$resp['success']) {
+                            throw new \Exception('Error en Recepción de Bienes: ' . (is_array($resp) && isset($resp['message']) ? $resp['message'] : ''));
+                        }
+                    }
+                    // 3. Aceptación Expresa (event_code = 4)
+                    if (empty($doc->aceptacion) || $doc->aceptacion == 0) {
+                        $req = new Request([
+                            'id' => $doc->id,
+                            'event_code' => '4'
+                        ]);
+                        $resp = $this->runEvent($req);
+                        if (!is_array($resp) || !isset($resp['success']) || !$resp['success']) {
+                            throw new \Exception('Error en Aceptación Expresa: ' . (is_array($resp) && isset($resp['message']) ? $resp['message'] : ''));
+                        }
+                    }
+                    $procesados++;
+                } catch (\Exception $e) {
+                    $errores++;
+                    $mensajes[] = "Documento ID {$doc->id}: " . $e->getMessage();
+                }
+            }
+            return [
+                'success' => true,
+                'message' => "Se procesaron $procesados documentos. Errores: $errores",
+                'errors' => $mensajes
+            ];
+        }
         $received_document = ReceivedDocument::with('email_reading_detail')->findOrFail($request->id);
         $from_address = $received_document->email_reading_detail ? $received_document->email_reading_detail->from_address : null;
 

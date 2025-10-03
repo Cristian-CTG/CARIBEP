@@ -3,6 +3,7 @@
 namespace Modules\Finance\Helpers;
 use App\Models\Tenant\Establishment;
 use App\Models\Tenant\PurchasePayment;
+use Modules\Purchase\Models\SupportDocumentPayment;
 use Modules\Expense\Models\ExpensePayment;
 use App\Models\Tenant\Invoice;
 use Carbon\Carbon;
@@ -100,6 +101,60 @@ class ToPay
         }
 
         /*
+         * Support Documents
+         */
+        $support_document_payments = DB::table('support_document_payments')
+            ->select('support_document_id', DB::raw('SUM(payment) as total_payment'))
+            ->groupBy('support_document_id');
+
+        if($d_start && $d_end){
+
+            $support_documents = DB::connection('tenant')
+                ->table('co_support_documents')
+                ->where('supplier_id', $supplier_id)
+                ->join('persons', 'persons.id', '=', 'co_support_documents.supplier_id')
+                ->join('co_type_documents', 'co_support_documents.type_document_id', '=', 'co_type_documents.id')
+                ->leftJoinSub($support_document_payments, 'payments', function ($join) {
+                    $join->on('co_support_documents.id', '=', 'payments.support_document_id');
+                })
+                ->whereIn('state_document_id', [1,2,3,4,5])
+                ->where('co_type_documents.code', '11')
+                ->select(DB::raw("co_support_documents.id as id, ".
+                                    "DATE_FORMAT(co_support_documents.date_of_issue, '%Y-%m-%d') as date_of_issue, ".
+                                    "null as date_of_due, ".
+                                    "persons.name as supplier_name, persons.id as supplier_id, co_support_documents.type_document_id, ".
+                                    "CONCAT(co_support_documents.prefix,'-',co_support_documents.number) AS number_full, ".
+                                    "co_support_documents.total as total, ".
+                                    "IFNULL(payments.total_payment, 0) as total_payment, ".
+                                    "'support_document' AS 'type', ". "co_support_documents.currency_id"))
+                ->where('co_support_documents.establishment_id', $establishment_id)
+                ->whereBetween('co_support_documents.date_of_issue', [$d_start, $d_end]);
+
+        } else {
+
+            $support_documents = DB::connection('tenant')
+                ->table('co_support_documents')
+                ->where('supplier_id', $supplier_id)
+                ->join('persons', 'persons.id', '=', 'co_support_documents.supplier_id')
+                ->join('co_type_documents', 'co_support_documents.type_document_id', '=', 'co_type_documents.id')
+                ->leftJoinSub($support_document_payments, 'payments', function ($join) {
+                    $join->on('co_support_documents.id', '=', 'payments.support_document_id');
+                })
+                ->whereIn('state_document_id', [1,2,3,4,5])
+                ->where('co_type_documents.code', '11')
+                ->select(DB::raw("co_support_documents.id as id, ".
+                                    "DATE_FORMAT(co_support_documents.date_of_issue, '%Y-%m-%d') as date_of_issue, ".
+                                    "null as date_of_due, ".
+                                    "persons.name as supplier_name, persons.id as supplier_id, null as document_type_id, ".
+                                    "CONCAT(co_support_documents.prefix,'-',co_support_documents.number) AS number_full, ".
+                                    "co_support_documents.total as total, ".
+                                    "IFNULL(payments.total_payment, 0) as total_payment, ".
+                                    "'support_document' AS 'type', ". "co_support_documents.currency_id"))
+                ->where('co_support_documents.establishment_id', $establishment_id);
+
+        }
+
+        /*
          * Sale Notes
          */
         $expense_payments = DB::table('expense_payments')
@@ -153,7 +208,7 @@ class ToPay
 
         }
 
-        $records = $purchases->union($expenses)->get();
+        $records = $purchases->union($expenses)->union($support_documents)->get();
 
         return collect($records)->transform(function($row) {
 
@@ -183,6 +238,10 @@ class ToPay
                 if($row->document_type_id){ 
 
                     $date_payment_last = PurchasePayment::where('purchase_id', $row->id)->orderBy('date_of_payment', 'desc')->first();
+                
+                }elseif($row->type_document_id){
+
+                    $date_payment_last = SupportDocumentPayment::where('support_document_id', $row->id)->orderBy('date_of_payment', 'desc')->first();
                 }
                 else{
                     $date_payment_last = ExpensePayment::where('expense_id', $row->id)->orderBy('date_of_payment', 'desc')->first();
@@ -230,6 +289,29 @@ class ToPay
                                     "IFNULL(payments.total_payment, 0) as total_payment, ".
                                     "'purchase' AS 'type', ". "purchases.currency_id"));
 
+        $support_document_payments = DB::table('support_document_payments')
+            ->select('support_document_id', DB::raw('SUM(payment) as total_payment'))
+            ->groupBy('support_document_id');
+
+
+            $support_documents = DB::connection('tenant')
+                ->table('co_support_documents')
+                ->join('persons', 'persons.id', '=', 'co_support_documents.supplier_id')
+                ->join('co_type_documents', 'co_support_documents.type_document_id', '=', 'co_type_documents.id')
+                ->where('co_type_documents.code', '11')
+                ->leftJoinSub($support_document_payments, 'payments', function ($join) {
+                    $join->on('co_support_documents.id', '=', 'payments.support_document_id');
+                })
+                ->whereIn('state_type_id', [1,2,3,4,5])
+                ->select(DB::raw("co_support_documents.id as id, ".
+                                    "DATE_FORMAT(co_support_documents.date_of_issue, '%Y-%m-%d') as date_of_issue, ".
+                                    "DATE_FORMAT(co_support_documents.date_of_due, '%Y-%m-%d') as date_of_due, ".
+                                    "persons.name as supplier_name, persons.id as supplier_id, co_support_documents.type_document_id, ".
+                                    "CONCAT(co_support_documents.prefix,'-',co_support_documents.number) AS number_full, ".
+                                    "co_support_documents.total as total, ".
+                                    "IFNULL(payments.total_payment, 0) as total_payment, ".
+                                    "'support_documents' AS 'type', ". "co_support_documents.currency_id"));
+
  
         $expense_payments = DB::table('expense_payments')
             ->select('expense_id', DB::raw('SUM(payment) as total_payment'))
@@ -252,7 +334,7 @@ class ToPay
                                 "'sale_note' AS 'type', " . "expenses.currency_id"));
 
 
-        $records = $purchases->union($expenses)->get();
+        $records = $purchases->union($expenses)->union($support_documents)->get();
 
         return collect($records)->transform(function($row) {
 
@@ -282,8 +364,11 @@ class ToPay
                 if($row->document_type_id){ 
 
                     $date_payment_last = PurchasePayment::where('purchase_id', $row->id)->orderBy('date_of_payment', 'desc')->first();
-                }
-                else{
+                }elseif($row->type_document_id){
+
+                    $date_payment_last = SupportDocumentPayment::where('support_document_id', $row->id)->orderBy('date_of_payment', 'desc')->first();
+
+                }else{
                     $date_payment_last = ExpensePayment::where('expense_id', $row->id)->orderBy('date_of_payment', 'desc')->first();
                 }
 

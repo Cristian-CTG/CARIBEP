@@ -114,8 +114,11 @@
                                 <tr v-for="(row, index) in form.payments" :key="index">
                                     <td>
                                         <div class="form-group mb-2 mr-2">
-                                            <el-select v-model="row.payment_method_type_id" >
+                                            <!-- <el-select v-model="row.payment_method_type_id" >
                                                 <el-option v-for="option in payment_method_types" :key="option.id" :value="option.id" :label="option.description"></el-option>
+                                            </el-select> -->
+                                            <el-select v-model="row.payment_method_id">
+                                                <el-option v-for="option in payment_methods" :key="option.id" :value="option.id" :label="option.name"></el-option>
                                             </el-select>
                                         </div>
                                     </td>
@@ -234,7 +237,8 @@
                 payment_destinations:  [],
                 income_reasons: [],
                 expenseNewId: null,
-                incomeNewId:null
+                incomeNewId:null,
+                payment_methods: [],
             }
         },
         created() {
@@ -244,6 +248,7 @@
 
                     this.income_reasons = response.data.income_reasons
                     this.payment_method_types = response.data.payment_method_types
+                    this.payment_methods = response.data.payment_methods
                     this.income_types = response.data.income_types
                     this.currencies = response.data.currencies
                     this.establishment = response.data.establishment
@@ -309,7 +314,8 @@
                     id: null,
                     income_id: null,
                     date_of_payment:  moment().format('YYYY-MM-DD'),
-                    payment_method_type_id: '01',
+                    payment_method_id: 10,
+                    payment_method_type_id: null,
                     payment_destination_id: 'cash',
                     reference: null,
                     payment: 0,

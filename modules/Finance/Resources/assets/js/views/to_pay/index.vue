@@ -224,6 +224,14 @@
                                                     @click.prevent="clickPurchasePayment(row.id)"
                                                 >Pagos</button>
                                                 </template>
+                                                <template v-else-if="row.type === 'support_document'">
+                                                    <button
+                                                        type="button"
+                                                        style="min-width: 41px"
+                                                        class="btn waves-effect waves-light btn-xs btn-info m-1__2"
+                                                        @click.prevent="clickSupportDocumentPayment(row.id)"
+                                                    >Pagos</button>
+                                                </template>
                                                 <template v-else>
                                                 <button
                                                     type="button"
@@ -251,6 +259,12 @@
             :purchaseId="recordId"
             :external="true"
             ></purchase-payments>
+        
+        <support-document-payments
+            :showDialog.sync="showDialogSupportDocumentPayments"
+            :recordId="recordId"
+            :external="true"
+        ></support-document-payments>
 
         <expense-payments
             :showDialog.sync="showDialogExpensePayments"
@@ -265,12 +279,13 @@
 <script>
 
     import ExpensePayments from "@viewsModuleExpense/expense_payments/payments.vue";
+    import SupportDocumentPayments from "@viewsModulePurchase/support-documents/payments.vue";
     import PurchasePayments from "@viewsModulePurchase/purchase_payments/payments.vue";
     import DataTable from '../../components/DataTableWithoutPaging.vue'
     import queryString from "query-string";
 
     export default {
-        components: {ExpensePayments, PurchasePayments, DataTable},
+        components: {ExpensePayments, PurchasePayments, DataTable, SupportDocumentPayments},
         data() {
             return {
                 resource: 'finances/to-pay',
@@ -292,7 +307,8 @@
                     }
                 },
                 showDialogPurchasePayments: false,
-                showDialogExpensePayments: false
+                showDialogExpensePayments: false,
+                showDialogSupportDocumentPayments: false,
             }
         },
         async created() {
@@ -433,6 +449,10 @@
                     });
 
                 }
+            },
+            clickSupportDocumentPayment(recordId) {
+                this.recordId = recordId;
+                this.showDialogSupportDocumentPayments = true;
             },
             clickPurchasePayment(recordId) {
                 this.recordId = recordId;

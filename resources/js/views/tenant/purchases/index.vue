@@ -156,6 +156,10 @@
 
             <purchase-import :showDialog.sync="showImportDialog"></purchase-import>
         </div>
+        <barcode-config
+            :show.sync="showBarcodeConfig"
+            :itemId="barcodeItemIds">
+        </barcode-config>
 
 
         <purchase-payments
@@ -173,12 +177,13 @@
     import {deletable} from '../../../mixins/deletable'
     import PurchaseImport from './import.vue'
     import PurchasePayments from '@viewsModulePurchase/purchase_payments/payments.vue'
+    import BarcodeConfig from '../items/barcode-config.vue'
 
 
     export default {
         mixins: [deletable],
         // components: {DocumentsVoided, DocumentOptions, DataTable},
-        components: {DataTable, PurchaseImport, PurchasePayments},
+        components: {DataTable, PurchaseImport, PurchasePayments, BarcodeConfig},
         data() {
             return {
                 showDialogVoided: false,
@@ -187,6 +192,8 @@
                 showDialogOptions: false,
                 showDialogPurchasePayments: false,
                 showImportDialog: false,
+                showBarcodeConfig: false,
+                barcodeItemIds: [],
                 initSearch: {
                     column: 'date_of_issue',
                     value: this.getCurrentMonth()
@@ -231,6 +238,16 @@
         created() {
         },
         methods: {
+            openBarcodeConfigForPurchase(row) {
+                    console.log(row.items);
+                    // Extrae los IDs de los productos de la compra
+                    this.barcodeItemIds = (row.items || []).map(it => it.item_id).filter(Boolean);
+                    if (this.barcodeItemIds.length === 0) {
+                        this.$message.warning('No hay productos en esta compra.');
+                        return;
+                    }
+                    this.showBarcodeConfig = true;
+                },
             clickPurchasePayment(recordId) {
                 this.recordId = recordId;
                 this.showDialogPurchasePayments = true

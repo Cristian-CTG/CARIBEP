@@ -12,6 +12,7 @@ use Modules\Sale\Models\ContractPayment;
 use Modules\Expense\Models\ExpensePayment;
 use Modules\Finance\Models\IncomePayment;
 use Modules\Sale\Models\RemissionPayment;
+use Modules\Purchase\Models\SupportDocumentPayment;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -33,8 +34,10 @@ class GlobalPaymentServiceProvider extends ServiceProvider
         $this->deletingPayment(ContractPayment::class);
         $this->deletingPayment(IncomePayment::class);
         $this->deletingPayment(RemissionPayment::class);
+        $this->deletingPayment(SupportDocumentPayment::class);
 
-        $this->paymentsPurchases(); 
+        $this->paymentsPurchases();
+        $this->paymentsSupportDocuments();
 
     }
 
@@ -54,6 +57,17 @@ class GlobalPaymentServiceProvider extends ServiceProvider
         });
 
     }
+
+    private function paymentsSupportDocuments()
+    {
+        SupportDocumentPayment::created(function ($support_document_payment) {
+            $this->transaction_payment($support_document_payment);
+        });
+
+        SupportDocumentPayment::deleted(function ($support_document_payment) {
+            $this->transaction_payment($support_document_payment);
+        });
+    }
  
 
     private function paymentsPurchases()
@@ -69,24 +83,24 @@ class GlobalPaymentServiceProvider extends ServiceProvider
         
     }
  
-    private function transaction_payment($purchase_payment){
-
-        $purchase = $purchase_payment->purchase;
-        $total_payments = $purchase->payments->sum('payment');
-
-        $balance = $purchase->total - $total_payments;
-
-        if($balance <= 0){
-
-            $purchase->total_canceled = true;
-            $purchase->update();
-
-        }else{
-            
-            $purchase->total_canceled = false;
-            $purchase->update();
+    private function transaction_payment($payment)
+    {
+        // Detecta el documento relacionado
+        if ($payment instanceof PurchasePayment) {
+            $document = $payment->purchase;
+        } elseif ($payment instanceof SupportDocumentPayment) {
+            $document = $payment->support_document;
+        } else {
+            $document = null;
         }
 
+        if ($document && $document->total !== null) {
+            $total_payments = $document->payments->sum('payment');
+            $balance = $document->total - $total_payments;
+
+            $document->total_canceled = $balance <= 0;
+            $document->save();
+        }
     }
  
 }

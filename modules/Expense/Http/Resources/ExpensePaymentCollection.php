@@ -18,7 +18,8 @@ class ExpensePaymentCollection extends ResourceCollection
             return [
                 'id' => $row->id,
                 'date_of_payment' => $row->date_of_payment->format('d/m/Y'),
-                'expense_method_type_description' => $row->expense_method_type->description,
+                'payment_method_name' => $row->payment_method_name,
+                'expense_method_type_description' => $row->expense_method_type ? $row->expense_method_type->description : null,
                 'destination_description' => ($row->global_payment) ? $row->global_payment->destination_description:null,
                 'reference' => $row->reference,
                 'filename' => ($row->payment_file) ? $row->payment_file->filename:null,

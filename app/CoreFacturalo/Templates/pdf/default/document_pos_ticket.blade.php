@@ -41,6 +41,10 @@
     }
     $total_payment = $document->payments->sum('payment');
     $balance = ($document->total - $total_payment) - $document->payments->sum('change');
+        $monto_ingresado = isset($document->enter_amount) && !is_null($document->enter_amount)
+        ? $document->enter_amount
+        : $document->payments->sum('payment');
+    $vuelto = $monto_ingresado - $document->total;
 @endphp
 <html>
 <head>
@@ -207,13 +211,32 @@
             <span>PAGOS:</span><br>
             <ul>
                 @foreach($payments as $row)
-                    <li>{{ $row->payment_method_type->number_days ? $row->date_of_payment->addDays($row->payment_method_type->number_days)->format('d/m/Y') : $row->date_of_payment->format('d/m/Y') }} {{ $row->payment_method_type->description }} {{ $row->reference ? $row->reference.' - ':'' }} {{ $document->currency_type->symbol }}{{ $row->payment }}</li>
+                    <li>
+                        {{-- Fecha de pago --}}
+                        @if(isset($row->payment_method_type->number_days) && $row->payment_method_type->number_days)
+                            {{ $row->date_of_payment->addDays($row->payment_method_type->number_days)->format('d/m/Y') }}
+                        @elseif(isset($row->date_of_payment))
+                            {{ $row->date_of_payment->format('d/m/Y') }}
+                        @endif
+
+                        {{-- Método de pago --}}
+                        @if(!empty($row->payment_method_name))
+                            {{ $row->payment_method_name }}
+                        @elseif(isset($row->payment_method_type->description))
+                            {{ $row->payment_method_type->description }}
+                        @else
+                            Método de pago no disponible
+                        @endif
+
+                        {{-- Referencia y monto --}}
+                        {{ $row->reference ? $row->reference.' - ' : '' }} {{ $document->currency_type->symbol }}{{ $row->payment }}
+                    </li>
                     @php
                         $payment += (float) $row->payment;
                     @endphp
                 @endforeach
             </ul>
-            <span>VUELTO: {{ $document->currency_type->symbol }} {{ number_format(abs($balance),2, ".", "") }}</span><br>
+            <span>VUELTO: {{ $document->currency_type->symbol }} {{ number_format($vuelto > 0 ? $vuelto : 0,2, ".", "") }}</span><br>
             <span>SALDO: {{ $document->currency_type->symbol }} {{ number_format($document->total - $payment, 2) }}</span>
             @if($resolution)
                 <br>

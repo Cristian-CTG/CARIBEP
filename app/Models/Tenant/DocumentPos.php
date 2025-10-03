@@ -28,6 +28,7 @@ class DocumentPos extends ModelTenant
         'customer',
         'exchange_rate_sale',
         'total',
+        'enter_amount',
         'filename',
         'total_canceled',
         'quotation_id',

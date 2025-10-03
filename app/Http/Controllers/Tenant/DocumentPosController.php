@@ -211,6 +211,9 @@ class DocumentPosController extends Controller
         try{
 //        DB::connection('tenant')->transaction(function () use ($request) {
             $data = $this->mergeData($request);
+            if ($request->has('enter_amount')) {
+                $data['enter_amount'] = $request->input('enter_amount');
+            }
 //            \Log::debug($request);
 //            \Log::debug(json_encode($data));
             $customer = Person::where('number', $data['customer']['number'])->where('type', 'customers')->firstOrFail();

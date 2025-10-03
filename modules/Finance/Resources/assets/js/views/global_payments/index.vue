@@ -53,7 +53,7 @@
                             <td>{{row.instance_type_description}}</td>
                             <td>{{row.destination_description}}</td>
                             <td>{{row.date_of_payment}}</td>
-                            <td>{{row.payment_method_type_description}}</td>
+                            <td>{{ row.payment_method_name || row.payment_method_type_description }}</td>
                             <td>{{row.reference}}</td>
                             <td>{{row.total | numberFormat}}</td>
                         </tr>

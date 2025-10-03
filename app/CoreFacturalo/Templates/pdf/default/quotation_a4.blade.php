@@ -231,16 +231,25 @@
     <td>
     <strong>PAGOS:</strong> </td></tr>
         @php
-            $payment = 0;
+    $payment = 0;
+@endphp
+@if(isset($document->payments) && count($document->payments) > 0)
+    @foreach($document->payments as $row)
+        @if($row->payment_method_type)
+            <tr>
+                <td>
+                    - {{ $row->payment_method_type->description }} - {{ $row->reference ? $row->reference.' - ':'' }} {{ $document->currency->symbol }} {{ $row->payment }}
+                </td>
+            </tr>
+        @endif
+        @php
+            $payment += (float) $row->payment;
         @endphp
-        @foreach($document->payments as $row)
-            <tr><td>- {{ $row->payment_method_type->description }} - {{ $row->reference ? $row->reference.' - ':'' }} {{ $document->currency->symbol }} {{ $row->payment }}</td></tr>
-            @php
-                $payment += (float) $row->payment;
-            @endphp
-        @endforeach
-        <tr><td><strong>SALDO:</strong> {{ $document->currency->symbol }} {{ number_format($document->total - $payment, 2) }}</td>
-    </tr>
+    @endforeach
+@endif
+<tr>
+    <td><strong>SALDO:</strong> {{ $document->currency->symbol }} {{ number_format($document->total - $payment, 2) }}</td>
+</tr>
 
 </table>
 </body>

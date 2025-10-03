@@ -8,6 +8,7 @@ use App\Models\Tenant\{
     PurchasePayment,
     DocumentPosPayment,
 };
+use Modules\Purchase\Models\SupportDocumentPayment;
 use Modules\Sale\Models\QuotationPayment;
 use Modules\Sale\Models\ContractPayment;
 use Modules\Finance\Models\IncomePayment;
@@ -45,6 +46,11 @@ class PaymentMethodType extends ModelTenant
     public function purchase_payments()
     {
         return $this->hasMany(PurchasePayment::class,  'payment_method_type_id');
+    }
+
+    public function support_document_payments()
+    {
+        return $this->hasMany(SupportDocumentPayment::class,  'payment_method_type_id');
     }
 
     public function quotation_payments()
@@ -103,6 +109,12 @@ class PaymentMethodType extends ModelTenant
                 //         });
                 // },
                 'purchase_payments' => function($q) use($params){
+                    $q->whereBetween('date_of_payment', [$params->date_start, $params->date_end])
+                        ->whereHas('associated_record_payment', function($p) use($params){
+                            $p->whereStateTypeAccepted()->whereTypeUser()->where('currency_id', $params->currency_id);
+                        });
+                },
+                'support_document_payments' => function($q) use($params){
                     $q->whereBetween('date_of_payment', [$params->date_start, $params->date_end])
                         ->whereHas('associated_record_payment', function($p) use($params){
                             $p->whereStateTypeAccepted()->whereTypeUser()->where('currency_id', $params->currency_id);

@@ -19,6 +19,7 @@ use Mpdf\Config\FontVariables;
 use Modules\Finance\Traits\FinanceTrait; 
 use Modules\Finance\Traits\FilePaymentTrait; 
 use Illuminate\Support\Facades\DB;
+use Modules\Factcolombia1\Models\Tenant\PaymentMethod;
 
 class SaleNotePaymentController extends Controller
 {
@@ -35,6 +36,7 @@ class SaleNotePaymentController extends Controller
     {
         return [
             'payment_method_types' => PaymentMethodType::all(),
+            'payment_methods' => PaymentMethod::all(),
             'payment_destinations' => $this->getPaymentDestinations()
         ];
     }
@@ -70,6 +72,9 @@ class SaleNotePaymentController extends Controller
 
             $record = SaleNotePayment::firstOrNew(['id' => $id]);
             $record->fill($request->all());
+            if ($request->filled('payment_method_id')) {
+                $record->payment_method_type_id = null;
+            }
             $record->save();
             $this->createGlobalPayment($record, $request->all());
             $this->saveFiles($record, $request, 'sale_notes');

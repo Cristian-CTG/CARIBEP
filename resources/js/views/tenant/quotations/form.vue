@@ -93,7 +93,7 @@
                                         v-text="errors.currency_id[0]"></small>
                                 </div>
                             </div>
-                            <div class="col-lg-8 mt-2">
+                            <!-- <div class="col-lg-8 mt-2">
                                 <table>
                                     <thead>
                                         <tr width="100%">
@@ -146,7 +146,7 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                            </div>
+                            </div> -->
                             <div class="col-lg-4">
                                 <div class="form-group" :class="{ 'has-danger': errors.exchange_rate_sale }">
                                     <label class="control-label">Descripcion

@@ -313,7 +313,17 @@
                 $payment = 0;
             @endphp
             @foreach($document->payments as $row)
-                <div>- {{ $row->payment_method_type->description }} - {{ $row->reference ? $row->reference.' - ':'' }} {{ $document->currency->symbol }} {{ $row->payment }}</div>
+                <div>
+                    - 
+                    @if(!empty($row->payment_method_name))
+                        {{ $row->payment_method_name }}
+                    @elseif(isset($row->payment_method_type->description))
+                        {{ $row->payment_method_type->description }}
+                    @else
+                        Método de pago no disponible
+                    @endif
+                    - {{ $row->reference ? $row->reference.' - ' : '' }} {{ $document->currency->symbol }} {{ $row->payment }}
+                </div>
                 @php
                     $payment += (float) $row->payment;
                 @endphp
