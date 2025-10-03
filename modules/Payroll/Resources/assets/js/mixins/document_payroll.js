@@ -32,7 +32,11 @@ export const documentPayrollMixin = {
 
         },
         setPaymentServiceBonus(index){
-            this.form.accrued.service_bonus[index].payment = this.roundNumber((this.form.accrued.total_base_salary / this.quantity_days_year) * this.form.accrued.service_bonus[index].quantity)
+            let salario = this.form.accrued.total_base_salary || 0
+            let subsidio = this.form.accrued.transportation_allowance ? this.form.accrued.transportation_allowance : 0
+            let dias = this.form.accrued.service_bonus[index].quantity || 0
+            let prima = this.roundNumber((salario + subsidio) * (dias / this.quantity_days_year))
+            this.form.accrued.service_bonus[index].payment = prima
         },
         clickCancelServiceBonus(index){
             this.form.accrued.service_bonus.splice(index, 1)

@@ -26,7 +26,7 @@
                             <div class="col-md-6 pb-2">
                                 <div class="form-group" :class="{'has-danger': errors.worker_id}">
                                     <label class="control-label">
-                                        Empleados<span class="text-danger"> *</span>
+                                        Empleados<span class="text-danger"> **</span>
                                         <el-tooltip class="item" effect="dark" content="Escribir al menos 3 caracteres para buscar" placement="top-start">
                                             <i class="fa fa-info-circle"></i>
                                         </el-tooltip>
@@ -608,7 +608,7 @@
                                                             </td> -->
                                                             <td>
                                                                 <div class="form-group mb-2 mr-2"  >
-                                                                    <el-select v-model="row.type" filterable>
+                                                                    <el-select v-model="row.type" filterable @change="changeWDisabilityType(index)">
                                                                         <el-option v-for="option in type_disabilities" :key="option.id" :value="option.id" :label="option.name"></el-option>
                                                                     </el-select>
                                                                 </div>
@@ -1249,8 +1249,8 @@
                                             <label class="control-label">EPS - Deducciones por ley
                                                 <span class="text-danger"> *</span>
                                             </label>
-                                            <el-select v-model="form.deduction.eps_type_law_deductions_id"   filterable @change="changeEpsTypeLawDeduction" :disabled="form_disabled.inputs_type_worker_sena">
-                                                <el-option v-for="option in type_law_deductions" :key="option.id" :value="option.id" :label="option.name"></el-option>
+                                            <el-select v-model="form.deduction.eps_type_law_deductions_id" filterable @change="changeEpsTypeLawDeduction" :disabled="form_disabled.inputs_type_worker_sena">
+                                                <el-option v-for="option in type_law_deductions" :key="option.id" :value="option.id" :label="`${option.name} (${option.percentage}%)`"></el-option>
                                             </el-select>
                                             <small class="form-control-feedback" v-if="errors['deduction.eps_type_law_deductions_id']" v-text="errors['deduction.eps_type_law_deductions_id'][0]"></small>
                                         </div>
@@ -1268,8 +1268,8 @@
                                     <div class="col-md-3">
                                         <div class="form-group" :class="{'has-danger': errors['deduction.pension_type_law_deductions_id']}">
                                             <label class="control-label">Pensión - Deducciones por ley<span class="text-danger"> *</span></label>
-                                            <el-select v-model="form.deduction.pension_type_law_deductions_id"   filterable @change="changePensionTypeLawDeduction" :disabled="form_disabled.inputs_type_worker_sena || form_disabled.inputs_not_discount_pension">
-                                                <el-option v-for="option in type_law_deductions" :key="option.id" :value="option.id" :label="option.name"></el-option>
+                                            <el-select v-model="form.deduction.pension_type_law_deductions_id" filterable @change="changePensionTypeLawDeduction" :disabled="form_disabled.inputs_type_worker_sena || form_disabled.inputs_not_discount_pension">
+                                                <el-option v-for="option in type_law_deductions" :key="option.id" :value="option.id" :label="`${option.name} (${option.percentage}%)`"></el-option>
                                             </el-select>
                                             <small class="form-control-feedback" v-if="errors['deduction.pension_type_law_deductions_id']" v-text="errors['deduction.pension_type_law_deductions_id'][0]"></small>
                                         </div>
@@ -1291,8 +1291,8 @@
                                         <div class="col-md-3">
                                             <div class="form-group" :class="{'has-danger': errors['deduction.fondossp_type_law_deductions_id']}">
                                                 <label class="control-label">Fondo de seguridad pensional</label>
-                                                <el-select v-model="form.deduction.fondossp_type_law_deductions_id" clearable   filterable @change="changeFondosspTypeLawDeduction" :disabled="form_disabled.inputs_type_worker_sena">
-                                                    <el-option v-for="option in type_law_deductions" :key="option.id" :value="option.id" :label="option.name"></el-option>
+                                                <el-select v-model="form.deduction.fondossp_type_law_deductions_id" clearable filterable @change="changeFondosspTypeLawDeduction" :disabled="form_disabled.inputs_type_worker_sena">
+                                                    <el-option v-for="option in type_law_deductions" :key="option.id" :value="option.id" :label="`${option.name} (${option.percentage}%)`"></el-option>
                                                 </el-select>
                                                 <small class="form-control-feedback" v-if="errors['deduction.fondossp_type_law_deductions_id']" v-text="errors['deduction.fondossp_type_law_deductions_id'][0]"></small>
                                             </div>
@@ -1311,8 +1311,8 @@
                                         <div class="col-md-3">
                                             <div class="form-group" :class="{'has-danger': errors['deduction.fondossp_sub_type_law_deductions_id']}">
                                                 <label class="control-label">Fondo de subsistencia</label>
-                                                <el-select v-model="form.deduction.fondossp_sub_type_law_deductions_id" clearable   filterable @change="changeFondosspSubTypeLawDeduction" :disabled="form_disabled.inputs_type_worker_sena">
-                                                    <el-option v-for="option in type_law_deductions" :key="option.id" :value="option.id" :label="option.name"></el-option>
+                                                <el-select v-model="form.deduction.fondossp_sub_type_law_deductions_id" clearable filterable @change="changeFondosspSubTypeLawDeduction" :disabled="form_disabled.inputs_type_worker_sena">
+                                                    <el-option v-for="option in type_law_deductions" :key="option.id" :value="option.id" :label="`${option.name} (${option.percentage}%)`"></el-option>
                                                 </el-select>
                                                 <small class="form-control-feedback" v-if="errors['deduction.fondossp_sub_type_law_deductions_id']" v-text="errors['deduction.fondossp_sub_type_law_deductions_id'][0]"></small>
                                             </div>
@@ -1841,6 +1841,38 @@
                 // deducciones
 
             },
+            // Vacaciones disfrutadas
+            changeCommonVacationStartEndDate(index) {
+                const start_end_date = this.form.accrued.common_vacation[index].start_end_date
+                const start_date = start_end_date[0]
+                const end_date = start_end_date[1]
+                const quantity = this.roundNumber(moment(end_date, "YYYY-MM-DD").diff(moment(start_date, "YYYY-MM-DD"), 'days', true) + 1)
+                const payment = this.roundNumber((this.form.accrued.total_base_salary / this.quantity_days_month) * quantity)
+                this.form.accrued.common_vacation[index].quantity = quantity
+                this.form.accrued.common_vacation[index].payment = payment
+                this.calculateTotal()
+            },
+            clickAddCommonVacation() {
+                const start_date = moment().format('YYYY-MM-DD')
+                const end_date = moment().add(1, 'days').format('YYYY-MM-DD')
+                const quantity = this.roundNumber(moment(end_date, "YYYY-MM-DD").diff(moment(start_date, "YYYY-MM-DD"), 'days', true) + 1)
+                const payment = this.roundNumber((this.form.accrued.total_base_salary / this.quantity_days_month) * quantity)
+                this.form.accrued.common_vacation.push({
+                    start_end_date: [start_date, end_date],
+                    quantity: quantity,
+                    payment: payment
+                })
+                this.calculateTotal()
+            },
+            changePaymentCommonVacation(index) {
+                this.calculateTotal()
+            },
+            clickCancelCommonVacation(index) {
+                this.form.accrued.common_vacation.splice(index, 1)
+                this.calculateTotal()
+            },
+            // Prima de servicios
+            
             async changeTotalBaseSalary(){
 
                 this.form.accrued.salary = this.form.accrued.total_base_salary
@@ -2160,10 +2192,8 @@
             recalculateWorkDisability(){
 
                 this.form.accrued.work_disabilities.forEach((element, index) => {
-
-                    let payment = this.getPaymentWorkDisability(element.quantity, element.is_complete)
+                    let payment = this.getPaymentWorkDisability(element.quantity, element.is_complete, element.type)
                     this.form.accrued.work_disabilities[index].payment =  payment
-
                 })
 
             },
@@ -2178,8 +2208,12 @@
                 const start_end_date = this.form.accrued.work_disabilities[index].start_end_date
                 const start_date = start_end_date[0]
                 const end_date = start_end_date[1]
-                const quantity = this.roundNumber(moment(end_date, "YYYY-MM-DD").diff(moment(start_date, "YYYY-MM-DD"), 'days', true))
-                let payment = this.getPaymentWorkDisability(quantity, this.form.accrued.work_disabilities[index].is_complete)
+                const quantity = this.roundNumber(moment(end_date, "YYYY-MM-DD").diff(moment(start_date, "YYYY-MM-DD"), 'days', true)+ 1)
+                let payment = this.getPaymentWorkDisability(
+                    quantity,
+                    this.form.accrued.work_disabilities[index].is_complete,
+                    this.form.accrued.work_disabilities[index].type
+                )
 
                 //calcular valores finales
                 this.form.accrued.work_disabilities[index].start_date = start_date
@@ -2190,22 +2224,43 @@
                 this.calculateTotal()
 
             },
-            getPaymentWorkDisability(quantity, is_complete = false){
+            getPaymentWorkDisability(quantity, is_complete = false, type = null) {
+                const tipoObj = this.type_disabilities.find(t => t.id === type)
+                const tipoNombre = tipoObj ? tipoObj.name : type
 
-                let payment = is_complete ? (this.getPaymentPerDay() * quantity) : (this.getPaymentPerDay() * this.percentageToFactor(this.percentageWorkDisability) * quantity)
+                const IBC = this.getPaymentPerDay();
+                let payment = 0;
 
-                return this.roundNumber(payment)
+                // Si es laboral o profesional: 100% desde el día 1
+                if (tipoNombre === 'Laboral' || tipoNombre === 'Profesional') {
+                    payment = IBC * quantity;
+                } else {
+                    // Común
+                    if (is_complete) {
+                        payment = IBC * quantity;
+                    } else {
+                        if (quantity <= 90) {
+                            payment = IBC * 0.6666 * quantity;
+                        } else if (quantity <= 540) {
+                            payment = (IBC * 0.6666 * 90) + (IBC * 0.5 * (quantity - 90));
+                        } else {
+                            payment = (IBC * 0.6666 * 90) + (IBC * 0.5 * (540 - 90));
+                        }
+                    }
+                }
+
+                return this.roundNumber(payment);
             },
             clickAddWorkDisability(){
 
                 const salary_validation = this.salaryValidation()
                 if(!salary_validation.success) return this.$message.warning(salary_validation.message)
 
-                const quantity = 1
                 const start_date = moment().format('YYYY-MM-DD')
-                const end_date = moment().add(quantity, 'days').format('YYYY-MM-DD')
+                const end_date = moment().add(1, 'days').format('YYYY-MM-DD')
+                const quantity = this.roundNumber(moment(end_date, "YYYY-MM-DD").diff(moment(start_date, "YYYY-MM-DD"), 'days', true) + 1)
                 const type = (this.type_disabilities.length > 0) ? this.type_disabilities[0].id : null
-                let payment = this.getPaymentWorkDisability(quantity)
+                let payment = this.getPaymentWorkDisability(quantity, false, type)
 
                 this.form.accrued.work_disabilities.push({
                     is_complete :  false,
@@ -2226,6 +2281,9 @@
             clickCancelWorkDisability(index){
                 this.form.accrued.work_disabilities.splice(index, 1)
                 this.calculateTotal()
+            },
+            changeWDisabilityType(index) {
+                this.calculateWDisabilityStartEndDate(index)
             },
             // incapacidades
 
