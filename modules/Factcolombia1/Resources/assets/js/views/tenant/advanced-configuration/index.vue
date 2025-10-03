@@ -272,7 +272,7 @@
 
                                 </div>
                                 <div class="row mt-4">
-                                    <div class="col-md-4">
+                                    <div class="col-md-4 mt-2">
                                         <label class="control-label">
                                             Mostrar documentos por
                                             <el-tooltip class="item" effect="dark" content="Elija si desea mostrar documentos por crédito o al contado" placement="top-start">
@@ -286,6 +286,42 @@
                                                 :inactive-value="false"
                                                 active-text="Crédito y Contado"
                                                 inactive-text="Solo Crédito"
+                                                @change="submit"
+                                            ></el-switch>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mt-2">
+                                        <label class="control-label">
+                                            Procesar correos RADIAN automáticamente
+                                            <el-tooltip class="item" effect="dark" content="Si está activo, los correos se procesarán automáticamente cada día." placement="top-start">
+                                                <i class="fa fa-info-circle"></i>
+                                            </el-tooltip>
+                                        </label>
+                                        <div class="form-group">
+                                            <el-switch
+                                                v-model="form.auto_process_radian_emails"
+                                                :active-value="true"
+                                                :inactive-value="false"
+                                                active-text="Sí"
+                                                inactive-text="No"
+                                                @change="submit"
+                                            ></el-switch>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mt-2">
+                                        <label class="control-label">
+                                            Procesar eventos RADIAN automáticamente
+                                            <el-tooltip class="item" effect="dark" content="Si está activo, los eventos pendientes se procesarán automáticamente cada día." placement="top-start">
+                                                <i class="fa fa-info-circle"></i>
+                                            </el-tooltip>
+                                        </label>
+                                        <div class="form-group">
+                                            <el-switch
+                                                v-model="form.auto_process_radian_events"
+                                                :active-value="true"
+                                                :inactive-value="false"
+                                                active-text="Sí"
+                                                inactive-text="No"
                                                 @change="submit"
                                             ></el-switch>
                                         </div>
@@ -413,6 +449,8 @@ export default {
                 radian_imap_port: null,
                 radian_imap_password: null,
                 radian_imap_user: null,
+                auto_process_radian_emails: false,
+                auto_process_radian_events: false,
                 uvt: 0,
                 item_tax_included: false,
                 validate_min_stock: false,

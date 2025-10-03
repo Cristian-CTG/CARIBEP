@@ -28,6 +28,8 @@ class AdvancedConfiguration extends Model
         'radian_imap_port',
         'radian_imap_password',
         'radian_imap_user',
+        'auto_process_radian_emails',
+        'auto_process_radian_events',
         'uvt',
         'item_tax_included',
         'validate_min_stock',
@@ -56,6 +58,8 @@ class AdvancedConfiguration extends Model
         'enable_seller_views' => 'bool',
         'radian_show_credit_only' => 'bool',
         'default_format_print' => 'integer',
+        'auto_process_radian_emails' => 'bool',
+        'auto_process_radian_events' => 'bool',
     ];
 
 
@@ -76,6 +80,8 @@ class AdvancedConfiguration extends Model
             'radian_imap_port' => $this->radian_imap_port,
             'radian_imap_password' => $this->radian_imap_password,
             'radian_imap_user' => $this->radian_imap_user,
+            'auto_process_radian_emails' => $this->auto_process_radian_emails,
+            'auto_process_radian_events' => $this->auto_process_radian_events,
             'uvt' => $this->uvt,
             'item_tax_included' => $this->item_tax_included,
             'validate_min_stock' => $this->validate_min_stock,
