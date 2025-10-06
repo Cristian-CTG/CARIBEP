@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\View;
 use Mpdf\Mpdf;
+use Mpdf\HTMLParserMode;
 
 
 class ItemController extends Controller
@@ -39,9 +40,14 @@ class ItemController extends Controller
         $company = Company::active();
         $companyName = $company ? $company->name : 'EMPRESA';
 
-        // Recibe parámetros de tamaño y campos
-        $width = $request->input('width');
-        $height = $request->input('height');
+        // Parámetros de tamaño y campos
+        $width = $request->input('width', 32); // ancho etiqueta en mm
+        $height = $request->input('height', 25); // alto etiqueta en mm
+        $pageWidth = $request->input('pageWidth', 100); // ancho de hoja en mm
+        $columns = $request->input('columns', 3); // etiquetas por fila
+        $gapX = $request->input('gapX', 2); // espacio horizontal entre etiquetas
+        $repeat = $request->input('repeat', 1); // cuántas etiquetas imprimir
+
         $fields = [
             'name' => filter_var($request->input('name', true), FILTER_VALIDATE_BOOLEAN),
             'price' => filter_var($request->input('price', true), FILTER_VALIDATE_BOOLEAN),
@@ -51,44 +57,37 @@ class ItemController extends Controller
             'size' => filter_var($request->input('size', false), FILTER_VALIDATE_BOOLEAN),
         ];
 
-        $generator = new BarcodeGeneratorPNG();
-        $usableHeight = ($height ?? 25) * 0.32; // 32% de la altura para el código de barras
-        $usableWidth = ($width ?? 32) * 0.80;   // 80% del ancho para el código de barras
+        // Calcular filas necesarias
+        $pageHeight = $height + $gapX+0.1;
 
-        $codeLength = strlen($item->internal_id);
-
-        // Calcula el ancho de barra para que el código de barras no se desborde
-        $barcodeWidthFactor = $usableWidth / $codeLength / 2.2;
-        $barcodeWidthFactor = max(min($barcodeWidthFactor, 2), 0.5); // Limita el rango
-
-        // Altura en píxeles, proporcional a la altura de la etiqueta (1mm ≈ 3.78px)
-        $barcodeHeightPx = intval($usableHeight * 3.78);
-        $barcodeHeightPx = max(min($barcodeHeightPx, 60), 12); // Limita el rango
-
-        $barcodeData = $generator->getBarcode(
-            $item->internal_id,
-            $generator::TYPE_CODE_128,
-            $barcodeWidthFactor,
-            $barcodeHeightPx
-        );
-        $barcodeBase64 = base64_encode($barcodeData);
-
-        $html = view('tenant.item.barcode_label', compact('item', 'companyName', 'barcodeBase64', 'fields', 'width', 'height'))->render();
+        $html = view('tenant.item.barcode_labels_grid', [
+            'width' => $width,
+            'height' => $height,
+            'gapX' => $gapX,
+            'columns' => $columns,
+            'repeat' => $repeat,
+            'item' => $item,
+            'companyName' => $companyName,
+            'fields' => $fields,
+            'pageWidth' => $pageWidth,
+            'pageHeight' => $pageHeight,
+        ])->render();
 
         $mpdf = new Mpdf([
-            'format' => [(float)$width, (float)$height],
+            'format' => [(float)$pageWidth, (float)$pageHeight], // ancho hoja x alto calculado
             'unit' => 'mm',
             'margin_left' => 0,
             'margin_right' => 0,
             'margin_top' => 0,
             'margin_bottom' => 0,
         ]);
+
         $mpdf->WriteHTML($html);
-        // Sanitiza el nombre del producto para el archivo
+
         $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $item->name);
         $filename = $safeName.'_barcode.pdf';
 
-        return response($mpdf->Output($filename, 'S'))
+        return response($mpdf->Output($filename, 'I'))
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
     }

@@ -10,12 +10,12 @@
       <h5 class="mb-2">Opciones de etiqueta</h5>
       <div class="form-group mb-2">
         <div class="row align-items-center">
-          <div class="col-6 col-md-4 d-flex flex-column align-items-center justify-content-center">
+          <!-- <div class="col-6 col-md-4 d-flex flex-column align-items-center justify-content-center">
             <label class="font-weight-bold mb-1 text-center">
               Tamaño <span class="text-muted ml-1">(mm)</span>:
             </label>
             <div class="text-muted small text-center mt-1">&nbsp;</div>
-          </div>
+          </div> -->
           <div class="col-6 col-md-4 d-flex flex-column align-items-center">
             <el-input-number
               class="w-100"
@@ -26,7 +26,7 @@
               controls-position="right"
               placeholder="Ancho"
             />
-            <div class="text-muted small text-center mt-1">Ancho</div>
+            <div class="text-muted small text-center mt-1">Ancho (mm)</div>
           </div>
           <div class="col-6 col-md-4 d-flex flex-column align-items-center">
             <el-input-number
@@ -38,7 +38,64 @@
               controls-position="right"
               placeholder="Alto"
             />
-            <div class="text-muted small text-center mt-1">Alto</div>
+            <div class="text-muted small text-center mt-1">Alto (mm)</div>
+          </div>
+          <div class="col-6 col-md-4 d-flex flex-column align-items-center">
+            <el-input-number
+              class="w-100"
+              v-model="pageWidth"
+              :min="60"
+              :max="300"
+              label="Ancho hoja"
+              controls-position="right"
+              placeholder="Ancho hoja (mm)"
+            />
+            <div class="text-muted small text-center mt-1">Ancho hoja (mm)</div>
+          </div>
+          <div class="col-6 col-md-4 d-flex flex-column align-items-center">
+            <el-input-number
+              class="w-100"
+              v-model="columns"
+              :min="1"
+              :max="3"
+              label="Columnas"
+              controls-position="right"
+              placeholder="Columnas"
+            />
+            <div class="text-muted small text-center mt-1">Columnas</div>
+          </div>
+          <div class="col-6 col-md-4 d-flex flex-column align-items-center">
+            <el-input-number
+              class="w-100"
+              v-model="gapX"
+              :min="0.1"
+              :max="5"
+              label="Espacio horizontal"
+              controls-position="right"
+              placeholder="Espacio entre etiquetas (mm)"
+            />
+            <div class="text-muted small text-center mt-1">Espacio entre etiquetas (mm)</div>
+          </div>
+          <div class="form-group mb-2">
+            <label class="font-weight-bold mb-1">Cantidad de etiquetas a imprimir:</label>
+            <el-input-number
+              class="w-100"
+              v-model="repeat"
+              :min="1"
+              :max="500"
+              label="Cantidad"
+              controls-position="right"
+              placeholder="Cantidad de etiquetas"
+              :disabled="useStockAsRepeat"
+            />
+            <el-checkbox
+              v-if="stock !== null && stock > 0"
+              class="ml-2"
+              v-model="useStockAsRepeat"
+              @change="onUseStockAsRepeat"
+            >
+              Usar stock actual ({{ stock }})
+            </el-checkbox>
           </div>
         </div>
       </div>
@@ -64,12 +121,21 @@ export default {
   props: {
     show: Boolean,
     itemId: [Number, Array],
+    stock: {
+      type: Number,
+      default: null,
+    }
   },
   data() {
     return {
       localShow: this.show,
       width: 32,
       height: 25,
+      pageWidth: 105,
+      columns: 3,
+      gapX: 2,
+      repeat: 15,
+      useStockAsRepeat: false,
       fields: {
         name: true,
         price: true,
@@ -105,6 +171,16 @@ export default {
     window.removeEventListener('resize', this.setDialogWidth);
   },
   methods: {
+    onUseStockAsRepeat(val) {
+      if (val && this.stock > 0) {
+        this.repeat = this.stock;
+      }
+    },
+    setRepeatToStock() {
+      if (this.stock > 0) {
+        this.repeat = this.stock;
+      }
+    },
     handleClose() {
       this.localShow = false;
     },
@@ -112,6 +188,10 @@ export default {
       const params = new URLSearchParams({
         width: this.width,
         height: this.height,
+        pageWidth: this.pageWidth,
+        columns: this.columns,
+        gapX: this.gapX,
+        repeat: this.repeat,
         ...this.fields,
       }).toString();
 

@@ -130,7 +130,8 @@
             </div>
             <barcode-config
                 :show.sync="showBarcodeConfig"
-                :itemId="barcodeItemId">
+                :itemId="barcodeItemId"
+                :stock="selectedStock">
             </barcode-config>
 
             <items-form :showDialog.sync="showDialog"
@@ -224,6 +225,7 @@
                     return this.$message.error('Para generar el código de barras debe registrar el código interno.');
                 }
                 this.barcodeItemId = row.id;
+                this.selectedStock = row.stock;
                 this.showBarcodeConfig = true;
             },
             downloadBarcodePng(row) {
