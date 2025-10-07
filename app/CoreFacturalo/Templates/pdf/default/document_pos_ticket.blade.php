@@ -122,7 +122,7 @@
     <tr>
         <td> {{--<h6>Tipo Venta: CONTADO 0 días </h6>--}}</td>
     </tr>
-    @if($seller_name)
+    @if(isset($seller_name) && $seller_name)
         <tr>
             <td class="align-top"><h6>Vendedor:</h6></td>
             <td colspan="3"><h6>{{ $seller_name }}</h6></td>

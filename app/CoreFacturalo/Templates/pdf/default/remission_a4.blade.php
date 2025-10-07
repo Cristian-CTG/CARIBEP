@@ -130,7 +130,7 @@
                         <td>Medio de Pago:</td>
                         <td>{{$document->payment_method->name}}</td>
                     </tr>
-                    @if($seller_name)
+                    @if(isset($seller_name) && $seller_name)
                         <tr>
                             <td>Vendedor:</td>
                             <td>{{ $seller_name }}</td>

@@ -170,7 +170,7 @@
             {{ $document->user->name }}
         </td>
     </tr>
-    @if($seller_name)
+    @if(isset($seller_name) && $seller_name)
         <tr>
             <td class="align-top">Vendedor:</td>
             <td colspan="3">{{ $seller_name }}</td>
