@@ -34,6 +34,8 @@ if($hostname) {
                 Route::get('initialize', 'InventoryController@initialize');
                 Route::get('download', 'InventoryController@download');
                 Route::get('search-items', 'InventoryController@searchItems');
+                Route::post('/transaction/import/massive', 'InventoryController@transactionImportMassive');
+                Route::get('/formats/Format_massive.xlsx', 'InventoryController@downloadFormatMassive');
             });
 
             Route::prefix('reports')->group(function () {

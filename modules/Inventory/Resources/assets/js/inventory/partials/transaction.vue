@@ -7,7 +7,20 @@
             <form autocomplete="off" @submit.prevent="submit">
                 <div class="row pb-4">
                     <div class="col-12 col-sm-6 mt-2">
-                        <a href="/formats/transaccion_ingreso_items.xlsx" target="_new" class="text-muted">Click  para descargar el formato</a>
+                        <a :href="massiveImport ? 'inventory/formats/Format_massive.xlsx' : '/formats/transaccion_ingreso_items.xlsx'" target="_new" class="text-muted">
+                            Click para descargar el formato
+                        </a>
+                        <el-tooltip v-if="massiveImport" class="item" effect="dark" placement="top">
+                            <div slot="content" style="max-width: 300px;">
+                                <strong>Formato de importación masiva:</strong><br/>
+                                • <strong>codigo_interno:</strong> Código del producto<br/>
+                                • <strong>tipo_transaccion:</strong> Código de transacción (ej: 02)<br/>
+                                • <strong>stock_1, stock_2, etc.:</strong> Stock representa el almacen y la cantidad para cada uno<br/>
+                                <br/>
+                                <em>Nota:</em> Las celdas vacías se ignoran, pero si pones 0 se creará el producto con stock cero en ese almacén.
+                            </div>
+                            <i class="el-icon-question ml-1" style="color: #409EFF; cursor: help;"></i>
+                        </el-tooltip>
                     </div>
                     <div class="col-12 col-sm-6 mt-2">
                         <el-dropdown>
@@ -21,7 +34,12 @@
                             </el-dropdown-menu>
                         </el-dropdown>
                     </div>
-                    <div class="col-12 mt-4">
+                    <div class="col-12 col-sm-6 mt-2">
+                        <el-checkbox v-model="massiveImport" class="ml-2">
+                            Importación masiva por almacenes
+                        </el-checkbox>
+                    </div>
+                    <div class="col-12 mt-4" v-if="!massiveImport">
                         <div class="form-group" :class="{'has-danger': errors.warehouse_id}">
                             <label class="control-label">Almacén</label>
                             <el-select v-model="warehouse_id">
@@ -35,8 +53,8 @@
                             <el-upload
                                 ref="upload"
                                 :headers="headers"
-                                :data="{'warehouse_id': warehouse_id}"
-                                action="/inventory/transaction/import/input"
+                                :data="uploadData"
+                                :action="uploadUrl"
                                 :show-file-list="true"
                                 :auto-upload="false"
                                 :multiple="false"
@@ -44,7 +62,7 @@
                                 :limit="1"
                                 :on-success="successUpload"
                                 accept=".xlsx, .xls">
-                                <el-button slot="trigger" type="primary">Seleccione un archivo (xls, xlsx) con la informacion a cargar...</el-button>
+                                <el-button slot="trigger" type="primary">Seleccione un archivo (xls, xlsx) con la información a cargar...</el-button>
                             </el-upload>
                         </div>
                         <small class="form-control-feedback" v-if="errors.file" v-text="errors.file[0]"></small>
@@ -56,16 +74,8 @@
                 </span>
             </form>
         </el-dialog>
-
     </div>
 </template>
-
-<style>
-.prevent-word-break {
-    word-break: keep-all;
-    display: inline-block;
-}
-</style>
 
 <script>
 export default {
@@ -75,12 +85,25 @@ export default {
             titleDialog: 'Importar ingresos',
             loading: false,
             resource: 'inventory',
-            loading_submit:false,
+            loading_submit: false,
             warehouse_id: null,
             warehouses: {},
             inventory_transactions: {},
             errors: {},
             headers: headers_token,
+            massiveImport: false, // NUEVO: para modo masivo
+        }
+    },
+    computed: {
+        uploadData() {
+            // Si es masivo, no se envía warehouse_id
+            return this.massiveImport ? {} : { 'warehouse_id': this.warehouse_id }
+        },
+        uploadUrl() {
+            // Puedes cambiar la URL si necesitas un endpoint diferente para masivo
+            return this.massiveImport
+                ? '/inventory/transaction/import/massive'
+                : '/inventory/transaction/import/input'
         }
     },
     methods: {
@@ -122,7 +145,7 @@ export default {
             }
         },
         async submit() {
-            if (!this.warehouse_id) {
+            if (!this.massiveImport && !this.warehouse_id) {
                 return this.$message.error('Debe seleccionar un Establecimiento')
             }
             this.loading_submit = true
