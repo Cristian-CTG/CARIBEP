@@ -298,20 +298,28 @@ class GlobalPayment extends ModelTenant
 
     public function getDocumentTypeDescription()
     {
-        $row = $this;
+        $record = $this->payment->associated_record_payment ?? null;
         $document_type = '';
 
-        if($row->payment->associated_record_payment->document_type || $row->payment->associated_record_payment->type_document)
-        {
-            $document_type = $row->payment->associated_record_payment->document_type->description ?? $row->payment->associated_record_payment->type_document->name;
-        }
-        elseif($row->instance_type === 'document_pos')
-        {
-            $document_type = $row->payment->associated_record_payment->getDocumentTypeDescription();
-        }
-        elseif(isset($row->payment->associated_record_payment->prefix))
-        {
-            $document_type = $row->payment->associated_record_payment->prefix;
+        if ($this->instance_type === 'purchase') {
+            // Para compras: validar document_type
+            if ($record && isset($record->document_type) && $record->document_type) {
+                $document_type = $record->document_type->description ?? $record->document_type->name ?? '';
+            }
+        } elseif ($this->instance_type === 'support_document') {
+            // Para documentos de soporte: validar type_document
+            if ($record && isset($record->type_document) && $record->type_document) {
+                $document_type = $record->type_document->description ?? $record->type_document->name ?? '';
+            }
+        } elseif ($this->instance_type === 'document_pos') {
+            // No tocar POS
+            $document_type = $record->getDocumentTypeDescription();
+        } elseif ($record && isset($record->prefix)) {
+            // Otros casos con prefijo
+            $document_type = $record->prefix;
+        } elseif ($record && isset($record->document_type) && $record->document_type) {
+            // Por defecto para documentos normales
+            $document_type = $record->document_type->description ?? $record->document_type->name ?? '';
         }
 
         return $document_type;

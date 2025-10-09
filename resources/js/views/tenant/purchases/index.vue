@@ -123,6 +123,13 @@
                                         :command="{action: 'pdf', id: row.id}">
                                         PDF
                                     </el-dropdown-item>                            
+
+                                    <el-dropdown-item :command="{action: 'labels', row: row}">
+                                        <span class="dropdown-item-content">
+                                            Etiquetas
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-printer text-muted"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="5" y="13" width="14" height="8" rx="2" /><polyline points="17 17 17 17.01" /><rect x="7" y="3" width="10" height="6" rx="2" /><path d="M17 7v4a2 2 0 0 1 2 2" /><path d="M7 7v4a2 2 0 0 0 -2 2" /></svg>
+                                        </span>
+                                    </el-dropdown-item>
                                 
                                     <el-dropdown-item 
                                         v-if="row.state_type_id != '11'" 
@@ -155,7 +162,10 @@
         </div>
         <barcode-config
             :show.sync="showBarcodeConfig"
-            :itemId="barcodeItemIds">
+            :itemId="barcodeItemIds"
+            :stock="barcodeItemQuantities"
+            :fromPurchase="fromPurchase"
+            @print-purchase-labels="handlePrintPurchaseLabels">
         </barcode-config>
 
 
@@ -190,6 +200,8 @@
                 showDialogPurchasePayments: false,
                 showImportDialog: false,
                 showBarcodeConfig: false,
+                barcodeItemQuantities: [],
+                fromPurchase: false,
                 barcodeItemIds: [],
                 initSearch: {
                     column: 'date_of_issue',
@@ -235,6 +247,34 @@
         created() {
         },
         methods: {
+            printPurchaseLabels(row) {
+                const items = (row.items || []).filter(it => it.item_id && it.quantity > 0);
+                if (items.length === 0) {
+                    this.$message.warning('No hay productos con cantidad mayor a 0 en esta compra.');
+                    return;
+                }
+                this.barcodeItemIds = items.map(it => it.item_id);
+                this.barcodeItemQuantities = items.map(it => parseInt(it.quantity) || 1);
+                this.fromPurchase = true;
+                this.showBarcodeConfig = true;
+            },
+            handlePrintPurchaseLabels({ width, height, pageWidth, columns, gapX, fields }) {
+                // Construye la URL y abre la impresión
+                const ids = this.barcodeItemIds;
+                const repeat = this.barcodeItemQuantities.join(',');
+                const params = new URLSearchParams({
+                    width,
+                    height,
+                    pageWidth,
+                    columns,
+                    gapX,
+                    repeat,
+                    ...fields,
+                }).toString();
+                const url = `/items/barcodes?ids=${ids.join(',')}&${params}`;
+                window.open(url, '_blank');
+                this.showBarcodeConfig = false;
+            },
             openBarcodeConfigForPurchase(row) {
                     console.log(row.items);
                     // Extrae los IDs de los productos de la compra
@@ -291,6 +331,9 @@
                         break;
                     case 'delete':
                         this.clickDelete(command.id);
+                        break;
+                    case 'labels':
+                        this.printPurchaseLabels(command.row);
                         break;
                     default:
                         break;

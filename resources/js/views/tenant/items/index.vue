@@ -241,6 +241,7 @@
                 items: [],
                 showBarcodeConfig: false,
                 barcodeItemId: null,
+                selectedStock: null,
             }
         },
         created() {
@@ -281,7 +282,14 @@
                     this.$message.warning('Seleccione al menos un producto.');
                     return;
                 }
-                this.barcodeItemId = [...this.selectedItems]; // pasa array de IDs
+                // Obtén todos los productos seleccionados (sin filtrar por stock)
+                const visibleRecords = this.$refs.dataTable.records || [];
+                const selectedRows = this.selectedItems
+                    .map(id => visibleRecords.find(r => r.id === id))
+                    .filter(item => !!item);
+
+                this.barcodeItemId = selectedRows.map(item => item.id);
+                this.selectedStock = selectedRows.map(item => parseFloat(item.stock));
                 this.showBarcodeConfig = true;
             },
             clickBarcodeConfig(row) {
@@ -289,7 +297,7 @@
                     return this.$message.error('Para generar el código de barras debe registrar el código interno.');
                 }
                 this.barcodeItemId = row.id;
-                this.selectedStock = row.stock;
+                this.selectedStock = parseFloat(row.stock);
                 this.showBarcodeConfig = true;
             },
             downloadBarcodePng(row) {

@@ -11,29 +11,33 @@
             width: 100%;
             height: 100%;
         }
+        .labels-sheet {
+            width: {{ $pageWidth }}mm;
+        }
         table.grid {
-            width: 90%;
-            height: 90%;
             border-collapse: separate;
-            border-spacing: {{ $gapX }}mm {{ $gapX }}mm; /* mismo espacio horizontal y vertical */
-            width: 100%;
-            height: 100%;
+            border-spacing: {{ $gapX }}mm {{ $gapX }}mm;
+            width: auto;
             table-layout: fixed;
-            border: 1px solid red;
+            border: 0.1px solid white;
         }
         td.label-cell {
             width: {{ $width }}mm;
+            max-width: {{ $width }}mm;
             height: {{ $height }}mm;
+            max-height: {{ $height }}mm;
             padding: 0;
             margin: 0;
             vertical-align: top;
             text-align: center;
             overflow: hidden;
-            border: 1px solid blue;
+            box-sizing: border-box;
         }
         .etiqueta-content {
             width: 100%;
+            max-width: 100%;
             height: 100%;
+            max-height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -41,11 +45,14 @@
             box-sizing: border-box;
             overflow: hidden;
             text-align: center;
-            border: 1px solid green;
         }
         .company, .details, .code, .price {
             box-sizing: border-box;
             margin-bottom: 0.2mm;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .company {
             font-size: {{ 0.10 * $height }}mm;
@@ -75,6 +82,7 @@
             height: auto;
             display: block;
             margin: 0 auto;
+            box-sizing: border-box;
         }
         .code {
             font-size: {{ 0.08 * $height }}mm;
@@ -90,82 +98,76 @@
 </head>
 <body>
     @php
+        $isMultiple = isset($items);
         $total = $repeat;
         $col = $columns;
         $rows = ceil($total / $col);
         $printed = 0;
     @endphp
-    @for($i = 0; $i < $rows; $i++)
+    <div class="labels-sheet">
         <table class="grid">
-            <tr>
-                @php
-                    $etiquetasRestantes = $total - $printed;
-                    $etiquetasEnFila = min($col, $etiquetasRestantes);
-                    $vaciasIzq = 0;
-                    $vaciasDer = 0;
-                    if($i == $rows - 1 && $etiquetasEnFila < $col) {
-                        $vaciasIzq = floor(($col - $etiquetasEnFila) / 2);
-                        $vaciasDer = $col - $etiquetasEnFila - $vaciasIzq;
-                    }
-                @endphp
+            @for($i = 0; $i < $rows; $i++)
+                <tr>
+                    @php
+                        $etiquetasRestantes = $total - $printed;
+                        $etiquetasEnFila = min($col, $etiquetasRestantes);
+                        $vaciasDer = ($i == $rows - 1) ? $col - $etiquetasEnFila : 0;
+                    @endphp
 
-                {{-- Celdas vacías a la izquierda --}}
-                @for($k = 0; $k < $vaciasIzq; $k++)
-                    <td class="label-cell"></td>
-                @endfor
-
-                {{-- Etiquetas --}}
-                @for($j = 0; $j < $etiquetasEnFila; $j++)
-                    <td class="label-cell">
-                        @if($printed < $total)
-                            <div class="etiqueta-content">
-                                <div class="company">{{ strtoupper($companyName) }}</div>
-                                @php
-                                    $details = [];
-                                    if($fields['name']) $details[] = $item->name;
-                                    if($fields['brand'] && $item->brand) $details[] = $item->brand->name;
-                                    if($fields['category'] && $item->category) $details[] = $item->category->name;
-                                    if($fields['color'] && $item->color) $details[] = $item->color->name;
-                                    if($fields['size'] && $item->size) $details[] = $item->size->name;
-                                    $detailsText = implode(' | ', $details);
-                                    $len = mb_strlen($detailsText);
-                                    $fontSize = $len > 50 ? 0.06 * $height : 0.08 * $height;
-                                @endphp
-                                <div class="details" style="font-size: {{ $fontSize }}mm;">
-                                    {{ $detailsText }}
-                                </div>
-                                <div class="barcode">
+                    {{-- Etiquetas --}}
+                    @for($j = 0; $j < $etiquetasEnFila; $j++)
+                        <td class="label-cell">
+                            @if($printed < $total)
+                                <div class="etiqueta-content">
+                                    <div class="company">{{ strtoupper($companyName) }}</div>
                                     @php
-                                        $colour = [0,0,0];
-                                        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
-                                        echo '<img style="max-width:80%;max-height:80%;height:auto;display:block;margin:0 auto;" src="data:image/png;base64,' .
-                                            base64_encode($generator->getBarcode($item->internal_id, $generator::TYPE_CODE_128, 1.2, 30, $colour)) .
-                                            '">';
+                                        // Soporte para uno o varios productos
+                                        $currentItem = $isMultiple ? $items[$printed] : $item;
+                                        $details = [];
+                                        if($fields['name']) $details[] = $currentItem->name;
+                                        if($fields['brand'] && $currentItem->brand) $details[] = $currentItem->brand->name;
+                                        if($fields['category'] && $currentItem->category) $details[] = $currentItem->category->name;
+                                        if($fields['color'] && $currentItem->color) $details[] = $currentItem->color->name;
+                                        if($fields['size'] && $currentItem->size) $details[] = $currentItem->size->name;
+                                        $detailsText = implode(' | ', $details);
+                                        $len = mb_strlen($detailsText);
+                                        $fontSize = $len > 50 ? 0.06 * $height : 0.08 * $height;
                                     @endphp
-                                </div>
-                                <div class="code">{{ $item->internal_id }}</div>
-                                @if($fields['price'])
-                                    <div class="price">
-                                        {{ $item->currency_type ? $item->currency_type->symbol : '$ ' }}
-                                        {{ number_format($item->sale_unit_price, 2) }}
+                                    <div class="details" style="font-size: {{ $fontSize }}mm;">
+                                        {{ $detailsText }}
                                     </div>
-                                @endif
-                            </div>
-                            @php $printed++; @endphp
-                        @endif
-                    </td>
-                @endfor
+                                    <div class="barcode">
+                                        @php
+                                            $barcodeWidth = min(3, round($width * 0.04));
+                                            $barcodeHeight = max(40, round($height * 0.7));
+                                            $colour = [0,0,0];
+                                            $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+                                            echo '<img style="max-width:95%;max-height:95%;height:auto;display:block;margin:0 auto; padding: 5px;" src="data:image/png;base64,' .
+                                                base64_encode($generator->getBarcode($currentItem->internal_id, $generator::TYPE_CODE_128, 1.2, 30, $colour)) .
+                                                '">';
+                                        @endphp
+                                    </div>
+                                    <div class="code">{{ $currentItem->internal_id }}</div>
+                                    @if($fields['price'])
+                                        <div class="price">
+                                            {{ $currentItem->currency_type ? $currentItem->currency_type->symbol : '$ ' }}
+                                            {{ number_format($currentItem->sale_unit_price, 2) }}
+                                        </div>
+                                    @endif
+                                </div>
+                                @php $printed++; @endphp
+                            @endif
+                        </td>
+                    @endfor
 
-                {{-- Celdas vacías a la derecha --}}
-                @for($k = 0; $k < $vaciasDer; $k++)
-                    <td class="label-cell"></td>
-                @endfor
+                    {{-- Celdas vacías a la derecha --}}
+                    @for($k = 0; $k < $vaciasDer; $k++)
+                        <td class="label-cell"></td>
+                    @endfor
 
-            </tr>
+                </tr>
+            @endfor
         </table>
-        @if($i < $rows - 1)
-            <div class="page-break"></div>
-        @endif
-    @endfor
+    </div>
 </body>
 </html>

@@ -50,8 +50,8 @@
                                     </td>
                                     <td>
                                         <div class="form-group mb-0" :class="{'has-danger': row.errors.payment_method_type_id}">
-                                            <el-select v-model="row.payment_method_type_id">
-                                                <el-option v-for="option in payment_method_types" :key="option.id" :value="option.id" :label="option.description"></el-option>
+                                            <el-select v-model="row.payment_method_id">
+                                                <el-option v-for="option in payment_methods" :key="option.id" :value="option.id" :label="option.name"></el-option>
                                             </el-select>
                                             <small class="form-control-feedback" v-if="row.errors.payment_method_type_id" v-text="row.errors.payment_method_type_id[0]"></small>
                                         </div>
@@ -148,6 +148,7 @@
                 records: [],
                 payment_destinations: [],
                 payment_method_types: [],
+                payment_methods: [],
                 headers: headers_token,
                 index_file: null,
                 fileList: [],
@@ -161,6 +162,7 @@
                 .then(response => {
                     this.payment_destinations = response.data.payment_destinations
                     this.payment_method_types = response.data.payment_method_types;
+                    this.payment_methods = response.data.payment_methods;
                 })
         },
         methods: {
@@ -219,6 +221,7 @@
                 this.records.push({
                     id: null,
                     date_of_payment: moment().format('YYYY-MM-DD'),
+                    payment_method_id: null,
                     payment_method_type_id: null,
                     payment_destination_id:null,
                     reference: null,
@@ -246,6 +249,7 @@
                     id: this.records[index].id,
                     purchase_id: this.purchaseId,
                     date_of_payment: this.records[index].date_of_payment,
+                    payment_method_id: this.records[index].payment_method_id,
                     payment_method_type_id: this.records[index].payment_method_type_id,
                     payment_destination_id: this.records[index].payment_destination_id,
                     reference: this.records[index].reference,

@@ -61,7 +61,7 @@
             <el-input-number
               class="w-100"
               v-model="pageWidth"
-              :min="60"
+              :min="50"
               :max="300"
               label="Ancho hoja"
               controls-position="right"
@@ -81,7 +81,7 @@
             />
             <div class="text-muted small text-center mt-1">Columnas</div>
           </div>
-          <div class="form-group mb-2">
+          <div class="form-group mb-2" v-if="!fromPurchase">
             <label class="font-weight-bold mb-1">Cantidad de etiquetas a imprimir:</label>
             <el-input-number
               class="w-100"
@@ -94,12 +94,20 @@
               :disabled="useStockAsRepeat"
             />
             <el-checkbox
-              v-if="stock !== null && stock > 0"
+              v-if="showMultiUseStock"
               class="ml-2"
               v-model="useStockAsRepeat"
               @change="onUseStockAsRepeat"
             >
-              Usar stock actual ({{ stock }})
+              Usar stock actual de cada producto
+            </el-checkbox>
+            <el-checkbox
+              v-else-if="showSingleUseStock"
+              class="ml-2"
+              v-model="useStockAsRepeat"
+              @change="onUseStockAsRepeat"
+            >
+              Usar stock actual ({{ singleStockLabel }})
             </el-checkbox>
           </div>
         </div>
@@ -127,8 +135,12 @@ export default {
     show: Boolean,
     itemId: [Number, Array],
     stock: {
-      type: Number,
+      type: [Number, Array, String],
       default: null,
+    },
+    fromPurchase: {
+      type: Boolean,
+      default: false,
     }
   },
   data() {
@@ -136,7 +148,7 @@ export default {
       localShow: this.show,
       width: 32,
       height: 25,
-      pageWidth: 105,
+      pageWidth: 100,
       columns: 3,
       gapX: 2,
       repeat: 15,
@@ -163,23 +175,84 @@ export default {
   watch: {
     show(val) {
       this.localShow = val;
+      this.localShow = val;
+      // Inicializar valores al abrir para evitar estados previos
+      if (val) {
+        this.useStockAsRepeat = false;
+        // Si es un solo item y hay stock, prellenar repeat con el stock; si no, dejar 1
+        if (!Array.isArray(this.itemId) && (typeof this.stock === 'number' || typeof this.stock === 'string')) {
+          this.repeat = parseInt(this.stock) || 1;
+        } else {
+          this.repeat = 1;
+        }
+      }
     },
     localShow(val) {
       if (!val) this.$emit('update:show', false);
+    },
+    itemId() {
+      if (this.useStockAsRepeat) this.applyStockToRepeat();
+    },
+    stock() {
+      if (this.useStockAsRepeat) this.applyStockToRepeat();
     }
   },
   mounted() {
     this.setDialogWidth();
     window.addEventListener('resize', this.setDialogWidth);
+    if (this.useStockAsRepeat) this.applyStockToRepeat();
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.setDialogWidth);
   },
+  computed: {
+    // Mostrar checkbox para múltiples items solo si todos tienen stock > 0
+    showMultiUseStock() {
+      if (Array.isArray(this.itemId) && Array.isArray(this.stock) && this.itemId.length > 0) {
+        return this.stock.every(s => parseFloat(s) > 0);
+      }
+      return false;
+    },
+    // Mostrar checkbox para item único solo si stock > 0
+    showSingleUseStock() {
+      // Solo muestra el checkbox si el stock es mayor a 0
+      return !Array.isArray(this.itemId) && (parseFloat(this.stock) > 0);
+    },
+    // Etiqueta legible para el checkbox de stock único
+    singleStockLabel() {
+      if (this.stock === null || this.stock === undefined) return '0';
+      const n = parseFloat(this.stock);
+      return Number.isFinite(n) ? (n % 1 === 0 ? String(n) : n.toFixed(2)) : String(this.stock);
+    }
+  },
   methods: {
     onUseStockAsRepeat(val) {
-      if (val && this.stock > 0) {
-        this.repeat = this.stock;
+      this.useStockAsRepeat = val;
+      if (val) {
+        this.applyStockToRepeat();
+      } else {
+        // restablecer a 1 o a un valor razonable
+        this.repeat = 1;
       }
+    },
+    applyStockToRepeat() {
+      if (this.useStockAsRepeat) {
+        // Si vienen varios items y stock es array -> CSV en mismo orden
+        if (Array.isArray(this.itemId) && Array.isArray(this.stock)) {
+          const idsLen = this.itemId.length;
+          const stocks = this.stock.slice(0, idsLen);
+          while (stocks.length < idsLen) stocks.push(0);
+          this.repeat = stocks.join(',');
+          return;
+        }
+        // Si es un solo item con stock numérico
+        if (!Array.isArray(this.itemId) && (typeof this.stock === 'number' || typeof this.stock === 'string')) {
+          const n = parseInt(this.stock) || 0;
+          this.repeat = n > 0 ? n : 0;
+          return;
+        }
+      }
+      // Si no está activo el checkbox, no tocar el repeat (deja el valor manual)
     },
     setRepeatToStock() {
       if (this.stock > 0) {
@@ -190,13 +263,20 @@ export default {
       this.localShow = false;
     },
     getPrintUrl() {
+      let repeatValue = this.repeat;
+      // Si hay varios productos y NO se usa el checkbox, repetir la cantidad para cada producto
+      if (Array.isArray(this.itemId) && !this.useStockAsRepeat) {
+        // Si repeat es un número, conviértelo a CSV para todos los productos
+        const qty = parseInt(this.repeat) || 1;
+        repeatValue = Array(this.itemId.length).fill(qty).join(',');
+      }
       const params = new URLSearchParams({
         width: this.width,
         height: this.height,
         pageWidth: this.pageWidth,
         columns: this.columns,
         gapX: this.gapX,
-        repeat: this.repeat,
+        repeat: repeatValue,
         ...this.fields,
       }).toString();
 
@@ -209,7 +289,19 @@ export default {
       }
     },
     printLabel() {
-      window.open(this.getPrintUrl(), '_blank');
+      if (this.fromPurchase) {
+            // Emite evento al padre para imprimir con cantidades de compra
+            this.$emit('print-purchase-labels', {
+                width: this.width,
+                height: this.height,
+                pageWidth: this.pageWidth,
+                columns: this.columns,
+                gapX: this.gapX,
+                fields: this.fields,
+            });
+        } else {
+            window.open(this.getPrintUrl(), '_blank');
+        }
     },
     setDialogWidth() {
       this.dialogWidth = window.innerWidth < 700 ? '95%' : '600px';
