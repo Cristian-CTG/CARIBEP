@@ -212,13 +212,17 @@
                 try {
                     const response = await this.$http.post(`/${this.resource}/run-event`, { all_pending: true })
                     if (response.data.success) {
-                        this.$message.success(response.data.message)
                         this.$eventHub.$emit('reloadData')
                     } else {
-                        this.$message.error(response.data.message)
+                        this.$message.error(response.data.message || 'Error al procesar eventos masivos')
                     }
                 } catch (e) {
-                    this.$message.error('Error al procesar eventos masivos')
+                    // Si es timeout, mostrar mensaje personalizado
+                    if (e.response && e.response.status === 504) {
+                        this.$message.info('El proceso masivo está en curso. Puede continuar trabajando, los eventos se procesarán en segundo plano.')
+                    } else {
+                        this.$message.error('Error al procesar eventos masivos')
+                    }
                 }
                 this.loading = false
             },
