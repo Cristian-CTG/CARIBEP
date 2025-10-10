@@ -79,9 +79,11 @@
                         placeholder="Buscar productos"
                         size="medium"
                         @select="handleSelectProduct"
+                        @input="onAutocompleteInput"
                         class="m-bottom"
                         :trigger-on-focus="false"
                         autofocus
+                        style="width: 100% !important;"
                     >
                         <el-button slot="append" icon="el-icon-plus" @click.prevent="showDialogNewItem = true"></el-button>
                     </el-autocomplete>
@@ -966,6 +968,7 @@ export default {
         },
         async querySearchAsync(queryString, cb) {
             if (!queryString || queryString.length < 1) {
+                this.filterItems();
                 return cb([]);
             }
             try {
@@ -974,6 +977,12 @@ export default {
                     url += `&cat=${encodeURIComponent(this.category_selected)}`;
                 }
                 const response = await this.$http.get(url);
+                // Actualizar la lista de productos mostrados
+                this.items = response.data.data;
+                this.pagination = response.data.meta;
+                this.pagination.per_page = parseInt(response.data.meta.per_page);
+                this.pagination.total = response.data.meta.total;
+                this.sortItemsByFavorites();
                 let results = [];
                 response.data.data.forEach(item => {
                     let stock = '';
@@ -988,6 +997,9 @@ export default {
                 });
                 cb(results);
             } catch (e) {
+                // En caso de error, limpiar todo
+                this.items = [];
+                this.pagination = { total: 0, per_page: 10, current_page: 1 };
                 cb([]);
             }
         },
@@ -995,6 +1007,11 @@ export default {
             // Al seleccionar, agrega el producto
             this.clickAddItem(option.itemData, 0);
             this.input_item = '';
+        },
+        onAutocompleteInput(value) {
+            if (!value || value.length === 0) {
+                this.filterItems();
+            }
         },
         async toggleFavorite(item) {
             this.loading = true;
