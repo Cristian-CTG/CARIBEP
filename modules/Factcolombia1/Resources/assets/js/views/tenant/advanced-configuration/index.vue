@@ -137,6 +137,20 @@
                                             <small class="form-control-feedback" v-if="errors.default_format_print" v-text="errors.default_format_print[0]"></small>
                                         </div>
                                     </div>
+                                    <div class="col-md-4 mt-4" :class="{'has-danger': errors.default_tax_id}">
+                                        <label class="control-label">
+                                            Impuesto predeterminado
+                                            <el-tooltip class="item" effect="dark" content="Este impuesto se aplicará automáticamente al crear nuevos productos" placement="top-start">
+                                                <i class="fa fa-info-circle"></i>
+                                            </el-tooltip>
+                                        </label>
+                                        <div class="form-group">
+                                            <el-select v-model="form.default_tax_id" placeholder="Seleccione impuesto" @change="submit" filterable clearable>
+                                                <el-option v-for="option in taxes" :key="option.id" :value="option.id" :label="option.name"></el-option>
+                                            </el-select>
+                                            <small class="form-control-feedback" v-if="errors.default_tax_id" v-text="errors.default_tax_id[0]"></small>
+                                        </div>
+                                    </div>
                                     <div class="col-12">
                                         <hr style="border-top: 3px solid #e0e0e0;">
                                         <h4 class="mt-3 mb-2">Campos personalizados para plantilla</h4>
@@ -427,10 +441,12 @@ export default {
             resolutions: [],
             resolution_id: null,
             loading_delete: false,
+            taxes: [],
         }
     },
     created() {
         this.getRecord()
+        this.getTaxes()
     },
     methods: {
         async getRecord() {
@@ -438,6 +454,16 @@ export default {
             await this.$http.get(`/${this.resource}/record`).then(response => {
                 this.form = response.data.data
             })
+        },
+        async getTaxes() {
+            try {
+                const response = await this.$http.get(`/${this.resource}/taxes`);
+                if (response.data.success) {
+                    this.taxes = response.data.data;
+                }
+            } catch (error) {
+                console.error('Error al cargar impuestos:', error);
+            }
         },
         initForm() {
             this.errors = {}
@@ -462,6 +488,7 @@ export default {
                 default_format_print: 1,
                 foot_note: '',
                 head_note: '',
+                default_tax_id: null,
                 // notes: '',
             }
         },

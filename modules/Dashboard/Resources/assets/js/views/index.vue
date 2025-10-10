@@ -1,6 +1,6 @@
 <template>
-  <div v-if="typeUser == 'admin'">
-    <header
+  <div v-if="typeUser == 'admin'">   
+    <!-- <header
       class="page-header"
       style="display: flex; justify-content: space-between; align-items: center"
     >
@@ -35,7 +35,7 @@
           </svg>
         </el-button>
       </div>
-    </header>
+    </header>  -->
     <div class="row">
       <div class="col-12" v-if="resolutions.length > 0">
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -48,11 +48,13 @@
       </div>
       <div class="col-xl-12">
         <section class="card card-featured-left card-featured-secondary mb-3">
-          <div class="card-body py-2">
+          <div class="card-body py-2 mt-0">
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <h4 class="card-title">Mi Plan</h4>
-                <div v-if="!electronicConsumption || !electronicConsumption.plan_name || electronicConsumption.plan_name === 'Sin plan'" class="alert alert-danger mb-0 py-2">
+                <div v-if="electronicConsumption === null" class="loading-container">
+                </div>
+                <div v-else-if="!electronicConsumption.plan_name || electronicConsumption.plan_name === 'Sin plan'" class="alert alert-danger mb-0 py-2">
                   No tiene un plan asignado, comuníquese con su administrador.
                 </div>
                 <div v-else class="small text-muted">
@@ -62,13 +64,16 @@
                   <span><strong>Límite:</strong>{{ electronicConsumption.plan_limit_documents == 0 ? 'Ilimitado' : electronicConsumption.plan_limit_documents }}</span>
                 </div>
               </div>
-              <div v-if="electronicConsumption">
+              <div v-if="electronicConsumption && electronicConsumption.plan_name && electronicConsumption.plan_name !== 'Sin plan'">
                 <span class="badge badge-primary p-2">
                   <strong>Total:</strong>{{ electronicConsumption.total_documents }} / {{ electronicConsumption.plan_limit_documents == 0 ? 'Ilimitado' : electronicConsumption.plan_limit_documents }}
                 </span>
               </div>
             </div>
-            <div v-if="electronicConsumption" class="mt-2">
+            <div v-if="electronicConsumption === null" class="mt-2 text-center py-3">
+              <i class="fas fa-circle-notch fa-spin text-primary fa-2x"></i>
+            </div>
+            <div v-else-if="electronicConsumption && electronicConsumption.plan_name && electronicConsumption.plan_name !== 'Sin plan'" class="mt-2">
               <table class="table table-sm table-borderless mb-0">
                 <tbody>
                   <tr>
@@ -82,13 +87,10 @@
                 </tbody>
               </table>
             </div>
-            <div v-else>
-              <el-skeleton rows="1"></el-skeleton>
-            </div>
           </div>
         </section>
       </div>
-      <div class="col-xl-12 px-0" v-show="showFilters">
+      <div class="col-xl-12 px-0">
         <section class="card card-featured-secondary">
           <div class="card-body">
             <div class="filters-container">
@@ -855,6 +857,14 @@
 .amount-danger{
   color: #e9797e !important;
 }
+.loading-container {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+}
+.loading-container i {
+  font-size: 18px;
+}
 @media (max-width: 525px) {
   .filters-container {
     flex-wrap: wrap;
@@ -870,6 +880,11 @@
   .filter-item el-date-picker {
     width: 100% !important;
   }
+}
+@media only screen and (min-width: 768px) {
+    html.fixed .inner-wrapper {
+        padding-top: 60px;
+    }
 }
 </style>
 <script>

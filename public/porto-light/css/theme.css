@@ -21095,6 +21095,8 @@ html.dark ul.nav-main li.nav-description{
 }
 .login-container .form-group input.input-password::placeholder{
     font-size: 1rem !important;
+    transform: translateY(5px);
+    display: inline-block; 
 }
 .login-container .btn-signin {
     border-radius: 8px;

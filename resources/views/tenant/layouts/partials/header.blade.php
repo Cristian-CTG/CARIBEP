@@ -1,7 +1,11 @@
 <header class="header">
     <div class="logo-container">
-        <div class="sidebar-toggle p-1" data-toggle-class="sidebar-left-collapsed" data-target="html"
-            data-fire-event="sidebar-left-toggle">
+        <div class="sidebar-toggle p-1" 
+            data-toggle-class="sidebar-left-collapsed" 
+            data-target="html"
+            data-fire-event="sidebar-left-toggle"
+            id="sidebar-toggle-btn"
+            style="cursor: pointer;">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-panel-left" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path></svg>
         </div>
         <div class="d-md-none toggle-sidebar-left" data-toggle-class="sidebar-left-opened" data-target="html" data-fire-event="sidebar-left-opened">
@@ -87,9 +91,15 @@
         </li>
         @endif
         <span class="separator"></span>
-        <li class="d-inline-block">
-            <a role="menuitem" class="nav-link btn-header mr-2" id="fullscreen-btn" title="Pantalla completa" style="font-size: 16px" data-toggle="tooltip">
-                <i id="fullscreen-icon" class="fas fa-expand"></i>
+        <li class="d-inline-block mr-2">
+            <a role="menuitem" class="nav-link btn-header" id="theme-toggle-btn" title="Cambiar tema" data-toggle="tooltip">
+                @php            
+                    $currentTheme = isset($visual) && $visual->bg === 'dark' ? 'dark' : 'light';
+                @endphp
+
+                <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg"  width="22"  height="22"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-sun" style="display: {{ $currentTheme === 'light' ? 'inline' : 'none' }};"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" /></svg>
+
+                <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg"  width="22"  height="22"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-moon" style="display: {{ $currentTheme === 'dark' ? 'inline' : 'none' }};"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" /></svg>
             </a>
         </li>
         <span class="separator"></span>
@@ -217,29 +227,137 @@ function toggleSupportSidebar() {
     sidebar.classList.toggle('show');
     backdrop.classList.toggle('show');
 }
-document.addEventListener('DOMContentLoaded', function() {
-    const btn = document.getElementById('fullscreen-btn');
-    const icon = document.getElementById('fullscreen-icon');
 
-    function updateIcon() {
-        if (document.fullscreenElement) {
-            icon.classList.remove('fa-expand');
-            icon.classList.add('fa-compress');
+document.addEventListener('DOMContentLoaded', function() {
+    // Theme Toggle
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const themeIconLight = document.getElementById('theme-icon-light');
+    const themeIconDark = document.getElementById('theme-icon-dark');
+
+    // Sidebar Toggle - Guardar estado sin recargar
+    const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+    if (sidebarToggleBtn) {
+        sidebarToggleBtn.addEventListener('click', function() {
+            // Esperar a que la clase se aplique
+            setTimeout(() => {
+                const isCollapsed = document.documentElement.classList.contains('sidebar-left-collapsed');
+                
+                // Primero obtener la configuración actual
+                fetch('/configurations/record', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(currentConfig => {
+                    // Actualizar solo el campo compact_sidebar
+                    const configData = currentConfig.data || currentConfig;
+                    configData.compact_sidebar = isCollapsed ? 1 : 0;
+                    
+                    // Guardar la configuración completa
+                    return fetch('/configurations', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(configData)
+                    });
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Estado del sidebar guardado:', isCollapsed ? 'contraído' : 'expandido');
+                    } else {
+                        console.error('Error en la respuesta:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al guardar estado del sidebar:', error);
+                });
+            }, 100);
+        });
+    }
+
+    // Obtener el tema actual desde el HTML
+    function getCurrentTheme() {
+        const htmlElement = document.documentElement;
+        // Verificar si tiene la clase dark
+        if (htmlElement.classList.contains('dark')) {
+            return 'dark';
+        }
+        // Verificar el atributo data-theme
+        const dataTheme = htmlElement.getAttribute('data-theme');
+        if (dataTheme) {
+            return dataTheme;
+        }
+        // Por defecto light
+        return 'light';
+    }
+
+    // Actualizar el icono según el tema
+    function updateThemeIcon(theme) {
+        if (theme === 'dark') {
+            // Modo oscuro: mostrar luna
+            themeIconLight.style.display = 'none';
+            themeIconDark.style.display = 'inline';
         } else {
-            icon.classList.remove('fa-compress');
-            icon.classList.add('fa-expand');
+            // Modo claro: mostrar sol
+            themeIconLight.style.display = 'inline';
+            themeIconDark.style.display = 'none';
         }
     }
 
-    btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-        } else {
-            document.exitFullscreen();
-        }
-    });
+    // El icono ya se renderiza correctamente desde el servidor, no necesitamos inicializarlo
+    // Solo actualizamos al hacer click
 
-    document.addEventListener('fullscreenchange', updateIcon);
+    // Cambiar tema al hacer click
+    themeToggleBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const currentTheme = getCurrentTheme();
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        // Actualizar icono inmediatamente para feedback visual
+        updateThemeIcon(newTheme);
+        
+        // Obtener el tema actual del sidebar (si existe)
+        const currentSidebarTheme = document.documentElement.getAttribute('data-sidebar-theme') || 
+                                   (document.querySelector('.sidebar-left')?.classList.contains('sidebar-dark') ? 'dark' : 'light');
+        
+        // Enviar petición al servidor con fetch para mejor manejo de errores
+        fetch('/configurations/visual_settings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: JSON.stringify({
+                bg: newTheme,
+                sidebars: currentSidebarTheme
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Tema cambiado a:', newTheme);
+                // Recargar la página para aplicar el nuevo tema
+                setTimeout(() => location.reload(), 100);
+            } else {
+                // Revertir icono si falla
+                updateThemeIcon(currentTheme);
+                console.error('Error al cambiar tema:', data.message);
+                alert('Error al cambiar el tema. Por favor, intente nuevamente.');
+            }
+        })
+        .catch(error => {
+            // Revertir icono si falla
+            updateThemeIcon(currentTheme);
+            console.error('Error al cambiar tema:', error);
+            alert('Error de conexión. Por favor, intente nuevamente.');
+        });
+    });
 });
 </script>

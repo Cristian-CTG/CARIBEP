@@ -514,6 +514,7 @@
                 account_sale_configurations: [],
                 show_has_igv:true,
                 have_account:false,
+                default_tax_id:null,
                 item_unit_type:{
                     id:null,
                     unit_type_id:null,
@@ -545,6 +546,10 @@
                     this.attribute_types = response.data.attribute_types
                     this.configuration = response.data.configuration
                     this.account_sale_configurations = response.data.account_sale_configurations
+                    this.default_tax_id = response.data.default_tax_id
+                    if (!this.recordId && this.default_tax_id) {
+                        this.form.tax_id = this.default_tax_id
+                    }
 
                     // this.form.sale_affectation_igv_type_id = (this.affectation_igv_types.length > 0)?this.affectation_igv_types[0].id:null
                     // this.form.purchase_affectation_igv_type_id = (this.affectation_igv_types.length > 0)?this.affectation_igv_types[0].id:null
@@ -713,6 +718,9 @@
                 }
                 this.show_has_igv = true
                 this.enabled_percentage_of_profit = false
+                if (!this.recordId && this.$refs && this.taxes && this.default_tax_id) {
+                    this.form.tax_id = this.default_tax_id
+                }
             },
             onSuccess(response, file, fileList) {
                 if (response.success) {

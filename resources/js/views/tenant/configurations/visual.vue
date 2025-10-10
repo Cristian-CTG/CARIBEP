@@ -20,21 +20,7 @@
             </div>
             <div v-if="typeUser != 'integrator'">
 
-                <div class="switch-container">
-                    <h5>Tema de la interfaz</h5>
-                    <el-switch
-                        v-model="visuals.bg"
-                        active-text="Oscuro"
-                        inactive-text="Claro"
-                        active-value="dark"
-                        inactive-value="light"
-                        active-color="#383f48"
-                        inactive-color="#ccc"
-                        @change="submit">
-                    </el-switch>
-                </div>
-
-                <div class="switch-container pt-3">
+                <!-- <div class="switch-container">
                     <h5>Tema del menú lateral</h5>
                     <el-switch
                         v-model="visuals.sidebars"
@@ -46,9 +32,9 @@
                         inactive-color="#ccc"
                         @change="submit">
                     </el-switch>
-                </div>
+                </div> -->
 
-                <div class="pt-3 switch-container">
+                <!-- <div class="pt-3 switch-container">
                     <h5>Menú lateral contraído</h5>
                     <div :class="{'has-danger': errors.compact_sidebar}">
                         <el-switch
@@ -60,7 +46,7 @@
                         <br>
                         <small class="form-control-feedback" v-if="errors.compact_sidebar" v-text="errors.compact_sidebar[0]"></small>
                     </div>
-                </div>
+                </div> -->
 
                 <div class="pt-3">
                     <h5>Visualización de productos en POS</h5>

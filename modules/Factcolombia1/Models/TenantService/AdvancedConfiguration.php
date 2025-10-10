@@ -46,6 +46,7 @@ class AdvancedConfiguration extends Model
         'foot_note',
         'head_note',
         'notes',
+        'default_tax_id',
     ];
 
     protected $casts = [
@@ -95,6 +96,7 @@ class AdvancedConfiguration extends Model
             'foot_note' => $this->foot_note,
             'head_note' => $this->head_note,
             'notes' => $this->notes,
+            'default_tax_id' => $this->default_tax_id,
         ];
 
     }

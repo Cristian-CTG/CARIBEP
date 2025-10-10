@@ -41,6 +41,7 @@ use Illuminate\Support\Facades\Log;
 use Modules\Item\Models\Color;
 use Modules\Item\Models\Size;
 use Modules\Accounting\Models\ChartAccountSaleConfiguration;
+use Modules\Factcolombia1\Models\TenantService\AdvancedConfiguration;
 
 
 class ItemController extends Controller
@@ -139,10 +140,12 @@ class ItemController extends Controller
         $colors = Color::all();
         $sizes = Size::all();
         $configuration = Configuration::select('affectation_igv_type_id')->firstOrFail();
+        $advanced_configuration = AdvancedConfiguration::first();
         $account_sale_configurations = ChartAccountSaleConfiguration::all();
+        $default_tax_id = $advanced_configuration ? $advanced_configuration->default_tax_id : null;
 
         return compact('unit_types', 'attribute_types','warehouses', 'accounts', 'tags', 'categories', 'brands',
-                        'configuration', 'taxes', 'currency_types','colors','sizes','account_sale_configurations');
+                        'configuration', 'taxes', 'currency_types','colors','sizes','account_sale_configurations', 'default_tax_id');
     }
 
     public function record($id)

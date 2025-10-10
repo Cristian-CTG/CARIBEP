@@ -10,6 +10,7 @@ use Modules\Factcolombia1\Models\TenantService\AdvancedConfiguration;
 use Modules\Factcolombia1\Http\Requests\Tenant\AdvancedConfigurationRequest;
 use App\Models\Tenant\Document;
 use Illuminate\Support\Facades\Log;
+use Modules\Factcolombia1\Models\Tenant\Tax;
 
 
 class AdvancedConfigurationController extends Controller
@@ -24,6 +25,16 @@ class AdvancedConfigurationController extends Controller
     {
         $record = new AdvancedConfigurationResource(AdvancedConfiguration::firstOrFail());
         return  $record;
+    }
+
+    public function getTaxes()
+    {
+        $taxes = Tax::where('is_retention', false)->get();
+        
+        return [
+            'success' => true,
+            'data' => $taxes
+        ];
     }
 
     public function store(AdvancedConfigurationRequest $request) {
