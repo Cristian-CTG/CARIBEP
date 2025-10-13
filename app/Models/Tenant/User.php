@@ -176,13 +176,16 @@ class User extends Authenticatable
         // 6 - Punto de venta (POS)
         // 7 - Dashboard
         // 8 - Inventario
+        // 9 - Contabilidad
         // 10 - Ecommerce
         // 12 - Finanzas
         // 13 - Nóminas
         // 20 - Factura del sector salud
         // 21 - RADIAN
+        // 22 - Contactos
+        // 23 - Producto
 
-        return [1,2,4,5,6,7,8,9,10,12,13,20,21];
+        return [1,2,4,5,6,7,8,9,10,12,13,20,21,22,23];
     }
 
 

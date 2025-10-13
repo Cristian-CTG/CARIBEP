@@ -105,6 +105,8 @@ class RedirectModule
             'payroll'        => 'tenant.payroll.document-payrolls.index',
             'radian'         => 'tenant.co-radian-events-manage.index',
             'invoicehealth'  => 'tenant.co-documents-health.create',
+            'contacts'       => 'tenant.persons.index',      // Nuevo módulo Contactos
+            'products'       => 'tenant.items.index',
         ];
 
         // Busca el primer módulo activo que tenga ruta
@@ -113,6 +115,9 @@ class RedirectModule
                 continue;
             }
             if (isset($routes[$activeModule])) {
+                if ($activeModule === 'contacts') {
+                    return redirect()->route($routes[$activeModule], ['type' => 'customers']); // Por defecto, redirige a 'customers'
+                }
                 return redirect()->route($routes[$activeModule]);
             }
         }
@@ -134,8 +139,11 @@ class RedirectModule
 
     private function getGroup($path, $module){
 
-        if($path[0] == "documents" || $path[0] == "quotations" || $path[0] == "items" || $path[0] == "summaries" || $path[0] == "voided"|| $path[0] == "co-documents" ) {
+        if($path[0] == "documents" || $path[0] == "quotations" || $path[0] == "summaries" || $path[0] == "voided"|| $path[0] == "co-documents" ) {
             return "documents";
+        }
+        if($path[0] == "items" || $path[0] == "categories" || $path[0] == "brands") {
+            return "products";
         }
         if($path[0] == "dashboard") {
             return "dashboard";
@@ -159,8 +167,7 @@ class RedirectModule
             return "configuration";
         }
         if($path[0] == "persons") {
-            if($path[1] ?? '' == "suppliers") return "purchases";
-            if($path[1] ?? '' == "customers") return "documents";
+            return "contacts";
         }
         if(in_array($path[0], ["pos", "cash"])) {
             return "pos";

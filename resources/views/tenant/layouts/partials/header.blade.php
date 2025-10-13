@@ -52,7 +52,7 @@
                 <span>GCP</span>
             </a>
             @endif
-            @if(in_array('inventory', $vc_modules))
+            @if(in_array('products', $vc_modules))
             <a href="{{ route('tenant.items.index') }}"
                 title="Productos"
                 class="topbar-links"
@@ -62,7 +62,7 @@
                 <span>PRO</span>
             </a>
             @endif
-            @if(in_array('reports', $vc_modules))
+            @if(in_array('contacts', $vc_modules))
             <a href="{{ route('tenant.persons.index', ['type' => 'customers']) }}"
                 title="Nuevo Cliente"
                 class="topbar-links"
