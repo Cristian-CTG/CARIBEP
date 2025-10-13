@@ -58,6 +58,10 @@ class DocumentPayrollAdjustNoteController extends Controller
                             ->whereJsonContains('establishment_ids', $establishment_id);
                     });
             })
+            ->where(function($query) {
+                $query->whereNull('resolution_date_end')
+                    ->orWhere('resolution_date_end', '>=', now()->format('Y-m-d'));
+            })
             ->get();
 
         // nomina eliminacion

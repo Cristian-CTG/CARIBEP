@@ -117,6 +117,10 @@ class SupportDocumentController extends Controller
                         }
                     });
             })
+            ->where(function($query) {
+                $query->whereNull('resolution_date_end')
+                    ->orWhere('resolution_date_end', '>=', now()->format('Y-m-d'));
+            })
             ->get();
             
         $payment_methods = PaymentMethod::get();
