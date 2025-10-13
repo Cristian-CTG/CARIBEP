@@ -20,6 +20,8 @@ use Modules\Item\Models\ItemLotsGroup;
 use Barryvdh\DomPDF\Facade as PDF;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\Inventory\Imports\TransactionInputImport;
+use Modules\Inventory\Exports\FormatMassiveExport;
+use Modules\Inventory\Imports\TransactionMassiveImport;
 
 
 class InventoryController extends Controller
@@ -93,6 +95,11 @@ class InventoryController extends Controller
             'warehouses' => $this->optionsWarehouse(),
             'inventory_transactions' => $this->optionsInventoryTransaction($type),
         ];
+    }
+
+    public function downloadFormatMassive()
+    {
+        return Excel::download(new FormatMassiveExport, 'Format_massive.xlsx');
     }
 
     public function store(Request $request)
@@ -419,6 +426,45 @@ class InventoryController extends Controller
         return [
             'success' => true,
             'message' => 'Importación exítosa.'
+        ];
+    }
+
+    public function transactionImportMassive(Request $request)
+    {
+        try {
+            if ($request->hasFile('file')) {
+                Excel::import(new TransactionMassiveImport, $request->file('file'));
+            }
+        }
+        catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+
+            $errors = [];
+            foreach ($failures as $failure) {
+                $errors[] = [
+                    'row' => $failure->row(),
+                    'attribute' => $failure->attribute(),
+                    'errors' => $failure->errors(),
+                    'values' => $failure->values(),
+                ];
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Errores de validación durante la importación masiva.',
+                'errors' => $errors
+            ], 422);
+        }
+        catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+
+        return [
+            'success' => true,
+            'message' => 'Importación masiva exitosa.'
         ];
     }
 
