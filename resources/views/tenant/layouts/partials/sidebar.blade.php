@@ -351,7 +351,7 @@
                         </li>
                         @endif
                         {{-- Nuevo menú Contactos con clientes y proveedores --}}
-                        @if(auth()->user()->type != 'integrator' && (in_array('documents', $vc_modules) || in_array('purchases', $vc_modules)))
+                        @if(auth()->user()->type != 'integrator' && (in_array('contacts', $vc_modules) ))
                         <li class="nav-parent
                             {{ ($path[0] === 'persons' && in_array($path[1], ['customers', 'suppliers'])) ? 'nav-active nav-expanded' : '' }}
                             ">
@@ -360,14 +360,12 @@
                                 <span>Contactos</span>
                             </a>
                             <ul class="nav nav-children">
-                                @if(in_array('purchases', $vc_modules))
+                                @if(in_array('contacts', $vc_modules))
                                 <li class="{{ ($path[0] === 'persons' && $path[1] === 'suppliers') ? 'nav-active' : '' }}">
                                     <a class="nav-link" href="{{route('tenant.persons.index', ['type' => 'suppliers'])}}">
                                         Proveedores
                                     </a>
                                 </li>
-                                @endif
-                                @if(in_array('documents', $vc_modules))
                                 <li class="{{ ($path[0] === 'persons' && $path[1] === 'customers') ? 'nav-active' : '' }}">
                                     <a class="nav-link" href="{{route('tenant.persons.index', ['type' => 'customers'])}}">
                                         Clientes
@@ -379,7 +377,7 @@
                         @endif
 
                         {{-- Nuevo menú Productos (antes en Catálogos) colocado debajo de Clientes --}}
-                        @if(in_array('documents', $vc_modules) && auth()->user()->type != 'integrator')
+                        @if(in_array('products', $vc_modules) && auth()->user()->type != 'integrator')
                         <li class="nav-parent
                             {{ ($path[0] === 'items')?'nav-active nav-expanded':'' }}
                             {{ ($path[0] === 'categories')?'nav-active nav-expanded':'' }}
