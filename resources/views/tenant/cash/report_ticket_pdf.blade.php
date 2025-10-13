@@ -30,9 +30,6 @@
         $first_document = $list->first()->document_pos->series . '-' . $list->first()->document_pos->number;
         $last_document = $list->last()->document_pos->series . '-' . $list->last()->document_pos->number;
     }
-    foreach ($methods_payment as $method) {
-        $method->transaction_count = 0;
-    }
     foreach ($cash_documents as $cash_document) {
         if ($cash_document->document_pos) {
             $cash_income += $cash_document->document_pos->getTotalCash();

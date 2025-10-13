@@ -238,14 +238,47 @@ class CashController extends Controller
             return !is_null($doc->expense_payment_id);
         })->map->expense_payment;
 
-        // Inicialización de methods_payment
-        $methods_payment = PaymentMethodType::all()->map(function($row) {
-            return (object)[
-                'id' => $row->id,
-                'name' => $row->description,
-                'sum' => 0
-            ];
-        });
+        $methods_payment = collect();
+        
+        foreach ($filtered_documents as $cash_document) {
+            if ($cash_document->document_pos && $cash_document->document_pos->payments) {
+                foreach ($cash_document->document_pos->payments as $payment) {
+                    $method_key = null;
+                    $method_name = '';
+                    
+                    if ($payment->payment_method_type_id) {
+                        $method_key = 'type_' . $payment->payment_method_type_id;
+                        $method_name = $payment->payment_method_type 
+                            ? $payment->payment_method_type->description 
+                            : 'Método no especificado';
+                    } elseif ($payment->payment_method_id) {
+                        $method_key = 'method_' . $payment->payment_method_id;
+                        $method_name = $payment->payment_method 
+                            ? $payment->payment_method->name 
+                            : 'Método no especificado';
+                    }
+                    
+                    if ($method_key) {
+                        if (!$methods_payment->has($method_key)) {
+                            $methods_payment->put($method_key, (object)[
+                                'id' => $method_key,
+                                'name' => $method_name,
+                                'sum' => 0,
+                                'transaction_count' => 0
+                            ]);
+                        }
+                        
+                        $method = $methods_payment->get($method_key);
+                        $method->sum += $payment->payment;
+                        $method->transaction_count++;
+                    }
+                }
+            }
+        }
+
+        $methods_payment = $methods_payment->filter(function($method) {
+            return $method->sum > 0;
+        })->values();
 
         // Se recuperan las categorías
         $categories = Category::all()->pluck('name', 'id');
@@ -272,7 +305,7 @@ class CashController extends Controller
             "expensePayments",
             "electronic_type",
             "is_resumido",
-            "filtered_documents" // Agregamos los documentos filtrados
+            "filtered_documents"
         ));
 
         $filename = "Reporte_POS - {$cash->user->name} - {$cash->date_opening} {$cash->time_opening}";
@@ -287,33 +320,66 @@ class CashController extends Controller
         $company = Company::first();
         $only_head = $type === 'simple' ? 'resumido' : null;
 
-        // FILTRO igual que en report()
-        if ($electronic_type === 'resumido') {
-            $filtered_documents = $cash->cash_documents()
-                ->whereHas('document_pos', function($query) use ($cash) {
-                    $query->whereDate('date_of_issue', $cash->date_opening);
-                })->get();
-        } else {
-            $filtered_documents = $cash->cash_documents()
-                ->whereHas('document_pos', function($query) use ($cash, $electronic_type) {
-                    $query->whereDate('date_of_issue', $cash->date_opening);
-                    if ($electronic_type !== 'all') {
-                        $query->where('electronic', $electronic_type);
-                    }
-                })->get();
-        }
+        $start = $cash->date_opening . ' ' . $cash->time_opening;
+        $end = $cash->date_closed
+            ? $cash->date_closed . ' ' . $cash->time_closed
+            : $cash->date_opening . ' 23:59:59';
+
+        $filtered_documents = $cash->cash_documents()
+            ->whereHas('document_pos', function($query) use ($start, $end, $electronic_type) {
+                $query->whereRaw("created_at >= ?", [$start])
+                    ->whereRaw("created_at <= ?", [$end]);
+                if ($electronic_type !== 'all' && $electronic_type !== 'resumido') {
+                    $query->where('electronic', $electronic_type);
+                }
+            })->get();
 
         $cashEgress = $filtered_documents->sum(function ($cashDocument) {
             return $cashDocument->expense_payment ? $cashDocument->expense_payment->payment : 0;
         });
 
-        $methods_payment = PaymentMethodType::all()->map(function($row) {
-            return (object)[
-                'id' => $row->id,
-                'name' => $row->description,
-                'sum' => 0
-            ];
-        });
+        $methods_payment = collect();
+        
+        foreach ($filtered_documents as $cash_document) {
+            if ($cash_document->document_pos && $cash_document->document_pos->payments) {
+                foreach ($cash_document->document_pos->payments as $payment) {
+                    $method_key = null;
+                    $method_name = '';
+                    
+                    if ($payment->payment_method_type_id) {
+                        $method_key = 'type_' . $payment->payment_method_type_id;
+                        $method_name = $payment->payment_method_type 
+                            ? $payment->payment_method_type->description 
+                            : 'Método no especificado';
+                    } elseif ($payment->payment_method_id) {
+                        $method_key = 'method_' . $payment->payment_method_id;
+                        $method_name = $payment->payment_method 
+                            ? $payment->payment_method->name 
+                            : 'Método no especificado';
+                    }
+                    
+                    if ($method_key) {
+                        if (!$methods_payment->has($method_key)) {
+                            $methods_payment->put($method_key, (object)[
+                                'id' => $method_key,
+                                'name' => $method_name,
+                                'sum' => 0,
+                                'transaction_count' => 0
+                            ]);
+                        }
+                        
+                        $method = $methods_payment->get($method_key);
+                        $method->sum += $payment->payment;
+                        $method->transaction_count++;
+                    }
+                }
+            }
+        }
+
+        // Solo mantener métodos que tengan transacciones (sum > 0)
+        $methods_payment = $methods_payment->filter(function($method) {
+            return $method->sum > 0;
+        })->values();
 
         $categories = Category::all()->pluck('name', 'id');
         $query = ConfigurationPos::select('cash_type', 'plate_number', 'electronic');

@@ -67,9 +67,48 @@ class Cash extends ModelTenant
      */
     public function getSumCashFinalBalance()
     {
-        return $this->cash_documents->sum(function($row){
+        \Log::info('Iniciando cálculo de balance final para caja', ['cash_id' => $this->id]);
+        
+        $totalDocuments = $this->cash_documents->count();
+        \Log::info('Total de documentos encontrados en caja', ['documents_count' => $totalDocuments]);
+        
+        $totalBalance = 0;
+        $processedDocuments = 0;
+        $documentsWithPos = 0;
+        
+        $result = $this->cash_documents->sum(function($row) use (&$totalBalance, &$processedDocuments, &$documentsWithPos){
+            $processedDocuments++;
+            
+            if ($row->document_pos) {
+                $documentsWithPos++;
+                $documentTotal = $row->document_pos->getTotalCash();
+                $totalBalance += $documentTotal;
+
+                \Log::debug('Documento procesado', [
+                    'document_id' => $row->id,
+                    'document_pos_id' => $row->document_pos->id ?? null,
+                    'document_total' => $documentTotal
+                ]);
+            } else {
+                \Log::warning('Documento sin document_pos encontrado', [
+                    'document_id' => $row->id,
+                    'cash_id' => $this->id
+                ]);
+            }
+            
             return $row->document_pos ? $row->document_pos->getTotalCash() : 0;
         });
+
+        \Log::info('Balance final calculado', [
+            'cash_id' => $this->id,
+            'total_balance' => $result,
+            'total_documents' => $totalDocuments,
+            'processed_documents' => $processedDocuments,
+            'documents_with_pos' => $documentsWithPos,
+            'documents_without_pos' => $processedDocuments - $documentsWithPos
+        ]);
+        
+        return $result;
     }
 
     

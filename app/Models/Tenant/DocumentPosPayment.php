@@ -50,6 +50,17 @@ class DocumentPosPayment extends ModelTenant
         return null;
     }
 
+    public function getPaymentMethodKeyAttribute()
+    {
+        if ($this->payment_method_id) {
+            return 'method_' . $this->payment_method_id;
+        }
+        if ($this->payment_method_type_id) {
+            return 'type_' . $this->payment_method_type_id;
+        }
+        return null;
+    }
+
     public function card_brand()
     {
         return $this->belongsTo(CardBrand::class);

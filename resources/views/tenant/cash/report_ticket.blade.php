@@ -1,17 +1,14 @@
 @php
-
     $establishment = $cash->user->establishment;
     $final_balance = 0;
     $cash_income = 0;
-    // Calcular el total de egresos (gastos)
     $cashEgress = $cash->cash_documents->sum(function ($cashDocument) {
         return $cashDocument->expense_payment ? $cashDocument->expense_payment->payment : 0;
     });
     $cash_final_balance = 0;
     $document_count = 0;
     $cash_taxes = 0;
-    $cash_documents = $cash->cash_documents;
-    // dd($cash_documents);
+    $cash_documents = $filtered_documents ?? $cash->cash_documents;
     $is_complete = $only_head === 'resumido' ? false : true;
     $first_document = '';
     $last_document = '';
@@ -24,37 +21,63 @@
         $last_document = $list->last()->document_pos->series . '-' . $list->last()->document_pos->number;
     }
 
-    foreach ($methods_payment as $method) {
-        $method->transaction_count = 0; // Se Incializa el contador de transacciones
+    // Inicializar methods_payment si no está definido
+    if (!isset($methods_payment)) {
+        $methods_payment = collect();
+        
+        // Procesar pagos de documentos
+        foreach ($cash_documents as $cash_document) {
+            if ($cash_document->document_pos && $cash_document->document_pos->payments) {
+                foreach ($cash_document->document_pos->payments as $payment) {
+                    $method_key = null;
+                    $method_name = '';
+                    
+                    // Determinar qué campo usar para identificar el método de pago
+                    if ($payment->payment_method_type_id) {
+                        $method_key = 'type_' . $payment->payment_method_type_id;
+                        $method_name = $payment->payment_method_type 
+                            ? $payment->payment_method_type->description 
+                            : 'Método no especificado';
+                    } elseif ($payment->payment_method_id) {
+                        $method_key = 'method_' . $payment->payment_method_id;
+                        $method_name = $payment->payment_method 
+                            ? $payment->payment_method->name 
+                            : 'Método no especificado';
+                    }
+                    
+                    if ($method_key) {
+                        if (!$methods_payment->has($method_key)) {
+                            $methods_payment->put($method_key, (object)[
+                                'id' => $method_key,
+                                'name' => $method_name,
+                                'sum' => 0,
+                                'transaction_count' => 0
+                            ]);
+                        }
+                        
+                        $method = $methods_payment->get($method_key);
+                        $method->sum += $payment->payment;
+                        $method->transaction_count++;
+                    }
+                }
+            }
+        }
+        
+        $methods_payment = $methods_payment->filter(function($method) {
+            return $method->sum > 0;
+        })->values();
     }
 
+    // Calcular totales
     foreach ($cash_documents as $cash_document) {
         if ($cash_document->document_pos) {
             $cash_income += $cash_document->document_pos->getTotalCash();
             $final_balance += $cash_document->document_pos->getTotalCash();
             $cash_taxes += $cash_document->document_pos->total_tax;
             $document_count = $cash_document->document_pos->count();
-
-            if (count($cash_document->document_pos->payments) > 0) {
-                $pays =
-                    $cash_document->document_pos->state_type_id === '11'
-                        ? collect()
-                        : $cash_document->document_pos->payments;
-                foreach ($methods_payment as $record) {
-                    $record->sum = $record->sum + $pays->where('payment_method_type_id', $record->id)->sum('payment');
-                }
-
-                foreach ($cash_document->document_pos->payments as $payment) {
-                    $paymentMethod = $methods_payment->firstWhere('id', $payment->payment_method_type_id);
-                    if ($paymentMethod) {
-                        $paymentMethod->transaction_count++; // Se incrementa el contador de transacciones
-                    }
-                }
-            }
         }
     }
     $cash_final_balance = $final_balance + $cash->beginning_balance - $cashEgress;
-
 @endphp
 
 <!DOCTYPE html>
@@ -208,7 +231,6 @@
 
     <body>
         <div>
-            {{-- <p align="center" class="title"><strong>COMPROBANTE INFORME DIARIO</strong></p> --}}
             <div style="margin-top: -30px;" class="text-center">
                 <p>
                     <strong>Empresa: </strong>{{ $company->name }} <br>
@@ -224,29 +246,6 @@
                     @endif
                 </p>
             </div>
-        </div>
-        @php
-            $is_complete = $only_head === 'resumido' ? false : true;
-        @endphp
-
-        <div>
-            @php
-                $tipoComprobante = 'Factura POS';
-                $numeroInicial = null;
-                $numeroFinal = null;
-
-                foreach ($cash_documents as $cash_document) {
-                    if ($cash_document->document_pos) {
-                        $numeroActual = $cash_document->document_pos->number_full;
-                        if (!$numeroInicial || $numeroActual < $numeroInicial) {
-                            $numeroInicial = $numeroActual;
-                        }
-                        if (!$numeroFinal || $numeroActual > $numeroFinal) {
-                            $numeroFinal = $numeroActual;
-                        }
-                    }
-                }
-            @endphp
         </div>
 
         <table>
