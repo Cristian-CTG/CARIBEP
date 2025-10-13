@@ -117,6 +117,7 @@ if($current_hostname) {
             Route::post('/configuration/type_document/{type_document}', 'Tenant\ConfigurationController@updateTypeDocument');
             Route::get('/co-configuration-change-ambient', 'Tenant\ConfigurationController@changeAmbient')->name('tenant.configuration.change.ambient');
             Route::post('/co-configuration/production/changeEnvironmentProduction/{environment}', 'Tenant\ConfigurationController@changeEnvironmentProduction');
+            Route::post('/co-configuration/production/changeEnvironmentOnly/{environment}', 'Tenant\ConfigurationController@changeEnvironmentOnly');
             Route::post('/co-configuration/production/queryTechnicalKey', 'Tenant\ConfigurationController@queryTechnicalKey');
 
             Route::post('/company', 'Tenant\ConfigurationController@company');

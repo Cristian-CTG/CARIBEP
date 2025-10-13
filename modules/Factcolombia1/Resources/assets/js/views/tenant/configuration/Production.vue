@@ -18,7 +18,7 @@
                                                 Pasar a Habilitación
                                             </el-button>
                                             <el-button :loading="loadingCompanyP" class="submit mb-2" type="primary"
-                                                @click="validateProduction('P')">
+                                                @click="showProductionOptions('P')">
                                                 Pasar a Producción
                                             </el-button>
                                             <el-button class="submit mb-2" type="primary"
@@ -39,7 +39,7 @@
                                                 Pasar a Habilitación
                                             </el-button>
                                             <el-button :loading="loadingEqDocsP" class="submit mb-2" type="primary"
-                                                @click="validateProduction('eqdocsP')">
+                                                @click="showProductionOptions('eqdocsP')">
                                                 Pasar a Producción
                                             </el-button>
                                             <el-button class="submit mb-2" type="primary"
@@ -60,7 +60,7 @@
                                                 Pasar a Habilitación
                                             </el-button>
                                             <el-button :loading="loadingPayrollP" class="submit mb-2" type="primary"
-                                                @click="validateProduction('payrollP')">
+                                                @click="showProductionOptions('payrollP')">
                                                 Pasar a Producción
                                             </el-button>
                                         </div>
@@ -72,17 +72,46 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal de opciones de producción -->
+        <el-dialog
+            title="Opciones de Producción"
+            :visible.sync="showProductionModal"
+            width="500px"
+            :close-on-click-modal="false">
+            <div class="text-center">
+                <h5 class="mb-4">¿Qué tipo de cambio a producción desea realizar?</h5>
+                <div class="d-flex flex-column">
+                    <el-button 
+                        class="mb-3" 
+                        type="primary" 
+                        @click="validateProduction(currentEnvironment, false)">
+                        Solo cambio de ambiente
+                        <div class="text-muted mt-1" style="font-size: 12px;">
+                            Cambiar directamente a producción sin validar set de pruebas
+                        </div>
+                    </el-button>
+                    <el-button 
+                        class="mb-3" 
+                        type="success" 
+                        @click="validateProduction(currentEnvironment, true)">
+                        Proceso completo de habilitación
+                        <div class="text-muted mt-1" style="font-size: 12px;">
+                            Validar set de pruebas antes de pasar a producción
+                        </div>
+                    </el-button>
+                </div>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="showProductionModal = false">Cancelar</el-button>
+            </span>
+        </el-dialog>
+
         <resolutions-modal :showDialog.sync="showResolutionsModal" :moduleType="currentModuleType"
             @refresh="handleRefresh">
         </resolutions-modal>
     </div>
 </template>
-
-<style>
-/* .custom-textarea .el-textarea__inner textarea {
-        height: 350px;
-    } */
-</style>
 
 <script>
 import Helper from "../../../mixins/Helper";
@@ -109,11 +138,23 @@ export default {
         loadingTechnicalKeyPayroll: false,
         loadingTechnicalKeyEqdocs: false,
         showResolutionsModal: false,
-        currentModuleType: 'invoice'
+        currentModuleType: 'invoice',
+        showProductionModal: false,
+        currentEnvironment: null
     }),
 
     methods: {
-        validateProduction(environment) {
+        showProductionOptions(environment) {
+            this.currentEnvironment = environment;
+            this.showProductionModal = true;
+        },
+
+        validateProduction(environment, withValidation = null) {
+            // Cerrar modal si está abierto
+            if (this.showProductionModal) {
+                this.showProductionModal = false;
+            }
+
             // Resetear todos los loadings
             this.resetLoadingStates();
 
@@ -125,13 +166,27 @@ export default {
             if (environment === 'eqdocsH') this.loadingEqDocsH = true;
             if (environment === 'eqdocsP') this.loadingEqDocsP = true;
 
+            // Determinar qué endpoint usar
+            let endpoint = '';
+            if (withValidation === true) {
+                // Proceso completo con validación
+                endpoint = `${this.route}/changeEnvironmentProduction/${environment}`;
+            } else if (withValidation === false) {
+                // Solo cambio de ambiente
+                endpoint = `${this.route}/changeEnvironmentOnly/${environment}`;
+            } else {
+                // Para habilitación, usar el endpoint normal
+                endpoint = `${this.route}/changeEnvironmentProduction/${environment}`;
+            }
+
             axios
-                .post(`${this.route}/changeEnvironmentProduction/${environment}`)
+                .post(endpoint)
                 .then(response => {
-                    this.$message.success(response.data)
+                    this.$message.success(response.data.message || response.data)
                 })
                 .catch(error => {
-                    this.$message.error(error.response.data)
+                    const message = error.response?.data?.message || error.response?.data || 'Error desconocido';
+                    this.$message.error(message);
                 })
                 .then(() => {
                     this.resetLoadingStates();

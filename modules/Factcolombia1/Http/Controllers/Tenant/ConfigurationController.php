@@ -608,6 +608,46 @@ class ConfigurationController extends Controller
         }
     }
 
+    public function changeEnvironmentOnly(string $environment)
+    {
+        $company = ServiceCompany::firstOrFail();
+        $base_url = config("tenant.service_fact", "");
+        
+        $ch = curl_init("{$base_url}ubl2.1/config/environment");
+        $data = $this->getDataByTypeEnvironment($environment);
+        
+        $data_production = json_encode($data);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, ($data_production));
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+            'Accept: application/json',
+            "Authorization: Bearer {$company->api_token}"
+        ));
+        
+        $response_change = curl_exec($ch);
+        $err = curl_error($ch);
+        $respuesta = json_decode($response_change);
+
+        if ($err) {
+            return response()->json([
+                'message' => "Error en peticion Api.",
+                'success' => false,
+            ], 500);
+        } else {
+            if (property_exists($respuesta, 'message')) {
+                return $this->updateTypeEnvironmentCompany($environment, $company);
+            } else {
+                return response()->json([
+                    'message' => "Error en validacion de datos Api.",
+                    'success' => false,
+                ], 400);
+            }
+        }
+    }
     /**
      * Cambiar facturación a producción con validación de Set de Pruebas
      */
@@ -646,6 +686,8 @@ class ConfigurationController extends Controller
             ];
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Content-Type: application/json',
                 "Authorization: Bearer {$company->api_token}"
@@ -735,6 +777,8 @@ class ConfigurationController extends Controller
         $ch = curl_init("{$base_url}ubl2.1/invoice/{$testSetId}");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($json));
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             "Authorization: Bearer {$company->api_token}"
@@ -769,6 +813,8 @@ class ConfigurationController extends Controller
         ];
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             "Authorization: Bearer {$company->api_token}"
@@ -1066,6 +1112,8 @@ class ConfigurationController extends Controller
         $ch = curl_init("{$base_url}ubl2.1/eqdoc/{$testSetId}");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($json));
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             "Authorization: Bearer {$company->api_token}"
@@ -1100,6 +1148,8 @@ class ConfigurationController extends Controller
         ];
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             "Authorization: Bearer {$company->api_token}"
