@@ -62,7 +62,12 @@ class PurchasePaymentController extends Controller
                 $record->payment_method_type_id = null;
             }
             $record->save();
-            $this->createGlobalPayment($record, $request->all());
+
+            // Obtener la compra asociada
+            $purchase = $record->purchase;
+            $is_credit = $purchase->date_of_issue != $purchase->date_of_due;
+
+            $this->createGlobalPayment($record, $request->all(), $is_credit);
             $this->saveFiles($record, $request, 'purchases');
 
         });

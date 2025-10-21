@@ -21,6 +21,7 @@
                                     <th>Fecha</th>
                                     <th>Código de cuenta</th>
                                     <th>Nombre de cuenta</th>
+                                    <th>Tercer Implicado</th>
                                     <th>Debe</th>
                                     <th>Haber</th>
                                 </tr>
@@ -32,6 +33,12 @@
                                         <td>{{ row.date }}</td>
                                         <td>{{ row.chart_account_code }}</td>
                                         <td>{{ row.chart_account_name }}</td>
+                                        <td>
+                                            <span v-if="row.third_party_name">
+                                                {{ row.third_party_name }} <span class="text-muted">({{ getThirdPartyTypeName(row.third_party_type) }})</span>
+                                            </span>
+                                            <span v-else>-</span>
+                                        </td>
                                         <td>{{ row.debit | numberFormat }}</td>
                                         <td>{{ row.credit | numberFormat }}</td>
                                     </template>
@@ -39,7 +46,7 @@
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td colspan="4" class="text-right"><b>Total</b></td>
+                                    <td colspan="5" class="text-right"><b>Total</b></td>
                                     <td>
                                         <b>{{ records.reduce((sum, r) => sum + Number(r.debit || 0), 0).toFixed(2) | numberFormat }}</b>
                                     </td>
@@ -81,6 +88,15 @@
 
         },
         methods: {
+            getThirdPartyTypeName(type) {
+                switch(type) {
+                    case 'customers': return 'Cliente';
+                    case 'suppliers': return 'Proveedor';
+                    case 'employee': return 'Empleado';
+                    case 'seller': return 'Vendedor';
+                    default: return type || '-';
+                }
+            },
             async getData() {
                 await this.$http.get(`/${this.resource}/${this.recordId}`)
                     .then(response => {

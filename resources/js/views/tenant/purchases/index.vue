@@ -87,7 +87,7 @@
                         <!-- <td>{{ row.state_type_description }}</td> -->
                         <td class="text-right">
                             <button
-                                v-if="row.state_type_id != '11'"
+                                v-if="row.state_type_id != '11' && String(row.document_type_id) !== '07'"
                                 type="button"
                                 style="min-width: 41px"
                                 class="btn waves-effect waves-light btn-xs btn-info m-1__2"

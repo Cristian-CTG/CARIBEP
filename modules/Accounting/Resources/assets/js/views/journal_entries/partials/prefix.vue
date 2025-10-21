@@ -18,10 +18,15 @@
                                 <template v-if="row.id">
                                     <td>{{ index + 1 }}</td>
                                     <td>{{ row.prefix }}</td>
-                                    <td>{{ row.description }}</td>
+                                    <td>
+                                        {{ row.description }}
+                                        <span v-if="!row.modifiable" style="color: #888;">(Automático)</span>
+                                    </td>
                                     <td>
                                         <el-button type="primary" size="mini" @click="edit(row)">Editar</el-button>
-                                        <el-button type="danger" size="mini" @click="remove(row.id)">Eliminar</el-button>
+                                        <template v-if="row.modifiable">
+                                            <el-button type="danger" size="mini" @click="remove(row.id)">Eliminar</el-button>
+                                        </template>
                                     </td>
                                 </template>
                             </tr>

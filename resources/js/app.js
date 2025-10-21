@@ -400,6 +400,8 @@ Vue.component('tenant-accounting-charts-index', require('@viewsModuleAccounting/
 Vue.component('tenant-accounting-reports-financial-position-index', require('@viewsModuleAccounting/reports/financial_position.vue'));
 Vue.component('tenant-accounting-reports-income-statement-index', require('@viewsModuleAccounting/reports/income_statement.vue'));
 Vue.component('tenant-accounting-reports-auxiliary-movement-index', require('@viewsModuleAccounting/reports/auxiliary_movement.vue'));
+Vue.component('tenant-accounting-reports-bank-reconciliation-index', require('@viewsModuleAccounting/reports/bank_reconciliation.vue'));
+Vue.component('tenant-accounting-bank-book-index', require('@viewsModuleAccounting/reports/bank_book.vue'));
 
 Vue.component('system-support-configuration', require('./views/system/configuration/supportConfiguration.vue'));
 Vue.component('system-config-login', require('./views/system/configuration/configLogin.vue'));

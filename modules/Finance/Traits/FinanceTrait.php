@@ -25,7 +25,10 @@ use Modules\Accounting\Helpers\AccountingEntryHelper;
 use Modules\Accounting\Models\AccountingChartAccountConfiguration;
 use Modules\Accounting\Models\ChartOfAccount;
 use Modules\Factcolombia1\Models\Tenant\TypeDocument;
-
+use App\Models\Tenant\Person;
+use Modules\Accounting\Models\ThirdParty;
+use Modules\Factcolombia1\Models\Tenant\TypeIdentityDocument;
+use App\Models\Tenant\Catalogs\DocumentType;
 
 trait FinanceTrait
 {
@@ -92,7 +95,7 @@ trait FinanceTrait
 
     }
 
-    public function createGlobalPayment($model, $row)
+    public function createGlobalPayment($model, $row, $is_credit = false)
     {
         $destination = $this->getDestinationRecord($row);
         $company = Company::active();
@@ -103,12 +106,19 @@ trait FinanceTrait
         } elseif ($model instanceof DocumentPayment) {
             $document = $model->document;
         } 
-        // elseif ($model instanceof SupportDocumentPayment) {
-        //     $document = $model->support_document;
-        // }
+        elseif ($model instanceof SupportDocumentPayment) {
+            $document = $model->support_document;
+        }
 
-        if ($document && $document->payment_form_id == 2) {
-            $this->generateJournalEntry($model, $document, $destination);
+        if ($model instanceof PurchasePayment) {
+            if ($is_credit) {
+                $this->generateJournalEntry($model, $document, $destination);
+            }
+        } else {
+            // Para otros módulos, sigue la lógica anterior (por ejemplo, payment_form_id)
+            if ($document && isset($document->payment_form_id) && $document->payment_form_id == 2) {
+                $this->generateJournalEntry($model, $document, $destination);
+            }
         }
 
         $model->global_payment()->create([
@@ -133,17 +143,63 @@ trait FinanceTrait
         $destinationId = $destination['destination_id'];
 
         // movimiento de destino (caja/banco)
+        $accountDestinationID = null;
+        $bank_account_id = null;
         if ($destinationType === Cash::class) {
             $accountDestinationID = $accountCash->id;
+            $bank_account_id = null;
         } elseif ($destinationType === BankAccount::class) {
             $bank = BankAccount::find($destinationId);
             $accountDestinationID = $bank && $bank->chart_of_account_id
                 ? $bank->chart_of_account_id
                 : $accountBank->id;
+            $bank_account_id = $bank ? $bank->id : null;
+        }
+        // Obtener el cliente como tercer implicado
+        $thirdPartyId = null;
+        if ($document) {
+            // Si tiene customer_id, es cliente
+            if (isset($document->customer_id) && $document->customer_id) {
+                $person = Person::find($document->customer_id);
+                $documentType = null;
+                if ($person->identity_document_type_id) {
+                    $typeDoc = TypeIdentityDocument::find($person->identity_document_type_id);
+                    $documentType = $typeDoc ? $typeDoc->code : null;
+                }
+                if ($person) {
+                    $thirdParty = ThirdParty::updateOrCreate(
+                        ['document' => $person->number, 'type' => $person->type],
+                        ['name' => $person->name, 'email' => $person->email, 'address' => $person->address, 'phone' => $person->telephone, 'document_type' => $documentType]
+                    );
+                    $thirdPartyId = $thirdParty->id;
+                }
+            }
+            // Si tiene supplier_id, es proveedor
+            elseif (isset($document->supplier_id) && $document->supplier_id) {
+                $person = Person::find($document->supplier_id);
+                $documentType = null;
+                if ($person->identity_document_type_id) {
+                    $typeDoc = TypeIdentityDocument::find($person->identity_document_type_id);
+                    $documentType = $typeDoc ? $typeDoc->code : null;
+                }
+                if ($person) {
+                    $thirdParty = ThirdParty::updateOrCreate(
+                        ['document' => $person->number, 'type' => $person->type],
+                        ['name' => $person->name, 'email' => $person->email, 'address' => $person->address, 'phone' => $person->telephone, 'document_type' => $documentType]
+                    );
+                    $thirdPartyId = $thirdParty->id;
+                }
+            }
         }
 
         // Detectar tipo de modelo y configurar el asiento
         $typeConfig = $this->getPaymentTypeConfig($model, $accountReceivable, $accountPayable);
+
+        // Obtener el método de pago si existe
+        $payment_method_name = null;
+        if (method_exists($model, 'getPaymentMethodNameAttribute')) {
+            $payment_method_name = $model->payment_method_name;
+        }
 
         // Armar movimientos
         $movements = [
@@ -152,18 +208,32 @@ trait FinanceTrait
                 'debit' => $typeConfig['debit'],
                 'credit' => $typeConfig['credit'],
                 'affects_balance' => true,
+                'third_party_id' => $thirdPartyId, 
+                'payment_method_name' => $payment_method_name, // <-- aquí
+                'bank_account_id' => $bank_account_id, 
             ],
             [
                 'account_id' => $typeConfig['counter_account_id'],
                 'debit' => $typeConfig['counter_debit'],
                 'credit' => $typeConfig['counter_credit'],
                 'affects_balance' => false,
+                'third_party_id' => $thirdPartyId, 
+                // 'payment_method_name' => $payment_method_name, // <-- aquí
             ],
         ];
 
-        // Descripción
-        $documentType = TypeDocument::find($document->type_document_id);
-        $description = 'Pago de ' . $documentType->name . ' #' . $document->prefix . '-' . $document->number;
+        $description = 'Pago de ';
+        if ($model instanceof PurchasePayment) {
+            // Para compras, usa la relación document_type
+            $document_type = DocumentType::find($document->document_type_id);
+            $description .= $document_type ? $document_type->description : '';
+            $description .= ' #' . ($document->series ?? '') . '-' . ($document->number ?? '');
+        } else {
+            // Para otros módulos, usa TypeDocument
+            $documentType = TypeDocument::find($document->type_document_id);
+            $description .= $documentType ? $documentType->name : '';
+            $description .= ' #' . ($document->prefix ?? '') . '-' . ($document->number ?? '');
+        }
 
         // Identificador dinámico (document_id o purchase_id, o el que toque)
         $referenceField = $typeConfig['reference_field'];
@@ -191,28 +261,46 @@ trait FinanceTrait
         }
 
         if ($model instanceof PurchasePayment) {
+            $isCreditNote = false;
+            if (isset($model->purchase) && $model->purchase && isset($model->purchase->document_type_id)) {
+                $isCreditNote = $model->purchase->document_type_id == '07'; // Ajusta el ID si es diferente en tu sistema
+            }
+            if ($isCreditNote) {
+                // Reembolso: el proveedor te paga
+                return [
+                    'prefix_id' => 4,
+                    'debit' => $model->payment, // Bancos
+                    'credit' => 0,
+                    'counter_account_id' => $accountPayable->id, // Proveedores
+                    'counter_debit' => 0,
+                    'counter_credit' => $model->payment,
+                    'reference_field' => 'purchase_id',
+                ];
+            } else {
+                // Pago normal: tú pagas al proveedor
+                return [
+                    'prefix_id' => 4,
+                    'debit' => 0,
+                    'credit' => $model->payment,
+                    'counter_account_id' => $accountPayable->id,
+                    'counter_debit' => $model->payment,
+                    'counter_credit' => 0,
+                    'reference_field' => 'purchase_id',
+                ];
+            }
+        }
+
+        if ($model instanceof SupportDocumentPayment) {
             return [
-                'prefix_id' => 4,
+                'prefix_id' => 4, //Cual es el prefijo?
                 'debit' => 0,
                 'credit' => $model->payment,
                 'counter_account_id' => $accountPayable->id,
                 'counter_debit' => $model->payment,
                 'counter_credit' => 0,
-                'reference_field' => 'purchase_id',
+                'reference_field' => 'support_document_id',
             ];
         }
-
-        // if ($model instanceof SupportDocumentPayment) {
-        //     return [
-        //         'prefix_id' => 4, //Cual es el prefijo?
-        //         'debit' => 0,
-        //         'credit' => $model->payment,
-        //         'counter_account_id' => $accountPayable->id,
-        //         'counter_debit' => $model->payment,
-        //         'counter_credit' => 0,
-        //         'reference_field' => 'support_document_id',
-        //     ];
-        // }
 
         // Aquí puedes agregar nuevos tipos, por ejemplo:
         /*

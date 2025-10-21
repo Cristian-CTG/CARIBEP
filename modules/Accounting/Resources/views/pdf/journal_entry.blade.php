@@ -1,174 +1,160 @@
 @php
+    use Modules\Factcolombia1\Models\Tenant\Company as CoCompany;
+    $company = CoCompany::active();
     $number = $journalEntry->journal_prefix->prefix . '-' . $journalEntry->number;
     $details = $journalEntry->details;
     $statuses = [ 'rejected' => 'Rechazado', 'draft' => 'Borrador', 'posted' => 'Aprobado'];
-    use App\CoreFacturalo\Helpers\Number\NumberLetter;
+    $logo_path = public_path("storage/uploads/logos/{$company->logo}");
 @endphp
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Asiento contable {{ $number }}</title>
+    <title >Asiento contable {{ $number }}</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            color: #333;
-            line-height: 1.4;
-        }
-
-        .header {
-            text-align: center;
-            /* border-bottom: 2px solid #333; */
-            padding-bottom: 15px;
-            margin-bottom: 25px;
-        }
-
-        .header h2 {
-            margin: 0;
-            font-size: 24px;
-            font-weight: bold;
-            color: #000;
-        }
-
-        .info-section {
-            margin-bottom: 25px;
-            border: 1px solid #ccc;
-            padding: 15px;
-            background-color: #f9f9f9;
-        }
-
-        .info-row {
-            margin-bottom: 8px;
-        }
-
-        .info-label {
-            font-weight: bold;
-            display: inline-block;
-            width: 100px;
-            color: #333;
-        }
-
-        .info-value {
-            display: inline-block;
-            color: #555;
-        }
-
-        .status {
-            padding: 4px 8px;
-            border: 1px solid #666;
-            background-color: #eee;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            border: 1px solid #333;
-        }
-
-        th {
-            background-color: #ddd;
-            border: 1px solid #333;
-            padding: 10px;
-            text-align: left;
-            font-weight: bold;
-            color: #000;
-        }
-
-        td {
-            border: 1px solid #666;
-            padding: 8px;
-            vertical-align: top;
-        }
-
-        .text-right {
-            text-align: right;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .account-code {
-            font-family: "Courier New", monospace;
-            font-weight: bold;
-            color: #000;
-        }
-
-        .total-row {
-            background-color: #eee;
-            font-weight: bold;
-        }
-
-        .total-row td {
-            border-top: 2px solid #333;
-            padding: 12px 8px;
-        }
-
-        .amount {
-            font-family: "Courier New", monospace;
-            font-weight: normal;
-        }
-
-        .total-amount {
-            font-family: "Courier New", monospace;
-            font-weight: bold;
-            color: #000;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+        .header-table { width: 100%; margin-bottom: 15px; }
+        .header-table td { vertical-align: top; border: none; }
+        .company-title { font-size: 18px; font-weight: bold; color: #222; }
+        .company-info { font-size: 11px; color: #444; line-height: 1.6; }
+        .asiento-title { font-size: 16px; font-weight: bold; color: red; text-align: right; }
+        .asiento-info { font-size: 12px; color: #333; line-height: 1.6; }
+        .logo-box img { max-width: 120px; }
+        .info-section { margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9; }
+        .info-label { font-weight: bold; display: inline-block; width: 120px; color: #333; }
+        .info-value { display: inline-block; color: #555; }
+        .status { padding: 4px 8px; border: 1px solid #666; background-color: #eee; font-size: 12px; font-weight: bold; }
+        table.details { width: 100%; border-collapse: collapse; margin-top: 20px; border: 1px solid #333; }
+        table.details th { background-color: #ddd; border: 1px solid #333; padding: 8px; text-align: center; font-weight: bold; color: #000; }
+        table.details td { border: 1px solid #666; padding: 7px; vertical-align: top; font-size: 10px; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .account-code { font-family: "Courier New", monospace; font-weight: bold; color: #000; text-align: center; }
+        .total-row { background-color: #eee; font-weight: bold; }
+        .total-row td { border-top: 2px solid #333; padding: 10px 7px; }
+        .amount { font-family: "Courier New", monospace; font-weight: normal; }
+        .total-amount { font-family: "Courier New", monospace; font-weight: bold; color: #000; }
+        .third-party-block { font-size: 9px; color: #444; margin-top: 2px; line-height: 1.5; }
+        .third-party-label { font-weight: bold; display: inline-block; width: 90px; }
+        .third-party-row { margin-bottom: 2px; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h2>Asiento Contable: {{ $number }}</h2>
-    </div>
+    <table class="header-table">
+        <tr>
+            <td style="width: 20%; text-align: left;">
+                @if($company->logo && file_exists($logo_path))
+                    <div class="logo-box">
+                        <img src="data:{{mime_content_type($logo_path)}};base64,{{base64_encode(file_get_contents($logo_path))}}" alt="Logo">
+                    </div>
+                @endif
+            </td>
+            <td style="width: 55%; padding-left: 1rem;">
+                <div class="company-title">{{ $company->name ?? '' }}</div>
+                <div class="company-info">
+                    <div><strong>NIT:</strong> {{ $company->identification_number ?? $company->number ?? '' }}{{ $company->dv ? '-'.$company->dv : '' }}</div>
+                    <div><strong>Dirección:</strong> {{ $company->address ?? '' }}</div>
+                    <div><strong>Teléfono:</strong> {{ $company->phone ?? $company->telephone ?? '' }}</div>
+                    <div><strong>Email:</strong> {{ $company->email ?? '' }}</div>
+                    <div><strong>Régimen:</strong> {{ optional($company->type_regime)->name ?? '' }}</div>
+                </div>
+            </td>
+            <td style="width: 25%; text-align: right;">
+                <div class="asiento-title">ASIENTO CONTABLE</div>
+                <div class="asiento-info">
+                    <div><strong>Número:</strong> {{ $number }}</div>
+                    <div><strong>Fecha:</strong> {{ $journalEntry->date }}</div>
+                    <div><strong>Estado:</strong> <span class="status">{{ $statuses[$journalEntry->status] }}</span></div>
+                </div>
+            </td>
+        </tr>
+    </table>
 
     <div class="info-section">
-        <div class="info-row">
-            <span class="info-label">Fecha:</span>
-            <span class="info-value">{{ $journalEntry->date }}</span>
-        </div>
-
-        <div class="info-row">
-            <span class="info-label">Estado:</span>
-            <span class="info-value">
-                <span class="">{{ $statuses[$journalEntry->status] }}</span>
-            </span>
-        </div>
-
-        <div class="info-row">
-            <span class="info-label">Descripción:</span>
-            <span class="info-value">{{ $journalEntry->description }}</span>
-        </div>
+        <span class="info-label">Descripción:</span>
+        <span class="info-value">{{ $journalEntry->description }}</span>
     </div>
 
-    <table>
+    <table class="details">
         <thead>
             <tr>
-                <th>Código de cuenta</th>
-                <th>Nombre de cuenta</th>
-                <th class="text-right">Debe</th>
-                <th class="text-right">Haber</th>
+                <th style="width: 12%;">Código de cuenta</th>
+                <th style="width: 22%;">Nombre de cuenta</th>
+                <th style="width: 34%;">Tercer Implicado</th>
+                <th style="width: 10%;">Tipo</th>
+                <th class="text-right" style="width: 11%;">Debe</th>
+                <th class="text-right" style="width: 11%;">Haber</th>
             </tr>
         </thead>
         <tbody>
             @foreach($details as $detail)
                 <tr>
                     <td class="account-code">{{ $detail->chartOfAccount->code }}</td>
-                    <td>{{ $detail->chartOfAccount->name }}</td>
-                    <td class="text-right amount">{{ NumberLetter::numberFormat($detail->debit, 2) }}</td>
-                    <td class="text-right amount">{{ NumberLetter::numberFormat($detail->credit, 2) }}</td>
+                    <td style="text-align: left;">{{ $detail->chartOfAccount->name }}</td>
+                    <td>
+                        @if($detail->thirdParty)
+                            <div class="third-party-block">
+                                <div class="third-party-row">
+                                    <span class="third-party-label">Nombre:</span> {{ $detail->thirdParty->name }}
+                                </div>
+                                @php
+                                    $tipo_id = '';
+                                    $tipo = $detail->thirdParty->type ?? '';
+                                    if($tipo == 'employee' && isset($detail->thirdParty->document_type)) {
+                                        $tipo_id = \Modules\Factcolombia1\Models\TenantService\PayrollTypeDocumentIdentification::where('code', $detail->thirdParty->document_type)->first();
+                                        $tipo_id = $tipo_id ? $tipo_id->name : $detail->thirdParty->document_type;
+                                    } elseif($tipo == 'seller' && isset($detail->thirdParty->document_type)) {
+                                        $tipo_id = \Modules\Factcolombia1\Models\SystemService\TypeDocumentIdentification::where('code', $detail->thirdParty->document_type)->first();
+                                        $tipo_id = $tipo_id ? $tipo_id->name : $detail->thirdParty->document_type;
+                                    } elseif(($tipo == 'customers' || $tipo == 'suppliers') && isset($detail->thirdParty->document_type)) {
+                                        $tipo_id = \Modules\Factcolombia1\Models\Tenant\TypeIdentityDocument::where('code', $detail->thirdParty->document_type)->first();
+                                        $tipo_id = $tipo_id ? $tipo_id->name : $detail->thirdParty->document_type;
+                                    }
+                                @endphp
+                                <div class="third-party-row">
+                                    <span class="third-party-label">Tipo de identificación:</span> {{ $tipo_id }}
+                                </div>
+                                <div class="third-party-row">
+                                    <span class="third-party-label">Documento:</span> {{ $detail->thirdParty->document }}
+                                </div>
+                                @if($detail->thirdParty->email)
+                                    <div class="third-party-row">
+                                        <span class="third-party-label">Email:</span> {{ $detail->thirdParty->email }}
+                                    </div>
+                                @endif
+                                @if($detail->thirdParty->address)
+                                    <div class="third-party-row">
+                                        <span class="third-party-label">Dirección:</span> {{ $detail->thirdParty->address }}
+                                    </div>
+                                @endif
+                                @if($detail->thirdParty->phone)
+                                    <div class="third-party-row">
+                                        <span class="third-party-label">Teléfono:</span> {{ $detail->thirdParty->phone }}
+                                    </div>
+                                @endif
+                            </div>
+                        @else
+                            <span style="color:#bbb;">-</span>
+                        @endif
+                    </td>
+                    <td class="text-center">
+                        @if($detail->debit > 0)
+                            INGRESO
+                        @elseif($detail->credit > 0)
+                            EGRESO
+                        @else
+                            -
+                        @endif
+                    </td>
+                    <td class="text-right amount">{{ number_format($detail->debit, 2, ',', '.') }}</td>
+                    <td class="text-right amount">{{ number_format($detail->credit, 2, ',', '.') }}</td>
                 </tr>
             @endforeach
             <tr class="total-row">
-                <td colspan="2" class="text-right">Total</td>
-                <td class="text-right total-amount">{{ NumberLetter::numberFormat($details->sum('debit'), 2) }}</td>
-                <td class="text-right total-amount">{{ NumberLetter::numberFormat($details->sum('credit'), 2) }}</td>
+                <td colspan="4" class="text-right">Total</td>
+                <td class="text-right total-amount">{{ number_format($details->sum('debit'), 2, ',', '.') }}</td>
+                <td class="text-right total-amount">{{ number_format($details->sum('credit'), 2, ',', '.') }}</td>
             </tr>
         </tbody>
     </table>

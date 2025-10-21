@@ -73,6 +73,8 @@ use Illuminate\Support\Facades\View;
 use Modules\Accounting\Models\AccountingChartAccountConfiguration;
 use Modules\Accounting\Helpers\AccountingEntryHelper;
 use Modules\Accounting\Models\ChartOfAccount;
+use Modules\Accounting\Models\ThirdParty;
+use Modules\Factcolombia1\Models\Tenant\TypeIdentityDocument;
 
 
 class DocumentPosController extends Controller
@@ -657,6 +659,30 @@ class DocumentPosController extends Controller
         $accountIdIncome = ChartOfAccount::where('code','413595')->first();
         $document_type = DocumentType::find('90');
 
+        // Obtener cliente como tercer implicado
+        $person = Person::find($document->customer_id);
+        $thirdPartyId = null;
+        $documentType = null;
+        if ($person->identity_document_type_id) {
+            $typeDoc = TypeIdentityDocument::find($person->identity_document_type_id);
+            $documentType = $typeDoc ? $typeDoc->code : null;
+        }
+        if ($person) {
+            $thirdParty = ThirdParty::updateOrCreate(
+                ['document' => $person->number, 'type' => $person->type],
+                [
+                    'name' => $person->name,
+                    'email' => $person->email,
+                    'address' => $person->address,
+                    'phone' => $person->telephone,
+                    'document_type' => $documentType,
+                ]
+            );
+            $thirdPartyId = $thirdParty->id;
+        }
+
+        $payment_method_name = 'Contado';
+
         AccountingEntryHelper::registerEntry([
             'prefix_id' => 3, // Puedes ajustar el prefijo según tu configuración
             'description' => $document_type->description . ' #' . $document->series . '-' . $document->number,
@@ -667,12 +693,16 @@ class DocumentPosController extends Controller
                     'debit' => $document->total,
                     'credit' => 0,
                     'affects_balance' => true,
+                    'third_party_id' => $thirdPartyId,
+                    'payment_method_name' => $payment_method_name, // <-- aquí
                 ],
                 [
                     'account_id' => $accountIdIncome->id,
                     'debit' => 0,
                     'credit' => $document->sale,
                     'affects_balance' => true,
+                    'third_party_id' => $thirdPartyId,
+                    // 'payment_method_name' => $payment_method_name, // <-- aquí
                 ],
             ],
             'taxes' => $document->taxes ?? [],
@@ -682,6 +712,8 @@ class DocumentPosController extends Controller
                 'tax_credit' => true,
                 'retention_debit' => true,
                 'retention_credit' => false,
+                'third_party_id' => $thirdPartyId,
+                // 'payment_method_name' => $payment_method_name,
             ],
         ]);
     }

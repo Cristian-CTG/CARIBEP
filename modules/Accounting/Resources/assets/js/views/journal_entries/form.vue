@@ -45,6 +45,35 @@
                                 </el-select>
                             </template>
                         </el-table-column>
+                        <el-table-column prop="third_party_type" label="Tipo de Tercer Implicado">
+                            <template slot-scope="{ row }">
+                                <el-select v-model="row.third_party_type" placeholder="Tipo" style="width: 100%;" @change="onThirdPartyTypeChange(row)">
+                                    <el-option label="Cliente" value="customers"></el-option>
+                                    <el-option label="Proveedor" value="suppliers"></el-option>
+                                    <el-option label="Empleado" value="employee"></el-option>
+                                    <el-option label="Vendedor" value="seller"></el-option>
+                                </el-select>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="third_party_id" label="Tercer Implicado">
+                            <template slot-scope="{ row }">
+                                <el-select
+                                    v-model="row.third_party_id"
+                                    filterable
+                                    clearable
+                                    placeholder="Seleccionar"
+                                    :loading="row.loadingThirdParties"
+                                    style="width: 100%;"
+                                >
+                                    <el-option
+                                        v-for="item in row.thirdParties"
+                                        :key="item.id"
+                                        :label="item.name"
+                                        :value="item.id"
+                                    ></el-option>
+                                </el-select>
+                            </template>
+                        </el-table-column>
 
                         <el-table-column prop="debit" label="Débito">
                             <template slot-scope="{ row }">
@@ -108,7 +137,9 @@ export default {
             form: {},
             accounts: [],
             showDialogPrefix: false,
-            loadingAccounts: false
+            loadingAccounts: false,
+            thirdParties: [],
+            loadingThirdParties: false,
         };
     },
     created() {
@@ -133,6 +164,19 @@ export default {
                 details: [],
             };
         },
+        async onThirdPartyTypeChange(row) {
+            row.third_party_id = null;
+            row.thirdParties = [];
+            row.loadingThirdParties = true;
+
+            await this.$http.get('/accounting/journal/thirds/third-parties', { params: { type: row.third_party_type } })
+                .then(response => {
+                    row.thirdParties = response.data.data;
+                })
+                .finally(() => {
+                    row.loadingThirdParties = false;
+                });
+        },
         // async loadPrefixes() {
         //     await this.$http.get("/accounting/journal/prefixes").then((response) => {
         //         this.prefixes = response.data;
@@ -151,17 +195,38 @@ export default {
                 .finally(() => this.loadingAccounts = false);
         },
         addDetail() {
-            this.form.details.push({ chart_of_account_id: null, debit: 0, credit: 0 });
+            this.form.details.push({ chart_of_account_id: null, debit: 0, credit: 0, third_party_type: null, third_party_id: null, thirdParties: [], loadingThirdParties: false });
         },
         removeDetail(index) {
             this.form.details.splice(index, 1);
         },
-        create() {
+        async create() {
             this.titleDialog = this.recordId ? "Editar Asiento" : "Nuevo Asiento";
             if (this.recordId) {
-                this.$http.get(`/${this.resource}/${this.recordId}`).then((response) => {
+                await this.$http.get(`/${this.resource}/${this.recordId}`).then(async (response) => {
                     this.form = response.data.data;
+
+                    // Asegúrate de que cada detalle tenga las propiedades necesarias
+                    for (const row of this.form.details) {
+                        // Inicializa arrays y flags si no existen
+                        this.$set(row, 'thirdParties', []);
+                        this.$set(row, 'loadingThirdParties', false);
+
+                        // Si ya tiene tipo de tercero, carga la lista de terceros y selecciona el actual
+                        if (row.third_party_type) {
+                            row.loadingThirdParties = true;
+                            await this.$http.get('/accounting/journal/thirds/third-parties', { params: { type: row.third_party_type } })
+                                .then(res => {
+                                    row.thirdParties = res.data.data;
+                                })
+                                .finally(() => {
+                                    row.loadingThirdParties = false;
+                                });
+                        }
+                    }
                 });
+            } else {
+                this.initForm();
             }
         },
         getSummaries({ columns, data }) {

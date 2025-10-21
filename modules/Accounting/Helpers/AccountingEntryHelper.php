@@ -22,6 +22,7 @@ class AccountingEntryHelper
             'purchase_id' => $document['purchase_id'] ?? null,
             'document_pos_id' => $document['document_pos_id'] ?? null,
             'document_payroll_id' => $document['document_payroll_id'] ?? null,
+            'support_document_id' => $document['support_document_id'] ?? null,
             'status' => 'posted',
         ]);
 
@@ -30,6 +31,9 @@ class AccountingEntryHelper
                 'chart_of_account_id' => $movement['account_id'],
                 'debit' => $movement['debit'],
                 'credit' => $movement['credit'],
+                'third_party_id' => $movement['third_party_id'] ?? null,
+                'payment_method_name' => $movement['payment_method_name'] ?? null,
+                'bank_account_id' => $movement['bank_account_id'] ?? null,
             ]);
 
             if ($movement['affects_balance'] ?? false) {
@@ -55,6 +59,10 @@ class AccountingEntryHelper
             $taxModel = Tax::find($tax->id);
             if (!$taxModel) continue;
 
+            // Obtener el tercer implicado si viene en taxConfig
+            $thirdPartyId = $taxConfig['third_party_id'] ?? null;
+            $payment_method_name = $taxConfig['payment_method_name'] ?? null; // <-- nuevo
+
             // Impuestos normales
             if (floatval($tax->total) > 0 && isset($taxConfig['tax_field'])) {
                 $accountCode = $taxModel->{$taxConfig['tax_field']} ?? null;
@@ -65,6 +73,8 @@ class AccountingEntryHelper
                             'chart_of_account_id' => $account->id,
                             'debit' => $taxConfig['tax_debit'] ? $tax->total : 0,
                             'credit' => $taxConfig['tax_credit'] ? $tax->total : 0,
+                            'third_party_id' => $thirdPartyId ?? null,
+                            'payment_method_name' => $payment_method_name, // <-- aquí
                         ]);
                     }
                 }
@@ -80,6 +90,8 @@ class AccountingEntryHelper
                             'chart_of_account_id' => $account->id,
                             'debit' => $taxConfig['retention_debit'] ? $tax->retention : 0,
                             'credit' => $taxConfig['retention_credit'] ? $tax->retention : 0,
+                            'third_party_id' => $thirdPartyId ?? null,
+                            'payment_method_name' => $payment_method_name, // <-- aquí
                         ]);
                     }
                 }

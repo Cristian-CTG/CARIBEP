@@ -908,6 +908,11 @@
                                     Reporte de Movimiento auxiliar
                                 </a>
                             </li>
+                            <li class="{{(($path[0] === 'accounting') && ($path[1] == 'bank-book')) ? 'nav-active' : ''}}">
+                                <a class="nav-link" href="{{route('tenant.accounting.report.bank-book')}}">
+                                    Reporte Libro Bancos
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     @endif

@@ -33,7 +33,8 @@ use Modules\Payroll\Traits\UtilityTrait;
 use Modules\Accounting\Models\ChartOfAccount;
 use Modules\Accounting\Helpers\AccountingEntryHelper;
 use Modules\Accounting\Models\JournalPrefix;
-
+use Modules\Accounting\Models\ThirdParty;
+use Modules\Factcolombia1\Models\TenantService\PayrollTypeDocumentIdentification;
 
 class DocumentPayrollController extends Controller
 {
@@ -336,7 +337,7 @@ class DocumentPayrollController extends Controller
 
     }
 
-    private function makeMovement($account, $debit = 0, $credit = 0, $affects_balance = true)
+    private function makeMovement($account, $debit = 0, $credit = 0, $affects_balance = true, $third_party_id = null)
     {
         // Si la cuenta no existe o ambos valores son <= 0, no retorna nada
         if (!$account || (floatval($debit) <= 0 && floatval($credit) <= 0)) {
@@ -347,6 +348,7 @@ class DocumentPayrollController extends Controller
             'debit' => $debit,
             'credit' => $credit,
             'affects_balance' => $affects_balance,
+            'third_party_id' => $third_party_id,
         ];
     }
 
@@ -357,11 +359,37 @@ class DocumentPayrollController extends Controller
             $journal = JournalPrefix::where('prefix', 'NM')->first();
             $document_type = TypeDocument::where('id', $document->type_document_id)->first();
 
+            // Obtener el empleado como tercer implicado
+            $worker = Worker::find($document->worker_id);
+            $thirdPartyId = null;
+            $documentType = null;
+            if ($worker->payroll_type_document_identification_id) {
+                $typeDoc = PayrollTypeDocumentIdentification::find($worker->payroll_type_document_identification_id);
+                $documentType = $typeDoc ? $typeDoc->code : null;
+            }
+            if ($worker) {
+                $thirdParty = ThirdParty::updateOrCreate(
+                    ['document' => $worker->identification_number, 'type' => 'employee'],
+                    ['name' => $worker->full_name, 'email' => $worker->email, 'address' => $worker->address, 'phone' => $worker->cellphone, 'document_type' => $documentType]
+                );
+                $thirdPartyId = $thirdParty->id;
+            }
+
+            // Obtener método de pago del trabajador
+            $payment_method_name = null;
+            if ($worker && $worker->payment && isset($worker->payment->payment_method_id)) {
+                $paymentMethod = PaymentMethod::find($worker->payment->payment_method_id);
+                if ($paymentMethod) {
+                    $payment_method_name = $paymentMethod->name;
+                }
+            }
+
             // Sueldos
             $salary = $document->accrued->salary ?? 0;
             if ($salary > 0) {
                 $accountSalary = ChartOfAccount::where('code','510506')->first();
-                if ($movement = $this->makeMovement($accountSalary, $salary, 0)) {
+                if ($movement = $this->makeMovement($accountSalary, $salary, 0, true, $thirdPartyId)) {
+                    // $movement['payment_method_name'] = $payment_method_name;
                     $movements[] = $movement;
                 }
             }
@@ -370,7 +398,8 @@ class DocumentPayrollController extends Controller
             $eps_deduction = $document->deduction->eps_deduction ?? 0;
             if ($eps_deduction > 0) {
                 $accountHealth = ChartOfAccount::where('code','237005')->first();
-                if ($movement = $this->makeMovement($accountHealth, 0, $eps_deduction)) {
+                if ($movement = $this->makeMovement($accountHealth, 0, $eps_deduction, true, $thirdPartyId)) {
+                    // $movement['payment_method_name'] = $payment_method_name;
                     $movements[] = $movement;
                 }
             }
@@ -379,7 +408,8 @@ class DocumentPayrollController extends Controller
             $pension_deduction = $document->deduction->pension_deduction ?? 0;
             if ($pension_deduction > 0) {
                 $accountPension = ChartOfAccount::where('code','238030')->first();
-                if ($movement = $this->makeMovement($accountPension, 0, $pension_deduction)) {
+                if ($movement = $this->makeMovement($accountPension, 0, $pension_deduction, true, $thirdPartyId)) {
+                    // $movement['payment_method_name'] = $payment_method_name;
                     $movements[] = $movement;
                 }
             }
@@ -388,7 +418,7 @@ class DocumentPayrollController extends Controller
             $transportation_allowance = $document->accrued->transportation_allowance ?? 0;
             if ($transportation_allowance > 0) {
                 $accountPayment = ChartOfAccount::where('code','510527')->first(); // auxilio de transporte
-                if ($movement = $this->makeMovement($accountPayment, $transportation_allowance, 0)) {
+                if ($movement = $this->makeMovement($accountPayment, $transportation_allowance, 0, true, $thirdPartyId)) {
                     $movements[] = $movement;
                 }
             }
@@ -399,7 +429,8 @@ class DocumentPayrollController extends Controller
                 $totalPaymentVacaciones = array_sum(array_column($document->accrued->common_vacation, 'payment'));
                 if($totalPaymentVacaciones > 0) {
                     $accountVacation = ChartOfAccount::where('code', '510539')->first();
-                    if ($movement = $this->makeMovement($accountVacation, $totalPaymentVacaciones, 0)) {
+                    if ($movement = $this->makeMovement($accountVacation, $totalPaymentVacaciones, 0, true, $thirdPartyId)) {
+                        // $movement['payment_method_name'] = $payment_method_name;
                         $movements[] = $movement;
                     }
                 }
@@ -410,14 +441,14 @@ class DocumentPayrollController extends Controller
                 $totalPaymentSB = array_sum(array_column($document->accrued->service_bonus, 'payment'));
                 if($totalPaymentSB > 0) {
                     $accountSB = ChartOfAccount::where('code', '510536')->first(); // prima de servicio
-                    if ($movement = $this->makeMovement($accountSB, $totalPaymentSB, 0)) {
+                    if ($movement = $this->makeMovement($accountSB, $totalPaymentSB, 0, true, $thirdPartyId)) {
                         $movements[] = $movement;
                     }
                 }
                 $totalPaymentSBNS = array_sum(array_column($document->accrued->service_bonus, 'paymentNS'));
                 if($totalPaymentSBNS > 0) {
                     $accountSB = ChartOfAccount::where('code', '510542')->first(); // prima extralegales
-                    if ($movement = $this->makeMovement($accountSB, $totalPaymentSBNS, 0)) {
+                    if ($movement = $this->makeMovement($accountSB, $totalPaymentSBNS, 0, true, $thirdPartyId)) {
                         $movements[] = $movement;
                     }
                 }
@@ -428,14 +459,14 @@ class DocumentPayrollController extends Controller
                 $totalPaymentSeverance = array_sum(array_column($document->accrued->severance, 'payment'));
                 if($totalPaymentSeverance > 0) {
                     $accountSeverance = ChartOfAccount::where('code', '510530')->first();
-                    if ($movement = $this->makeMovement($accountSeverance, $totalPaymentSeverance, 0)) {
+                    if ($movement = $this->makeMovement($accountSeverance, $totalPaymentSeverance, 0, true, $thirdPartyId)) {
                         $movements[] = $movement;
                     }
                 }
                 $totalPaymentSeverancePctg = array_sum(array_column($document->accrued->severance, 'interest_payment'));
                 if($totalPaymentSeverancePctg > 0) {
                     $accountSP = ChartOfAccount::where('code', '510533')->first(); // intereses de cesantias
-                    if ($movement = $this->makeMovement($accountSP, $totalPaymentSeverancePctg, 0)) {
+                    if ($movement = $this->makeMovement($accountSP, $totalPaymentSeverancePctg, 0, true, $thirdPartyId)) {
                         $movements[] = $movement;
                     }
                 }
@@ -445,7 +476,8 @@ class DocumentPayrollController extends Controller
             $net_payment = ($document->accrued->accrued_total ?? 0) - ($document->deduction->deductions_total ?? 0);
             if ($net_payment > 0) {
                 $accountPayment = ChartOfAccount::where('code','110505')->first(); // TO DO: no se estable forma de pago de nomina
-                if ($movement = $this->makeMovement($accountPayment, 0, $net_payment)) {
+                if ($movement = $this->makeMovement($accountPayment, 0, $net_payment, true, $thirdPartyId)) {
+                    $movement['payment_method_name'] = $payment_method_name;
                     $movements[] = $movement;
                 }
             }
@@ -459,7 +491,7 @@ class DocumentPayrollController extends Controller
                 'tax_config' => [],
             ]);
         } catch (\Exception $e) {
-            dd($e->getMessage());
+            // dd($e->getMessage());
             \Log::error('insert Entry '.$e->getMessage());
         }
     }

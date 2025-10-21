@@ -9,6 +9,7 @@ use App\Models\Tenant\Document;
 use App\Models\Tenant\Purchase;
 use App\Models\Tenant\DocumentPos;
 use Modules\Payroll\Models\DocumentPayroll;
+use Modules\Purchase\Models\SupportDocument;
 
 
 class JournalEntry extends ModelTenant
@@ -22,6 +23,7 @@ class JournalEntry extends ModelTenant
         'description',
         'document_id',
         'purchase_id',
+        'support_document_id',
         'document_pos_id',
         'document_payroll_id',
         'status',
@@ -99,6 +101,11 @@ class JournalEntry extends ModelTenant
     public function purchase()
     {
         return $this->belongsTo(Purchase::class, 'purchase_id');
+    }
+
+    public function support_document()
+    {
+        return $this->belongsTo(SupportDocument::class, 'support_document_id');
     }
 
     public function document_pos()

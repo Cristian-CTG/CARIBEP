@@ -46,6 +46,9 @@ if($hostname) {
             Route::put('journal/entries/{id}/approve', 'JournalEntryController@approve');
             Route::put('journal/entries/{id}/reject', 'JournalEntryController@reject');
 
+            // Terceros
+            Route::get('journal/thirds/third-parties', 'ThirdPartyController@index');
+
             // CRUD para Detalles de Asientos Contables
             Route::apiResource('journal/entry-details', 'JournalEntryDetailController');
             Route::get('journal/entries/{id}/records-detail', 'JournalEntryDetailController@recordsDetail');
@@ -63,6 +66,11 @@ if($hostname) {
             Route::get('/auxiliary-movement', 'ReportAuxiliaryMovementController@index')->name('tenant.accounting.report.auxiliary-movement');
             Route::get('/auxiliary-movement/records', 'ReportAuxiliaryMovementController@records');
             Route::get('/auxiliary-movement/export', 'ReportAuxiliaryMovementController@export');
+            // Reporte de Libro Bancario
+            Route::get('/bank-book', 'ReportBankBookController@index')->name('tenant.accounting.report.bank-book');
+            Route::get('/bank-book/records', 'ReportBankBookController@records');
+            Route::get('/bank-book/export', 'ReportBankBookController@export');
+            
 
             Route::prefix('clasification-sale')->group(function () {
                 Route::get('records', 'ChartAccountSaleConfigurationController@records');

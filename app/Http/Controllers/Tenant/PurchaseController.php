@@ -48,6 +48,8 @@ use Modules\Accounting\Models\ChartAccountSaleConfiguration;
 use Modules\Accounting\Models\AccountingChartAccountConfiguration;
 use Modules\Accounting\Helpers\AccountBalanceHelper;
 use Modules\Accounting\Helpers\AccountingEntryHelper;
+use Modules\Accounting\Models\ThirdParty;
+use Modules\Factcolombia1\Models\Tenant\TypeIdentityDocument;
 
 class PurchaseController extends Controller
 {
@@ -243,16 +245,18 @@ class PurchaseController extends Controller
                         }
                     }
                 }
+                $is_credit = $doc->date_of_issue != $doc->date_of_due;
+                $is_credit_note = $doc->document_type_id == '07';
 
                 foreach ($data['payments'] as $payment) {
                     $record_payment = $doc->purchase_payments()->create($payment);
                     if(isset($payment['payment_destination_id'])){
-                        $this->createGlobalPayment($record_payment, $payment);
+                            $this->createGlobalPayment($record_payment, $payment, $is_credit);
                     }
                 }
 
                 // Registrar asientos contables compra/debito
-                if($doc->document_type_id == '01' || $doc->document_type_id == '09') {
+                if($doc->document_type_id == '01' || $doc->document_type_id == '09' || $doc->document_type_id == '08') {
                     $this->registerAccountingPurchaseEntries($doc);
                 }
 
@@ -288,6 +292,33 @@ class PurchaseController extends Controller
         $accountIdLiability = ChartOfAccount::where('code',$accountConfiguration->supplier_payable_account)->first();
         $document_type = DocumentType::find($document->document_type_id);
 
+        // Obtener proveedor como tercer implicado
+        $supplier = Person::find($document->supplier_id);
+        $thirdPartyId = null;
+        $documentType = null;
+        if ($supplier->identity_document_type_id) {
+            $typeDoc = TypeIdentityDocument::find($supplier->identity_document_type_id);
+            $documentType = $typeDoc ? $typeDoc->code : null;
+        }
+        if ($supplier) {
+            $thirdParty = ThirdParty::updateOrCreate(
+                ['document' => $supplier->number, 'type' => $supplier->type],
+                [
+                    'name' => $supplier->name,
+                    'email' => $supplier->email,
+                    'address' => $supplier->address,
+                    'phone' => $supplier->telephone,
+                    'document_type' => $documentType,
+                ]
+            );
+            $thirdPartyId = $thirdParty->id;
+        }
+        // ¿Es crédito?
+        $is_credit = $document->date_of_issue != $document->date_of_due;
+
+        // Aquí el ajuste solicitado:
+        $payment_method_name = $is_credit ? 'A crédito' : 'Contado';
+
         AccountingEntryHelper::registerEntry([
             'prefix_id' => 2,
             'description' => $document_type->description . ' #' . $document->series . '-' . $document->number,
@@ -298,12 +329,16 @@ class PurchaseController extends Controller
                     'debit' => $document->sale,
                     'credit' => 0,
                     'affects_balance' => true,
+                    'third_party_id' => $thirdPartyId,
+                    // 'payment_method_name' => $payment_method_name,
                 ],
                 [
                     'account_id' => $accountIdLiability->id,
                     'debit' => 0,
                     'credit' => $document->total,
                     'affects_balance' => true,
+                    'third_party_id' => $thirdPartyId,
+                    // 'payment_method_name' => $payment_method_name,
                 ],
             ],
             'taxes' => $document->taxes ?? [],
@@ -313,6 +348,8 @@ class PurchaseController extends Controller
                 'tax_credit' => false,
                 'retention_debit' => false,
                 'retention_credit' => true,
+                'third_party_id' => $thirdPartyId,
+                // 'payment_method_name' => $payment_method_name,
             ],
         ]);
     }
@@ -324,6 +361,30 @@ class PurchaseController extends Controller
         $accountIdLiability = ChartOfAccount::where('code',$accountConfiguration->supplier_payable_account)->first();
         $document_type = DocumentType::find($document->document_type_id);
 
+        // Obtener proveedor como tercer implicado
+        $supplier = Person::find($document->supplier_id);
+        $thirdPartyId = null;
+        $documentType = null;
+        if ($supplier->identity_document_type_id) {
+            $typeDoc = TypeIdentityDocument::find($supplier->identity_document_type_id);
+            $documentType = $typeDoc ? $typeDoc->code : null;
+        }
+        if ($supplier) {
+            $thirdParty = ThirdParty::updateOrCreate(
+                ['document' => $supplier->number, 'type' => $supplier->type],
+                [
+                    'name' => $supplier->name,
+                    'email' => $supplier->email,
+                    'address' => $supplier->address,
+                    'phone' => $supplier->telephone,
+                    'document_type' => $documentType,
+                ]
+            );
+            $thirdPartyId = $thirdParty->id;
+        }
+
+        $payment_method_name = 'Devolución';
+
         AccountingEntryHelper::registerEntry([
             'prefix_id' => 2,
             'description' => $document_type->description . ' #' . $document->series . '-' . $document->number,
@@ -331,15 +392,19 @@ class PurchaseController extends Controller
             'movements' => [
                 [
                     'account_id' => $accountIdInventory->id,
-                    'debit' => $document->sale,
-                    'credit' => 0,
+                    'debit' => 0,
+                    'credit' => $document->sale,
                     'affects_balance' => true,
+                    'third_party_id' => $thirdPartyId,
+                    // 'payment_method_name' => $payment_method_name,
                 ],
                 [
                     'account_id' => $accountIdLiability->id,
-                    'debit' => 0,
-                    'credit' => $document->total,
+                    'debit' => $document->total,
+                    'credit' => 0,
                     'affects_balance' => true,
+                    'third_party_id' => $thirdPartyId,
+                    // 'payment_method_name' => $payment_method_name,
                 ],
             ],
             'taxes' => $document->taxes ?? [],
@@ -349,6 +414,8 @@ class PurchaseController extends Controller
                 'tax_credit' => true,
                 'retention_debit' => true,
                 'retention_credit' => false,
+                'third_party_id' => $thirdPartyId,
+                // 'payment_method_name' => $payment_method_name,
             ],
         ]);
     }
@@ -417,13 +484,14 @@ class PurchaseController extends Controller
 
             // $doc->purchase_payments()->delete();
             $this->deleteAllPayments($doc->purchase_payments);
+            $is_credit = $doc->date_of_issue != $doc->date_of_due;
 
             foreach ($request['payments'] as $payment) {
 
                 $record_payment = $doc->purchase_payments()->create($payment);
 
                 if(isset($payment['payment_destination_id'])){
-                    $this->createGlobalPayment($record_payment, $payment);
+                        $this->createGlobalPayment($record_payment, $payment, $is_credit);
                 }
 
                 if(isset($payment['payment_filename'])){

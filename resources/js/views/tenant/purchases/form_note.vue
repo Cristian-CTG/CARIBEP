@@ -751,6 +751,8 @@ export default {
                     // this.form.id = dato.id
                     // this.form.document_type_id = dato.document_type_id
                     this.form.affected_document = dato.series + dato.number
+                    this.form.date_of_issue = dato.date_of_issue
+                    this.form.date_of_due = dato.date_of_due
                     // this.form.date_of_due = dato.date_of_due
                     // this.form.date_of_issue = dato.date_of_issue
                     this.form.supplier_id = dato.supplier_id

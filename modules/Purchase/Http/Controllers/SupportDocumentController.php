@@ -31,6 +31,12 @@ use Modules\Purchase\Http\Requests\SupportDocumentRequest;
 use Modules\Purchase\Helpers\SupportDocumentHelper;
 use Modules\Factcolombia1\Http\Controllers\Tenant\DocumentController;
 use Modules\Payroll\Traits\UtilityTrait; 
+use Modules\Accounting\Models\ChartOfAccount;
+use Modules\Accounting\Models\AccountingChartAccountConfiguration;
+use Modules\Accounting\Helpers\AccountingEntryHelper;
+use Modules\Accounting\Models\ThirdParty;
+use App\Models\Tenant\Catalogs\DocumentType;
+use Modules\Factcolombia1\Models\Tenant\TypeIdentityDocument;
 
 
 class SupportDocumentController extends Controller
@@ -194,8 +200,11 @@ class SupportDocumentController extends Controller
                 // Guardar pagos automáticamente si es al contado
                 $helper->savePayments($document, [], $request);
 
+                // <<<--- AGREGAR ESTA LÍNEA
+                $this->registerAccountingSupportDocumentEntries($document);
+
                 // enviar documento a la api
-                $send_to_api = $helper->sendToApi($document, $inputs);
+                $send_to_api = $helper->sendToApi($document, $inputs);                
 
                 $document->update([
                     'response_api' => $send_to_api
@@ -219,6 +228,80 @@ class SupportDocumentController extends Controller
             return $this->getErrorFromException($e->getMessage(), $e);
         }
 
+    }
+
+    private function registerAccountingSupportDocumentEntries($document)
+    {
+        $accountConfiguration = AccountingChartAccountConfiguration::first();
+        if(!$accountConfiguration) return;
+        $accountIdInventory = ChartOfAccount::where('code', $accountConfiguration->inventory_account)->first();
+        $accountIdLiability = ChartOfAccount::where('code', $accountConfiguration->supplier_payable_account)->first();
+        // Definir descripción según el tipo de documento soporte
+        $description = 'Documento de Soporte';
+        if (
+            (isset($document->type_document) && $document->type_document->code == '13')
+        ) {
+            $description = 'Nota de Ajuste de Documento de Soporte';
+        }
+
+        // Obtener proveedor como tercer implicado
+        $supplier = Person::find($document->supplier_id);
+        $thirdPartyId = null;
+        $documentType = null;
+        if ($supplier->identity_document_type_id) {
+            $typeDoc = TypeIdentityDocument::find($supplier->identity_document_type_id);
+            $documentType = $typeDoc ? $typeDoc->code : null;
+        }
+        if ($supplier) {
+            $thirdParty = ThirdParty::updateOrCreate(
+                ['document' => $supplier->number, 'type' => $supplier->type],
+                ['name' => $supplier->name, 'email' => $supplier->email, 'address' => $supplier->address, 'phone' => $supplier->telephone, 'document_type' => $documentType]
+            );
+            $thirdPartyId = $thirdParty->id;
+        }
+
+        // Obtener método de pago del primer pago
+        $payment_method_name = null;
+        if ($document->payments && $document->payments->count() > 0) {
+            $payment = $document->payments->first();
+            if (method_exists($payment, 'getPaymentMethodNameAttribute')) {
+                $payment_method_name = $payment->payment_method_name;
+            }
+        }
+
+        AccountingEntryHelper::registerEntry([
+            'prefix_id' => 2,
+            'description' => $description . ' #' . $document->prefix . '-' . $document->number,
+            'support_document_id' => $document->id,
+            'movements' => [
+                [
+                    'account_id' => $accountIdInventory->id,
+                    'debit' => $document->sale,
+                    'credit' => 0,
+                    'affects_balance' => true,
+                    'third_party_id' => $thirdPartyId,
+                    // 'payment_method_name' => $payment_method_name,
+                ],
+                [
+                    'account_id' => $accountIdLiability->id,
+                    'debit' => 0,
+                    'credit' => $document->total,
+                    'affects_balance' => true,
+                    'third_party_id' => $thirdPartyId,
+                    // 'payment_method_name' => $payment_method_name,
+                ],
+            ],
+            'taxes' => is_array($document->taxes) ? $document->taxes : (is_object($document->taxes) ? (array)$document->taxes : []),
+            'tax_config' => [
+                'tax_field' => 'chart_account_purchase',
+                'tax_debit' => true,
+                'tax_credit' => false,
+                'retention_debit' => false,
+                'retention_credit' => true,
+                'third_party_id' => $thirdPartyId,
+                // 'payment_method_name' => $payment_method_name,
+            ],
+        ]);
     }
 
 

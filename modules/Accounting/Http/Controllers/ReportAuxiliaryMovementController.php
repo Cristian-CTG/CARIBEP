@@ -98,6 +98,29 @@ class ReportAuxiliaryMovementController extends Controller
                 'third_party_name' => $document->customer->name,
             ];
         }
+
+        // AGREGAR ESTO:
+        if ($entry->support_document) {
+            $support = $entry->support_document;
+            return [
+                'type' => 'support_document',
+                'id' => $support->id,
+                'number' => $support->prefix . '-' . $support->number,
+                'third_party_number' => $support->supplier->number ?? '',
+                'third_party_name' => $support->supplier->name ?? '',
+            ];
+        }
+        // Si tienes notas de ajuste:
+        if ($entry->support_document_adjust_note) {
+            $note = $entry->support_document_adjust_note;
+            return [
+                'type' => 'support_document_adjust_note',
+                'id' => $note->id,
+                'number' => $note->prefix . '-' . $note->number,
+                'third_party_number' => $note->supplier->number ?? '',
+                'third_party_name' => $note->supplier->name ?? '',
+            ];
+        }
         // TO DO - inventory - extra...
         return null;
     }

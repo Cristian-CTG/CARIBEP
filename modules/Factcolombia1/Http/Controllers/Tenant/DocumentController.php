@@ -61,11 +61,15 @@ use Modules\Accounting\Models\ChartOfAccount;
 use Modules\Accounting\Models\ChartAccountSaleConfiguration;
 use Modules\Accounting\Models\AccountingChartAccountConfiguration;
 use Modules\Accounting\Helpers\AccountingEntryHelper;
+use Modules\Accounting\Models\ThirdParty;
+use Modules\Finance\Traits\FinanceTrait;
+use App\Models\Tenant\BankAccount;
+use App\Models\Tenant\Cash;
 
 
 class DocumentController extends Controller
 {
-    use DocumentTrait, SearchTrait;
+    use DocumentTrait, SearchTrait, FinanceTrait;
 
     const REGISTERED = 1;
     const ACCEPTED = 5;
@@ -1161,6 +1165,26 @@ class DocumentController extends Controller
             $accountReceibableCustomer = ChartOfAccount::where('code', $config_accounts->customer_receivable_account)->first(); // cuenta clientes
             $is_credit = $document->payment_form_id == 2 ? true : false;
 
+            $person = Person::find($document->customer_id);
+            $thirdPartyId = null;
+            $documentType = null;
+            if ($person->identity_document_type_id) {
+                $typeDoc = TypeIdentityDocument::find($person->identity_document_type_id);
+                $documentType = $typeDoc ? $typeDoc->code : null;
+            }
+
+            if ($person) {
+                // Busca o crea el tercer implicado en la tabla de terceros
+                $thirdParty = ThirdParty::updateOrCreate(
+                    ['document' => $person->number, 'type' => $person->type],
+                    ['name' => $person->name, 'email' => $person->email, 'address' => $person->address, 'phone' => $person->telephone, 'document_type' => $documentType]
+                );
+                $thirdPartyId = $thirdParty->id;
+            }
+
+            // Obtener método de pago si es al contado
+            $payment_method_name = !$is_credit ? 'Contado' : null;
+
             AccountingEntryHelper::registerEntry([
                 'prefix_id' => 1,
                 'description' => $document_type->name . ' #' . $document->prefix . '-' . $document->number,
@@ -1171,12 +1195,16 @@ class DocumentController extends Controller
                         'debit' => $document->total,
                         'credit' => 0,
                         'affects_balance' => true,
+                        'third_party_id' => $thirdPartyId,
+                        'payment_method_name' => $payment_method_name,
                     ],
                     [
                         'account_id' => $accountIdIncome->id,
                         'debit' => 0,
                         'credit' => $document->sale,
                         'affects_balance' => true,
+                        'third_party_id' => $thirdPartyId, //Caso a investigar si es correcto!!
+                        // 'payment_method_name' => $payment_method_name,
                     ],
                 ],
                 'taxes' => $document->taxes ?? [],
@@ -1186,6 +1214,8 @@ class DocumentController extends Controller
                     'tax_credit' => true,
                     'retention_debit' => true,
                     'retention_credit' => false,
+                    'third_party_id' => $thirdPartyId,
+                    // 'payment_method_name' => $payment_method_name,
                 ],
             ]);
         } catch (\Exception $e) {
@@ -1451,7 +1481,7 @@ class DocumentController extends Controller
             //\Log::debug($correlative_api);
             //\Log::debug($data_document);
             //            return $data_document;
-            //Log::debug($response);
+            // \Log::debug($response);
             //return "";
 
             $response_model = json_decode($response);
@@ -1584,6 +1614,12 @@ class DocumentController extends Controller
                 'cufe' => $response_model->cude
             ]);
 
+            // Registrar asientos contables
+            if($this->document->type_document_id == 3 ){
+                $this->registerAccountingCreditNoteEntries($this->document);
+                $this->registerAccountingCreditNotePaymentRefund($this->document);
+            }
+
             if ($request->reference_id && $this->document->type_document_id == 3) {
                 $referenced_document = Document::find($request->reference_id);
                 if ($referenced_document) {
@@ -1596,9 +1632,10 @@ class DocumentController extends Controller
             }
 
             // Registrar asientos contables
-            if($this->document->type_document_id == 3 ){
-                $this->registerAccountingCreditNoteEntries($this->document);
-            }
+            // if($this->document->type_document_id == 3 ){
+            //     $this->registerAccountingCreditNoteEntries($this->document);
+            //     $this->registerAccountingCreditNotePaymentRefund($this->document);
+            // }
             if($this->document->type_document_id == 2 ){
                 $this->registerAccountingSaleEntries($this->document);
             }
@@ -1672,6 +1709,21 @@ class DocumentController extends Controller
             $accountIdIncome = ChartOfAccount::where('code','417505')->first();
             $document_type = TypeDocument::find($document->type_document_id);
 
+            $person = Person::find($document->customer_id);
+            $thirdPartyId = null;
+            $documentType = null;
+            if ($person->identity_document_type_id) {
+                $typeDoc = TypeIdentityDocument::find($person->identity_document_type_id);
+                $documentType = $typeDoc ? $typeDoc->code : null;
+            }
+            if ($person) {
+                $thirdParty = ThirdParty::updateOrCreate(
+                    ['document' => $person->number, 'type' => $person->type],
+                    ['name' => $person->name, 'email' => $person->email, 'address' => $person->address, 'phone' => $person->telephone, 'document_type' => $documentType]
+                );
+                $thirdPartyId = $thirdParty->id;
+            }
+
             AccountingEntryHelper::registerEntry([
                 'prefix_id' => 1,
                 'description' => $document_type->name . ' #' . $document->prefix . '-' . $document->number,
@@ -1682,12 +1734,14 @@ class DocumentController extends Controller
                         'debit' => 0,
                         'credit' => $document->total,
                         'affects_balance' => true,
+                        'third_party_id' => $thirdPartyId,
                     ],
                     [
                         'account_id' => $accountIdIncome->id,
                         'debit' => $document->sale,
                         'credit' => 0,
                         'affects_balance' => true,
+                        'third_party_id' => $thirdPartyId, //Caso a investigar si es correcto!!
                     ],
                 ],
                 'taxes' => $document->taxes ?? [],
@@ -1697,10 +1751,94 @@ class DocumentController extends Controller
                     'tax_credit' => false,
                     'retention_debit' => false,
                     'retention_credit' => true,
+                    'third_party_id' => $thirdPartyId,
                 ],
             ]);
         } catch (\Exception $e) {
             \Log::error('insert Entry '.$e->getMessage());
+        }
+    }
+
+    private function registerAccountingCreditNotePaymentRefund($creditNote)
+    {
+        // 1. Buscar la factura afectada
+        $invoice = $creditNote->reference; // referencia al documento original
+
+        // 2. Buscar los pagos realizados a la factura
+        $payments = $invoice->payments;
+
+        // Validar: solo crear asiento si hay pagos
+        if ($payments->isEmpty()) {
+            return; // No hay pagos, no se crea asiento
+        }
+
+        // 3. Configuración de cuentas
+        $config = AccountingChartAccountConfiguration::first();
+        $accountReceivable = ChartOfAccount::where('code', $config->customer_receivable_account)->first();
+
+        // 3. Configuración de cuentas
+        $config = AccountingChartAccountConfiguration::first();
+        $accountReceivable = ChartOfAccount::where('code', $config->customer_receivable_account)->first();
+
+        // 4. Obtener el cliente y el tercero
+        $person = Person::find($invoice->customer_id);
+        $thirdPartyId = null;
+        $documentType = null;
+        if ($person && $person->identity_document_type_id) {
+            $typeDoc = TypeIdentityDocument::find($person->identity_document_type_id);
+            $documentType = $typeDoc ? $typeDoc->code : null;
+        }
+        if ($person) {
+            $thirdParty = ThirdParty::updateOrCreate(
+                ['document' => $person->number, 'type' => $person->type],
+                [
+                    'name' => $person->name,
+                    'email' => $person->email,
+                    'address' => $person->address,
+                    'phone' => $person->telephone,
+                    'document_type' => $documentType,
+                ]
+            );
+            $thirdPartyId = $thirdParty->id;
+        }
+
+        foreach ($payments as $payment) {
+            $accountDestinationID = null;
+            $payment_method_name = 'Devolución'; // <-- aquí
+            if ($payment->global_payment) {
+                if ($payment->global_payment->destination_type === BankAccount::class) {
+                    $bankAccount = BankAccount::find($payment->global_payment->destination_id);
+                    $accountDestinationID = $bankAccount ? $bankAccount->chart_of_account_id : null;
+                } elseif ($payment->global_payment->destination_type === Cash::class) {
+                    $accountCash = ChartOfAccount::where('code', '110505')->first();
+                    $accountDestinationID = $accountCash ? $accountCash->id : null;
+                }
+            }
+
+            // Generar asiento contable de devolución
+            AccountingEntryHelper::registerEntry([
+                'prefix_id' => 3, // Prefijo de devolución/nota de crédito
+                'description' => 'Devolución de pago por Nota de Crédito ' . $creditNote->prefix . '-' . $creditNote->number,
+                'document_id' => $creditNote->id,
+                'movements' => [
+                    [
+                        'account_id' => $accountDestinationID,
+                        'debit' => 0,
+                        'credit' => $payment->payment, // Sale el dinero
+                        'affects_balance' => true,
+                        'third_party_id' => $thirdPartyId,
+                        'payment_method_name' => $payment_method_name,
+                    ],
+                    [
+                        'account_id' => $accountReceivable->id,
+                        'debit' => $payment->payment, // Se reduce la cuenta por cobrar
+                        'credit' => 0,
+                        'affects_balance' => true,
+                        'third_party_id' => $thirdPartyId,
+                        // 'payment_method_name' => $payment_method_name,
+                    ],
+                ],
+            ]);
         }
     }
 
