@@ -1139,9 +1139,6 @@
     </div>
     @php
         $isConfigRoute = in_array($path[0], [
-            'co-configuration-change-ambient', 'co-configuration', 'co-configuration-documents',
-            'companies', 'catalogs', 'advanced', 'tasks', 'inventories','company_accounts','bussiness_turns',
-            'offline-configurations','series-configurations','configurations','co-advanced-configuration'
         ]);
     @endphp
 
