@@ -435,12 +435,17 @@ class PurchaseController extends Controller
                 $item->purchase->inventory_kardex()->create([
                     'date_of_issue' => date('Y-m-d'),
                     'item_id' => $item->item_id,
-                    'warehouse_id' => $establishment->id,
+                    'warehouse_id' => $item->warehouse_id,
                     'quantity' => -$item->quantity,
                 ]);
-                $wr = ItemWarehouse::where([['item_id', $item->item_id],['warehouse_id', $establishment->id]])->first();
-                $wr->stock =  $wr->stock - $item->quantity;
-                $wr->save();
+                $wr = ItemWarehouse::where([
+                    ['item_id', $item->item_id],
+                    ['warehouse_id', $item->warehouse_id]
+                ])->first();
+                if($wr) {
+                    $wr->stock =  $wr->stock - $item->quantity;
+                    $wr->save();
+                }
             }
 
             foreach ($doc->items()->get() as $it) {
@@ -527,12 +532,17 @@ class PurchaseController extends Controller
             $item->purchase->inventory_kardex()->create([
                 'date_of_issue' => date('Y-m-d'),
                 'item_id' => $item->item_id,
-                'warehouse_id' => $establishment->id,
+                'warehouse_id' => $item->warehouse_id,
                 'quantity' => -$item->quantity,
             ]);
-            $wr = ItemWarehouse::where([['item_id', $item->item_id],['warehouse_id', $warehouse->id]])->first();
-            $wr->stock =  $wr->stock - $item->quantity;
-            $wr->save();
+            $wr = ItemWarehouse::where([
+                ['item_id', $item->item_id],
+                ['warehouse_id', $item->warehouse_id]
+            ])->first();
+            if($wr) {
+                $wr->stock =  $wr->stock - $item->quantity;
+                $wr->save();
+            }
         }
 
         return [
