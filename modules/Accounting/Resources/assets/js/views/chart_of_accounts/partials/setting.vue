@@ -22,9 +22,9 @@
                                 <tr>
                                     <th>Ingresos</th>
                                     <th style="word-break: break-word;">Devoluciones en ventas</th>
-                                    <th>Clasificación contable</th>
-                                    <th>Invetario</th>
+                                    <th>Inventario</th>
                                     <th>Costo de ventas</th>
+                                    <th>Clasificación contable</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
