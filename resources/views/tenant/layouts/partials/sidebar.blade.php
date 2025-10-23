@@ -868,7 +868,7 @@
                     {{-- Debug temporal --}}
                     {{-- {{ dd($vc_modules) }} --}}
                     @if(in_array('accounting', $vc_modules))
-                    <li class="nav-parent {{$path[0] === 'accounting' && in_array($path[1], ['journal', 'charts', 'income-statement', 'financial-position', 'auxiliary-movement', 'bank-book', 'bank-reconciliation', 'third-report']) ? 'nav-active nav-expanded' : ''}}">
+                    <li class="nav-parent {{$path[0] === 'accounting' && in_array($path[1], ['journal', 'charts', 'income-statement', 'financial-position', 'auxiliary-movement', 'bank-book', 'bank-reconciliation', 'third-report', 'entry-details-report']) ? 'nav-active nav-expanded' : ''}}">
                         <a class="nav-link" href="#">
                             <span class="float-right badge badge-red badge-danger mr-3 bg-secondary bg-danger mt-1">Nuevo</span>
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chart-histogram">
@@ -891,6 +891,11 @@
                             <li class="{{(($path[0] === 'accounting') && ($path[1] == 'journal')) ? 'nav-active' : ''}}">
                                 <a class="nav-link" href="{{route('tenant.accounting.journal.entries.index')}}">
                                     Asientos contables
+                                </a>
+                            </li>
+                            <li class="{{(($path[0] === 'accounting') && ($path[1] == 'entry-details-report')) ? 'nav-active' : ''}}">
+                                <a class="nav-link" href="{{route('tenant.accounting.report.entry-details-report')}}">
+                                    Reporte Detalle de Asientos
                                 </a>
                             </li>
                             <li class="{{(($path[0] === 'accounting') && ($path[1] == 'financial-position')) ? 'nav-active' : ''}}">

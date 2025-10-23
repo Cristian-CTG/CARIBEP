@@ -403,6 +403,7 @@ Vue.component('tenant-accounting-reports-auxiliary-movement-index', require('@vi
 Vue.component('tenant-accounting-reports-bank-reconciliation-index', require('@viewsModuleAccounting/reports/bank_reconciliation.vue'));
 Vue.component('tenant-accounting-bank-book-index', require('@viewsModuleAccounting/reports/bank_book.vue'));
 Vue.component('tenant-accounting-reports-third-report-index', require('@viewsModuleAccounting/reports/third_report.vue'));
+Vue.component('tenant-accounting-reports-entry-details-report', require('@viewsModuleAccounting/reports/journal_entry_details_report.vue'));
 
 Vue.component('system-support-configuration', require('./views/system/configuration/supportConfiguration.vue'));
 Vue.component('system-config-login', require('./views/system/configuration/configLogin.vue'));

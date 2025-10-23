@@ -92,6 +92,11 @@
                 default: () => [],
                 required: false
             },
+            customFilters: {
+                type: Object,
+                default: null,
+                required: false
+            },
         },
         data () {
             return {
@@ -139,15 +144,15 @@
                 });
             },
             getQueryParameters() {
-                let searchParams = { ...this.search };
+                let params = this.customFilters ? { ...this.customFilters } : { ...this.search };
                 // Si es un rango de fechas, convierte el array en string
-                if (searchParams.column === 'daterange' && Array.isArray(searchParams.value)) {
-                    searchParams.value = searchParams.value.join('_');
+                if (params.column === 'daterange' && Array.isArray(params.value)) {
+                    params.value = params.value.join('_');
                 }
                 return queryString.stringify({
                     page: this.pagination.current_page,
                     limit: this.limit,
-                    ...searchParams
+                    ...params
                 });
             },
             changeClearInput(){

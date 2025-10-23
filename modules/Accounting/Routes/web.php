@@ -58,6 +58,11 @@ if($hostname) {
             Route::get('journal/entries/{id}/records-detail', 'JournalEntryDetailController@recordsDetail');
 
             // Reportes
+            // Reporte de Detalles de Asientos Contables
+            Route::get('/entry-details-report', 'JournalEntryDetailsReportController@index')->name('tenant.accounting.report.entry-details-report');
+            Route::get('/entry-details-report/records', 'JournalEntryDetailsReportController@records');
+            Route::get('/entry-details-report/columns', 'JournalEntryDetailsReportController@columns');
+            Route::get('/entry-details-report/export', 'JournalEntryDetailsReportController@export');
             // Reporte de Situación Financiera
             Route::get('/financial-position', 'ReportFinancialPositionController@index')->name('tenant.accounting.report.financial-position');
             Route::get('/financial-position/records', 'ReportFinancialPositionController@records');
@@ -72,7 +77,7 @@ if($hostname) {
             Route::get('/auxiliary-movement/export', 'ReportAuxiliaryMovementController@export');
             // Reporte de Libro Bancario
             Route::get('/bank-book', 'ReportBankBookController@index')->name('tenant.accounting.report.bank-book');
-            Route::get('/bank-book/records', 'ReportBankBookController@records');
+            // Route::get('/bank-book/records', 'ReportBankBookController@records');
             Route::get('/bank-book/export', 'ReportBankBookController@export');
             Route::get('/bank-book/preview', 'ReportBankBookController@preview');
 

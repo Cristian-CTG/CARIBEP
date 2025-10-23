@@ -141,6 +141,20 @@ class ReportBankBookController extends Controller
         $bank_account = null;
         if ($bank_account_id !== 'cash') {
             $bank_account = BankAccount::with('chart_of_account')->find($bank_account_id);
+            // Si no existe el banco, retorna vacío
+            if (!$bank_account) {
+                return response()->json([
+                    'preview' => [],
+                    'saldo_inicial' => '0,00',
+                    'saldo_final' => '0,00',
+                    'pagination' => [
+                        'total' => 0,
+                        'per_page' => $perPage,
+                        'current_page' => $page,
+                        'last_page' => 1,
+                    ]
+                ]);
+            }
         }
 
         // Calcular saldo inicial como la suma de todos los movimientos hasta el último día del mes anterior
@@ -165,22 +179,28 @@ class ReportBankBookController extends Controller
 
         $saldo_inicial = $saldo_inicial_query->sum('debit') - $saldo_inicial_query->sum('credit');
 
-        // Movimientos del mes actual
-        $query = JournalEntryDetail::with(['journalEntry', 'chartOfAccount'])
+        // Movimientos del mes actual (para saldo final, sin paginación)
+        $query_full = JournalEntryDetail::with(['journalEntry', 'chartOfAccount'])
             ->whereHas('journalEntry', function($q) use ($start_date, $end_date) {
                 $q->whereBetween('date', [$start_date, $end_date])
                 ->where('status', 'posted');
             });
 
         if ($bank_account_id === 'cash') {
-            $query->whereHas('chartOfAccount', function($q) {
+            $query_full->whereHas('chartOfAccount', function($q) {
                 $q->where('code', '110505');
             });
         } else {
-            $query->where('chart_of_account_id', $bank_account->chart_of_account_id)
+            $query_full->where('chart_of_account_id', $bank_account->chart_of_account_id)
                 ->where('bank_account_id', $bank_account->id);
         }
 
+        $saldo_final = $saldo_inicial + $query_full->get()->sum(function($d) {
+            return $d->debit - $d->credit;
+        });
+
+        // Movimientos paginados para la tabla
+        $query = clone $query_full;
         $total = $query->count();
         $details = $query->orderBy('id')->skip(($page - 1) * $perPage)->take($perPage)->get();
 
@@ -220,10 +240,6 @@ class ReportBankBookController extends Controller
                 'balance' => number_format($saldo, 2, ',', '.'),
             ];
         }
-
-        $saldo_final = $saldo_inicial + $query->get()->sum(function($d) {
-            return $d->debit - $d->credit;
-        });
 
         return response()->json([
             'preview' => $preview,
