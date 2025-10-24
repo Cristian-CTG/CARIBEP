@@ -292,15 +292,29 @@ class SupportDocumentController extends Controller
             ];
         }
 
-        // Movimiento de la cuenta por pagar a proveedores
-        $movements[] = [
-            'account_id' => $accountIdLiability->id,
-            'debit' => 0,
-            'credit' => $document->total,
-            'affects_balance' => true,
-            'third_party_id' => $thirdPartyId,
-            'description' => $accountIdLiability->code . ' - ' . $accountIdLiability->name,
-        ];
+        if ($document->payment_form_id == 1) {
+            // Contado: usar caja general (110505) o bancos (111005) según el medio de pago
+            // Puedes mejorar esto para usar bancos si corresponde
+            $accountCash = ChartOfAccount::where('code', '110505')->first();
+            $movements[] = [
+                'account_id' => $accountCash->id,
+                'debit' => 0,
+                'credit' => $document->total,
+                'affects_balance' => true,
+                'third_party_id' => $thirdPartyId,
+                'description' => $accountCash->code . ' - ' . $accountCash->name,
+            ];
+        } else {
+            // Crédito: proveedores
+            $movements[] = [
+                'account_id' => $accountIdLiability->id,
+                'debit' => 0,
+                'credit' => $document->total,
+                'affects_balance' => true,
+                'third_party_id' => $thirdPartyId,
+                'description' => $accountIdLiability->code . ' - ' . $accountIdLiability->name,
+            ];
+        }
 
         AccountingEntryHelper::registerEntry([
             'prefix_id' => 2,

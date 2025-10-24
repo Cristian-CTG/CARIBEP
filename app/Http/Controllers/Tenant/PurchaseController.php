@@ -290,6 +290,7 @@ class PurchaseController extends Controller
         if(!$accountConfiguration) return;
 
         $accountIdLiability = ChartOfAccount::where('code', $accountConfiguration->supplier_payable_account)->first();
+        $accountIdCash = ChartOfAccount::where('code', '110505')->first(); // Caja general
         $document_type = DocumentType::find($document->document_type_id);
 
         // Obtener proveedor como tercer implicado
@@ -352,14 +353,16 @@ class PurchaseController extends Controller
             ];
         }
 
-        // Movimiento de la cuenta por pagar a proveedores
+        $is_cash = ($document->date_of_issue == $document->date_of_due);
+
+        // Movimiento de la cuenta por pagar a proveedores o caja
         $movements[] = [
-            'account_id' => $accountIdLiability->id,
+            'account_id' => $is_cash ? $accountIdCash->id : $accountIdLiability->id,
             'debit' => 0,
             'credit' => $document->total,
             'affects_balance' => true,
             'third_party_id' => $thirdPartyId,
-            'description' => $accountIdLiability->code . ' - ' . $accountIdLiability->name,
+            'description' => ($is_cash ? $accountIdCash->code . ' - ' . $accountIdCash->name : $accountIdLiability->code . ' - ' . $accountIdLiability->name),
         ];
 
         AccountingEntryHelper::registerEntry([

@@ -69,7 +69,13 @@
                 <div class="bank-info">
                     <div><strong>Banco:</strong> {{ $bank_account->description ?? 'Caja General' }}</div>
                     <div><strong>N° Cuenta:</strong> {{ $bank_account->number ?? '-' }}</div>
-                    <div><strong>Auxiliar:</strong> {{ $auxiliar }}</div>
+                    <div><strong>Auxiliar:</strong>
+                        {{
+                            $bank_account && isset($bank_account->chart_of_account)
+                                ? $bank_account->chart_of_account->code
+                                : ($auxiliar ?: '')
+                        }}
+                    </div>
                     <div><strong>Periodo:</strong> {{ $periodo }}</div>
                 </div>
             </td>
