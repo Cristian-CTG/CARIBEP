@@ -728,6 +728,7 @@ export default {
                 row.item = this.prepareIndividualItem(row)
                 row.price = row.unit_price
                 row.id = row.item.id
+                row.notes = row.notes || row.item.notes || ''
                 return row
             })
         },
@@ -836,7 +837,10 @@ export default {
         clickEditItem(row, index) {
             // sumarle el iva al producto para editarlo modificado por Cristian
             // Declara las variables con 'let' para un alcance local
-            if (row.tax !== undefined) {
+            if (!row.tax && row.tax_id && this.taxes && this.taxes.length > 0) {
+                row.tax = this.taxes.find(tax => tax.id == row.tax_id) || null;
+            }
+            if (row.tax !== undefined && row.tax !== null) {
                 let ivaRate = parseFloat(row.tax.rate) / row.tax.conversion; // Obtiene la tasa de IVA
                 let precioConIVA = row.price * (1 + ivaRate); // Calcula el precio con IVA
                 // Redondea el precio con IVA a dos decimales
@@ -895,8 +899,8 @@ export default {
                 this.form.type_document_id = this.invoice.type_document_id;
                 this.form.resolution_id = this.invoice.type_document_id;
                 this.form.currency_id = this.invoice ? this.invoice.currency_id : null;
-                this.form.date_issue = this.invoice ? moment(this.invoice.date_of_issue, 'YYYY-MM-DD hh:mm:ss').format('YYYY-MM-DD') : moment().format('YYYY-MM-DD');
-                this.form.date_expiration = this.invoice ? moment(this.invoice.date_expiration, 'YYYY-MM-DD hh:mm:ss').format('YYYY-MM-DD') : null;
+                this.form.date_issue = moment().format('YYYY-MM-DD');
+                this.form.date_expiration = moment().format('YYYY-MM-DD');
                 this.form.type_invoice_id = this.invoice ? this.invoice.type_invoice_id : 1;
                 this.form.total_discount = this.invoice ? this.invoice.total_discount : 0;
                 this.form.total_tax = this.invoice ? (this.invoice.total_tax < 0 ? 0 : this.invoice.total_tax) : 0;
