@@ -16,7 +16,7 @@
         <h2>Reporte de Tercero</h2>
         <strong>Tercero:</strong> {{ $third_name }}<br>
         <strong>Documento:</strong> {{ $third_document }}<br>
-        <strong>Mes:</strong> {{ $month }}
+        <strong>Rango de fechas:</strong> {{ $start_date }} a {{ $end_date }}
     </div>
     <table>
         <thead>

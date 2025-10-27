@@ -210,6 +210,9 @@ class ReportBankBookController extends Controller
             return $d->debit - $d->credit;
         });
 
+        $total_debito = $query_full->sum('debit');
+        $total_credito = $query_full->sum('credit');
+
         foreach ($details as $detail) {
             $entry = $detail->journalEntry;
             $debit = $detail->debit ?? 0;
@@ -245,6 +248,8 @@ class ReportBankBookController extends Controller
             'preview' => $preview,
             'saldo_inicial' => number_format($saldo_inicial, 2, ',', '.'),
             'saldo_final' => number_format($saldo_final, 2, ',', '.'),
+            'total_debito' => number_format($total_debito, 2, ',', '.'),
+            'total_credito' => number_format($total_credito, 2, ',', '.'),
             'pagination' => [
                 'total' => $total,
                 'per_page' => $perPage,

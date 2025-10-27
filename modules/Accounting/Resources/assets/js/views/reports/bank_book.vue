@@ -66,6 +66,32 @@
         </div> -->
         <div v-if="preview.length > 0">
             <h4 class="mt-4">Vista previa de movimientos</h4>
+            <table class="table table-sm mb-0" style="width:100%; border-collapse:separate; border-spacing:0;">
+                <tbody>
+                    <tr style="font-weight:bold;">
+                        <td style="width:100px"></td>
+                        <td style="width:120px"></td>
+                        <td style="width:120px"></td>
+                        <td></td>
+                        <td style="width:60px"></td>
+                        <td style="width:100px; text-align:left;">Saldo inicial</td>
+                        <td style="width:100px; text-align:left;">Débito</td>
+                        <td style="width:100px; text-align:left;">Crédito</td>
+                        <td style="width:100px; text-align:left;">Saldo final</td>
+                    </tr>
+                    <tr>
+                        <td style="width:100px"></td>
+                        <td style="width:120px"></td>
+                        <td style="width:120px"></td>
+                        <td></td>
+                        <td style="width:60px; text-align:left; ">Totales:</td>
+                        <td style="width:100px; text-align:left; ">{{ saldo_inicial }}</td>
+                        <td style="width:100px; text-align:left; ">{{ debito_total }}</td>
+                        <td style="width:100px; text-align:center; ">{{ credito_total }}</td>
+                        <td style="width:100px; text-align:left; ">{{ saldo_final }}</td>
+                    </tr>
+                </tbody>
+            </table>
             <el-table :data="preview" style="width: 100%" size="mini">
                 <el-table-column prop="date" label="Fecha" width="100"/>
                 <el-table-column prop="document" label="Documento" width="120"/>
@@ -85,10 +111,10 @@
                 :current-page.sync="pagination.current_page"
                 @current-change="handlePageChange">
             </el-pagination>
-            <div class="mt-2">
+            <!-- <div class="mt-2">
                 <b>Saldo inicial:</b> {{ saldo_inicial }}<br>
                 <b>Saldo final:</b> {{ saldo_final }}
-            </div>
+            </div> -->
         </div>
         <div v-if="!previewLoading && preview.length === 0 && canExport" class="alert alert-info mt-3">
             No hay movimientos para los filtros seleccionados.
@@ -111,6 +137,8 @@ export default {
             preview: [],
             saldo_inicial: '0,00',
             saldo_final: '0,00',
+            debito_total: '0,00',
+            credito_total: '0,00',
             previewLoading: false,
             pagination: {
                 total: 0,
@@ -174,6 +202,8 @@ export default {
                 this.preview = []
                 this.saldo_inicial = '0,00'
                 this.saldo_final = '0,00'
+                this.debito_total = '0,00'
+                this.credito_total = '0,00'
                 this.pagination = { total: 0, per_page: 10, current_page: 1, last_page: 1 }
                 return
             }
@@ -184,11 +214,15 @@ export default {
                 this.preview = response.data.preview
                 this.saldo_inicial = response.data.saldo_inicial
                 this.saldo_final = response.data.saldo_final
+                this.debito_total = response.data.total_debito
+                this.credito_total = response.data.total_credito
                 this.pagination = response.data.pagination
             } catch (e) {
                 this.preview = []
                 this.saldo_inicial = '0,00'
                 this.saldo_final = '0,00'
+                this.debito_total = '0,00'
+                this.credito_total = '0,00'
                 this.pagination = { total: 0, per_page: 10, current_page: 1, last_page: 1 }
             }
             this.previewLoading = false
@@ -200,3 +234,10 @@ export default {
     }
 }
 </script>
+<style>
+.table-sm tr td {
+    border: none !important;
+    /* background: #f5f7fa !important; */
+    vertical-align: middle;
+}
+</style>
