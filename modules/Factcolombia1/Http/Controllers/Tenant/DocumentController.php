@@ -439,9 +439,16 @@ class DocumentController extends Controller
 //        try {
             $this->company = Company::query()->with('country', 'version_ubl', 'type_identity_document')->firstOrFail();
             $company = ServiceTenantCompany::firstOrFail();
+                \Log::info('API request_api:', [
+        'request_api' => $document_invoice->request_api
+    ]);
             $invoice_json_decoded = json_decode($document_invoice->request_api, true);
+            \Log::info('API request_api decoded:', $invoice_json_decoded);
 //            \Log::debug($invoice_json_decoded);
 //            \Log::debug($invoice_json_decoded);
+    if(isset($invoice_json_decoded['invoice_lines'])){
+        \Log::info('API invoice_lines:', $invoice_json_decoded['invoice_lines']);
+    }
             $correlative_api = $invoice_json_decoded['number'];
             $service_invoice = $invoice_json_decoded;
             if (isset($invoice_json_decoded['health_fields'])){
@@ -498,6 +505,54 @@ class DocumentController extends Controller
                 else
                     $request->total_discount = 0;
                 $request->taxes = Tax::all();
+                foreach ($request->taxes as $tax) {
+                    $tax->total = 0;
+                    $tax->retention = 0;
+                }
+                if (isset($service_invoice['tax_totals']) && is_array($service_invoice['tax_totals'])) {
+                    foreach ($service_invoice['tax_totals'] as $tax_total) {
+
+                        $tax_found = null;
+                        foreach ($request->taxes as $tax) {
+                            if (
+                                $tax->type_tax_id == $tax_total['tax_id'] &&
+                                floatval($tax->rate) == floatval($tax_total['percent']) &&
+                                (
+                                    ($tax->type_tax_id == 1 && $tax->code == '71') ||
+                                    ($tax->type_tax_id != 1)
+                                )
+                            ) {
+                                $tax_found = $tax;
+                                break;
+                            }
+                        }
+
+                        if (!$tax_found) {
+                            $tax_data = [
+                                'name' => isset($tax_total['name']) ? $tax_total['name'] : 'Impuesto automático',
+                                'code' => ($tax_total['tax_id'] == 1) ? '71' : (isset($tax_total['code']) ? $tax_total['code'] : ''),
+                                'rate' => $tax_total['percent'],
+                                'conversion' => 100,
+                                'is_percentage' => true,
+                                'is_fixed_value' => false,
+                                'is_retention' => false,
+                                'in_base' => false,
+                                'in_tax' => null,
+                                'type_tax_id' => $tax_total['tax_id'],
+                                'chart_account_sale' => null,
+                                'chart_account_purchase' => null,
+                                'chart_account_return_sale' => null,
+                                'chart_account_return_purchase' => null,
+                            ];
+                            $tax_found = Tax::create($tax_data);
+                            $tax_found->total = 0;
+                            $tax_found->retention = 0;
+                            $request->taxes->push($tax_found);
+                        }
+
+                        $tax_found->total += isset($tax_total['tax_amount']) ? floatval($tax_total['tax_amount']) : 0;
+                    }
+                }
                 $request->total_tax = $service_invoice['legal_monetary_totals']['tax_inclusive_amount'] - $service_invoice['legal_monetary_totals']['line_extension_amount'];
                 $request->subtotal = $service_invoice['legal_monetary_totals']['line_extension_amount'];
                 $request->payment_form_id = $service_invoice['payment_form']['payment_form_id'];
@@ -519,6 +574,9 @@ class DocumentController extends Controller
             $response = json_encode(['cufe' => $request->cufe]);
             $response_status = NULL;
             $request->state_document_id = 5; // Estado aceptado
+            \Log::info('TAXES CALCULADOS ANTES DE GUARDAR:', [
+    'taxes' => $request->taxes
+]);
             $this->document = DocumentHelper::createDocument($request, $nextConsecutive, $correlative_api, $this->company, $response, $response_status, $company->type_environment_id);
 //        } catch (\Exception $e) {
 //            DB::connection('tenant')->rollBack();

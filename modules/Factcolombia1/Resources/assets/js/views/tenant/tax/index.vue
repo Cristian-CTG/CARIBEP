@@ -61,7 +61,7 @@
                     </tr>
                 </data-table>
             </div>
-                <tenant-taxes-form :showDialog.sync="showDialog" :recordId="recordId"></tenant-taxes-form>  -->
+                <tenant-taxes-form :showDialog.sync="showDialog" :recordId="recordId"></tenant-taxes-form>
             </div>
     </div>
 </template>

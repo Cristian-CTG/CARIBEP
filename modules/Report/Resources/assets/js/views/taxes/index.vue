@@ -103,7 +103,7 @@
                           </div>
                         </td>
 
-                        <td class="text-right">$ {{ row.total | numberFormat }}</td>
+                        <td class="text-right">$ {{ row.subtotal | numberFormat }}</td>
                         <td class="text-right">$ {{ row.total_discount | numberFormat }}</td>
 
                         <td class="text-right" v-for="(tax, index) in taxTitles" :key="index + 'TD'">
