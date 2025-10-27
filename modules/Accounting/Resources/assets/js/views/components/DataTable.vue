@@ -59,6 +59,9 @@
                         <tbody>
                         <slot v-for="(row, index) in records" :row="row" :index="customIndex(index)"></slot>
                         </tbody>
+                        <tfoot>
+                            <slot name="footer"></slot>
+                        </tfoot>
                     </table>
                     <div>
                         <el-pagination
@@ -141,6 +144,7 @@
                     this.records = response.data.data
                     this.pagination = response.data.meta
                     this.pagination.per_page = parseInt(response.data.meta.per_page)
+                    return response.data
                 });
             },
             getQueryParameters() {

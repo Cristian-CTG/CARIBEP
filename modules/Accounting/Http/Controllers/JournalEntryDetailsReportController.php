@@ -57,6 +57,10 @@ class JournalEntryDetailsReportController extends Controller
                 $q->where('number', '<=', $request->number_to);
             });
         }
+        // Calcular totales según los filtros (sin paginación)
+        $totalsQuery = clone $query;
+        $total_debit = $totalsQuery->sum('debit');
+        $total_credit = $totalsQuery->sum('credit');
 
         $records = $query->orderBy('id', 'desc')->paginate(20);
 
@@ -79,6 +83,8 @@ class JournalEntryDetailsReportController extends Controller
                 'total' => $records->total(),
                 'current_page' => $records->currentPage(),
                 'per_page' => $records->perPage(),
+                'total_debit' => $total_debit,
+                'total_credit' => $total_credit,
             ]
         ];
     }

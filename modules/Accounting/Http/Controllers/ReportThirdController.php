@@ -53,15 +53,14 @@ class ReportThirdController extends Controller
         $format = $request->input('export', 'pdf');
         $type = $request->input('type');
         $third_id = $request->input('third_id');
-        $month = $request->input('month'); // formato yyyy-MM
 
         $third = ThirdParty::find($third_id);
         $third_name = $third ? $third->name : '';
         $third_document = $third ? $third->document : '';
 
         // Buscar detalles de asientos del mes y del tercero
-        $start_date = $month . '-01';
-        $end_date = date("Y-m-t", strtotime($start_date));
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
 
         $details = JournalEntryDetail::where('third_party_id', $third ? $third->id : null)
             ->whereHas('journalEntry', function($q) use ($start_date, $end_date) {
@@ -112,74 +111,81 @@ class ReportThirdController extends Controller
         $data = [
             'third_name' => $third_name,
             'third_document' => $third_document,
-            'month' => $month,
+            'start_date' => $start_date,
+            'end_date' => $end_date,
             'rows' => $rows,
         ];
 
         $pdf = PDF::loadView('accounting::reports.third_report_pdf', $data)->setPaper('a4', 'landscape');
         return $pdf->stream('ReporteTercero.pdf');
     }
-    public function exportAll(Request $request)
+    public function exportAllThirds(Request $request)
     {
-        $format = $request->input('export', 'pdf');
+        $type = $request->input('type');
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
 
-        // Obtiene todos los terceros (clientes, proveedores, empleados, vendedores y terceros manuales)
-        $thirds = collect();
+        // Filtra los terceros por tipo
+        $thirds = ThirdParty::query();
+        if ($type) {
+            $thirds->where('type', $type);
+        }
+        $thirds = $thirds->get();
 
-        // Clientes y proveedores
-        $persons = \App\Models\Tenant\Person::whereIn('type', ['customers', 'suppliers'])->get();
-        foreach ($persons as $p) {
-            $thirds->push([
-                'tipo' => ucfirst($p->type),
-                'nombre' => $p->name,
-                'documento' => $p->number,
-                'direccion' => $p->address,
-                'telefono' => $p->telephone,
-                'email' => $p->email,
-            ]);
+        $rows = [];
+
+        foreach ($thirds as $third) {
+            // Busca movimientos en el rango de fechas
+            $details = JournalEntryDetail::where('third_party_id', $third->id)
+                ->whereHas('journalEntry', function($q) use ($start_date, $end_date) {
+                    $q->whereBetween('date', [$start_date, $end_date])
+                    ->where('status', 'posted');
+                })
+                ->with('chartOfAccount')
+                ->get();
+
+            // Agrupa por cuenta
+            $grouped = [];
+            foreach ($details as $d) {
+                $key = $d->chartOfAccount->code . '|' . ($d->chartOfAccount->name ?? '');
+                if (!isset($grouped[$key])) {
+                    $grouped[$key] = [
+                        'codigo' => $d->chartOfAccount->code,
+                        'cuenta' => $d->chartOfAccount->name ?? '',
+                        'debito' => 0,
+                        'credito' => 0,
+                    ];
+                }
+                $grouped[$key]['debito'] += $d->debit;
+                $grouped[$key]['credito'] += $d->credit;
+            }
+
+            // Genera filas para este tercero
+            foreach ($grouped as $g) {
+                if ($g['debito'] > 0 || $g['credito'] > 0) {
+                    $rows[] = [
+                        'tipo' => $third->getTypeName(),
+                        'nombre' => $third->name,
+                        'documento' => $third->document,
+                        'codigo' => $g['codigo'],
+                        'cuenta' => $g['cuenta'],
+                        'debito' => $g['debito'],
+                        'credito' => $g['credito'],
+                    ];
+                }
+            }
         }
 
-        // Empleados
-        $workers = \Modules\Payroll\Models\Worker::all();
-        foreach ($workers as $w) {
-            $thirds->push([
-                'tipo' => 'Empleado',
-                'nombre' => $w->full_name,
-                'documento' => $w->identification_number,
-                'direccion' => $w->address,
-                'telefono' => $w->cellphone,
-                'email' => $w->email,
-            ]);
-        }
-
-        // Vendedores
-        $sellers = \App\Models\Tenant\Seller::all();
-        foreach ($sellers as $s) {
-            $thirds->push([
-                'tipo' => 'Vendedor',
-                'nombre' => $s->full_name,
-                'documento' => $s->document_number,
-                'direccion' => $s->address,
-                'telefono' => $s->phone,
-                'email' => $s->email,
-            ]);
-        }
-
-        // Terceros manuales
-        $manuals = ThirdParty::all();
-        foreach ($manuals as $m) {
-            $thirds->push([
-                'tipo' => 'Tercero',
-                'nombre' => $m->name,
-                'documento' => $m->document,
-                'direccion' => $m->address,
-                'telefono' => $m->phone,
-                'email' => $m->email,
-            ]);
+        $tipo_nombre = '';
+        if ($type) {
+            $tipo_nombre = (new ThirdParty(['type' => $type]))->getTypeName();
         }
 
         $data = [
-            'thirds' => $thirds,
+            'rows' => $rows,
+            'tipo' => $tipo_nombre,
+            'start_date' => $start_date,
+            'end_date' => $end_date,
         ];
 
         $pdf = PDF::loadView('accounting::reports.third_report_all_pdf', $data)->setPaper('a4', 'landscape');

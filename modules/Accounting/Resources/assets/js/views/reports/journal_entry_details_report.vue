@@ -77,10 +77,21 @@
                         <td>{{ row.journal_entry.date }}</td>
                         <td>{{ row.journal_entry.description }}</td>
                         <td>{{ row.third_party_name }}</td>
-                        <td>{{ row.chart_of_account_id }}</td>
+                        <td>{{ row.chart_of_account ? row.chart_of_account.code : '' }}</td>
                         <td>{{ row.debit | currency }}</td>
                         <td>{{ row.credit | currency }}</td>
                     </tr>
+                    <template slot="footer" slot-scope="props">
+                        <tr>
+                            <td colspan="5" style="text-align:right; font-weight:bold;">Totales:</td>
+                            <td style="font-weight:bold;">
+                                {{ totalDebit | currency }}
+                            </td>
+                            <td style="font-weight:bold;">
+                                {{ totalCredit | currency }}
+                            </td>
+                        </tr>
+                    </template>
                 </data-table>
             </div>
         </div>
@@ -99,6 +110,8 @@ export default {
         const month = (now.getMonth() + 1).toString().padStart(2, '0');
         return {
             resource: "accounting/entry-details-report",
+            totalDebit: 0,
+            totalCredit: 0,
             journalPrefixes: [],
             filters: {
                 month: `${year}-${month}`,
@@ -118,8 +131,13 @@ export default {
                 this.journalPrefixes = response.data;
             });
         },
-        getRecords() {
-            this.$refs.dataTable.getRecords();
+        async getRecords() {
+            const response = await this.$refs.dataTable.getRecords();
+            // Si tu DataTable retorna la respuesta, puedes hacer:
+            if (response && response.meta) {
+                this.totalDebit = response.meta.total_debit;
+                this.totalCredit = response.meta.total_credit;
+            }
         },
         exportPdf() {
             const params = queryString.stringify({ ...this.filters, format: 'pdf' });

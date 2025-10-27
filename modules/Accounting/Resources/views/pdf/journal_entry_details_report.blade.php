@@ -50,7 +50,7 @@
                         <td>{{ $group['fecha'] }}</td>
                         <td>{{ $group['concepto'] }}</td>
                         <td>{{ $row->third_party_name }}</td>
-                        <td>{{ $row->chart_of_account_id }}</td>
+                        <td>{{ $row->chartOfAccount ? $row->chartOfAccount->code : '' }}</td>
                         <td>{{ number_format($row->debit, 2) }}</td>
                         <td>{{ number_format($row->credit, 2) }}</td>
                     </tr>

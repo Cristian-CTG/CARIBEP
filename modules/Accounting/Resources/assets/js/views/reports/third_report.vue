@@ -15,11 +15,13 @@
                 <div class="form-group">
                     <label>Mes</label>
                     <el-date-picker
-                    v-model="filters.month"
-                    type="month"
-                    value-format="yyyy-MM"
-                    format="MM/yyyy"
-                    :clearable="false"
+                      v-model="filters.dates"
+                      type="daterange"
+                      range-separator="a"
+                      start-placeholder="Fecha inicio"
+                      end-placeholder="Fecha fin"
+                      value-format="yyyy-MM-dd"
+                      :clearable="false"
                     ></el-date-picker>
                 </div>
             </div>
@@ -39,6 +41,12 @@
               <label>Tercero</label>
               <el-select v-model="filters.third_id" placeholder="Seleccione" filterable :disabled="thirds.length === 0">
                 <el-option
+                  v-if="thirds.length > 0"
+                  :key="'all'"
+                  label="Todos"
+                  value="all"
+                ></el-option>
+                <el-option
                   v-for="third in thirds"
                   :key="third.id"
                   :label="third.name"
@@ -57,7 +65,7 @@
             <el-button
               type="primary"
               icon="el-icon-tickets"
-              @click.prevent="exportReport"
+              @click.prevent="filters.third_id === 'all' ? exportAllThirds() : exportReport()"
               :disabled="!filters.third_id"
             >Exportar PDF</el-button>
             <!-- <el-button
@@ -87,7 +95,7 @@ export default {
         type: "",
         third_id: "",
         search: "",
-        month: `${year}-${month}`,
+        dates: [],
       },
       thirds: [],
       loading: false,
@@ -120,13 +128,24 @@ export default {
       this.loading = false;
     },
     exportReport() {
-      if (!this.filters.third_id || !this.filters.month) return;
-      const params = { ...this.filters, export: 'pdf' };
+      if (!this.filters.third_id || !this.filters.dates.length === 2) return;
+      const params = {
+        ...this.filters,
+        start_date: this.filters.dates[0],
+        end_date: this.filters.dates[1],
+        export: 'pdf'
+      };
       window.open(`/accounting/third-report/export?${queryString.stringify(params)}`, '_blank');
     },
     exportAllThirds() {
-      // Llama a la nueva ruta para exportar todos los terceros
-      window.open('/accounting/third-report/export-all?export=pdf', '_blank');
+      if (!this.filters.type || this.filters.dates.length !== 2) return;
+      const params = {
+        type: this.filters.type,
+        start_date: this.filters.dates[0],
+        end_date: this.filters.dates[1],
+        export: 'pdf'
+      };
+      window.open(`/accounting/third-report/export-all?${queryString.stringify(params)}`, '_blank');
     },
   },
   watch: {

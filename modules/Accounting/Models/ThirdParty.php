@@ -27,4 +27,19 @@ class ThirdParty extends ModelTenant
     {
         return $this->hasMany(JournalEntryDetail::class, 'third_party_id');
     }
+    public function getTypeName()
+    {
+        switch ($this->type) {
+            case 'customers':
+                return 'Clientes';
+            case 'suppliers':
+                return 'Proveedores';
+            case 'employee':
+                return 'Empleados';
+            case 'seller':
+                return 'Vendedores';
+            default:
+                return ucfirst($this->type);
+        }
+    }
 }
