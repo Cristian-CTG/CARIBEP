@@ -24,7 +24,7 @@
         td.label-cell {
             width: {{ $width }}mm;
             max-width: {{ $width }}mm;
-            height: {{ $height }}mm;
+            height: {{ 60 }}mm;
             max-height: {{ $height }}mm;
             padding: 0;
             margin: 0;
