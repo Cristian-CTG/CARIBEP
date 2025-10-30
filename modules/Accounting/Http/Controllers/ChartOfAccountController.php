@@ -316,6 +316,15 @@ class ChartOfAccountController extends Controller
         ], 200);
     }
 
+    public function allAccounts()
+    {
+        // Solo cuentas de movimiento (nivel >= 1), puedes ajustar el nivel si lo necesitas
+        $accounts = ChartOfAccount::where('level', '>=', 1)
+            ->orderBy('code')
+            ->get(['id', 'code', 'name']);
+        return response()->json(['data' => $accounts]);
+    }
+
     public function recordsByGroups(Request $request)
     {
         $perPage = $request->input('per_page', 20);

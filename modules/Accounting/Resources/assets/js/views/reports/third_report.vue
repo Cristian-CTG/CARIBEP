@@ -13,7 +13,7 @@
         <div class="row mt-2">
             <div class="col-md-3 pb-1">
                 <div class="form-group">
-                    <label>Mes</label>
+                    <label>Rango de fechas de movimientos</label>
                     <el-date-picker
                       v-model="filters.dates"
                       type="daterange"
@@ -68,6 +68,13 @@
               @click.prevent="filters.third_id === 'all' ? exportAllThirds() : exportReport()"
               :disabled="!filters.third_id"
             >Exportar PDF</el-button>
+            <el-button
+              type="success"
+              icon="el-icon-document"
+              @click.prevent="filters.third_id === 'all' ? exportAllThirdsExcel() : exportExcel()"
+              :disabled="!filters.third_id"
+              style="margin-left: 10px;"
+            >Exportar Excel</el-button>
             <!-- <el-button
               type="success"
               icon="el-icon-document"
@@ -146,6 +153,26 @@ export default {
         export: 'pdf'
       };
       window.open(`/accounting/third-report/export-all?${queryString.stringify(params)}`, '_blank');
+    },
+    exportExcel() {
+      if (!this.filters.third_id || this.filters.dates.length !== 2) return;
+      const params = {
+        ...this.filters,
+        start_date: this.filters.dates[0],
+        end_date: this.filters.dates[1],
+        export: 'excel'
+      };
+      window.open(`/accounting/third-report/export-excel?${queryString.stringify(params)}`, '_blank');
+    },
+    exportAllThirdsExcel() {
+      if (!this.filters.type || this.filters.dates.length !== 2) return;
+      const params = {
+        type: this.filters.type,
+        start_date: this.filters.dates[0],
+        end_date: this.filters.dates[1],
+        export: 'excel'
+      };
+      window.open(`/accounting/third-report/export-all-excel?${queryString.stringify(params)}`, '_blank');
     },
   },
   watch: {

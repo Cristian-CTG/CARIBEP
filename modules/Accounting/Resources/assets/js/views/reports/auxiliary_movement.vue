@@ -23,7 +23,7 @@
         <div class="card mb-0">
             <div class="card-body">
                 <div class="row mb-2">
-                    <div class="col-6">
+                    <div class="col-3">
                         <div class="filter-container">
                             <el-date-picker
                                 v-model="dateRange"
@@ -38,8 +38,38 @@
                             />
                         </div>
                     </div>
-                    <div class="col-6 text-right">
+                    <div class="col-3">
+                        <el-select v-model="account_code" placeholder="Cuenta contable" filterable clearable @change="onDateChange">
+                            <el-option
+                                v-for="item in accountsList"
+                                :key="item.code"
+                                :label="item.code + ' - ' + item.name"
+                                :value="item.code"
+                            />
+                        </el-select>
+                    </div>
+                    <div class="col-2">
+                        <el-select v-model="third_party_type" placeholder="Tipo de tercero" @change="fetchThirdParties">
+                            <el-option label="Clientes" value="customers"/>
+                            <el-option label="Proveedores" value="suppliers"/>
+                            <el-option label="Empleados" value="employee"/>
+                            <el-option label="Vendedores" value="seller"/>
+                        </el-select>
+                    </div>
+                    <div class="col-2">
+                        <el-select v-model="third_party_id" placeholder="Tercero" filterable clearable @change="onDateChange">
+                            <el-option
+                                v-for="item in thirdParties"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id"
+                            />
+                        </el-select>
+                    </div>
+                    <div class="col-1 text-right">
                         <el-button type="primary" @click="ReportDownload('pdf')">Pdf</el-button>
+                    </div>
+                    <div class="col-1 text-right">
                         <el-button type="success" @click="ReportDownload('excel')">Excel</el-button>
                     </div>
                 </div>
@@ -75,8 +105,8 @@
                                         <td>{{ row.account_name }}</td>
                                         <td>{{ row.document_info && row.document_info.number }}</td>
                                         <td>{{ row.date }}</td>
-                                        <td>{{ row.document_info && row.document_info.third_party_number }}</td>
-                                        <td>{{ row.document_info && row.document_info.third_party_name }}</td>
+                                        <td>{{ row.third_party_number }}</td>
+                                        <td>{{ row.third_party_name }}</td>
                                         <td>{{ row.description }}</td>
                                         <td class="text-right">0</td>
                                         <td class="text-right">{{ row.debit | numberFormat }}</td>
@@ -119,12 +149,44 @@ export default {
                 moment().endOf('month').format('YYYY-MM-DD')
             ],
             accounts: [],
+            account_code: '',
+            third_party_type: '',
+            third_party_id: '',
+            accountsList: [],
+            thirdParties: [],
         }
     },
     mounted() {
+        this.fetchAccounts();
+        this.fetchThirdParties();
         this.onDateChange();
     },
     methods: {
+        async fetchAccounts() {
+            const res = await this.$http.get('/accounting/charts/all');
+            this.accountsList = res.data.data || [];
+        },
+        async fetchThirdParties() {
+            if (!this.third_party_type) {
+                this.thirdParties = [];
+                this.third_party_id = '';
+                return;
+            }
+            const res = await this.$http.get('/accounting/journal/thirds/third-parties', {
+                params: { type: this.third_party_type }
+            });
+            // Extrae el id de origen (puede ser null)
+            this.thirdParties = (res.data.data || []).map(item => {
+                let id = item.id;
+                if (typeof id === 'string' && id.includes('_')) {
+                    id = id.split('_')[1];
+                }
+                // Si el id es 'null' como string, pásalo a null
+                if (id === 'null') id = null;
+                return { ...item, id };
+            });
+            this.third_party_id = '';
+        },
         async fetchData(params = {}) {
             const response = await this.$http.get('/accounting/auxiliary-movement/records', { params });
             if(response.data.data.length > 0) {
@@ -136,6 +198,11 @@ export default {
                 date_start: this.dateRange[0],
                 date_end: this.dateRange[1],
             };
+            if (this.account_code) params.account_code = this.account_code;
+            if (this.third_party_type && this.third_party_id !== '') {
+                params.third_party_type = this.third_party_type;
+                params.third_party_origin_id = this.third_party_id; // Puede ser null
+            }
             this.fetchData(params);
         },
         ReportDownload(type = 'pdf') {
@@ -144,7 +211,11 @@ export default {
                 date_end: this.dateRange[1],
                 format: type,
             };
-
+            if (this.account_code) params.account_code = this.account_code;
+            if (this.third_party_type && this.third_party_id !== '') {
+                params.third_party_type = this.third_party_type;
+                params.third_party_origin_id = this.third_party_id; // Puede ser null
+            }
             window.open(`/accounting/auxiliary-movement/export?${queryString.stringify(params)}`, '_blank');
         }
     }

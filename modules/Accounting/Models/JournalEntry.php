@@ -150,4 +150,33 @@ class JournalEntry extends ModelTenant
             return self::create($data);
         });
     }
+
+    /**
+     * Retorna el nombre y número/prefijo del documento relacionado al asiento.
+     * @return string
+     */
+    public function getRelatedComprobanteNumber()
+    {
+        // Documento de venta
+        if ($this->document) {
+            return $this->document->prefix . '-' . $this->document->number;
+        }
+        // Compra
+        if ($this->purchase) {
+            return ($this->purchase->series ?? $this->purchase->prefix ?? '') . '-' . $this->purchase->number;
+        }
+        // Documento soporte
+        if ($this->support_document) {
+            return $this->support_document->prefix . '-' . $this->support_document->number;
+        }
+        // POS
+        if ($this->document_pos) {
+            return ($this->document_pos->series ?? $this->document_pos->prefix ?? '') . '-' . $this->document_pos->number;
+        }
+        // Nómina
+        if ($this->document_payroll) {
+            return $this->document_payroll->prefix . '-' . $this->document_payroll->consecutive;
+        }
+        return '-';
+    }
 }

@@ -5,6 +5,10 @@ namespace Modules\Accounting\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Accounting\Models\JournalEntryDetail;
+use Modules\Factcolombia1\Models\Tenant\Company;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Modules\Factcolombia1\Models\Tenant\TypeIdentityDocument;
 use Carbon\Carbon;
 use Mpdf\Mpdf;
 
@@ -163,10 +167,12 @@ class JournalEntryDetailsReportController extends Controller
             $grouped[$key]['total_debito'] += $detail->debit;
             $grouped[$key]['total_credito'] += $detail->credit;
         }
+        $company = Company::first();
 
         $html = view('accounting::pdf.journal_entry_details_report', [
             'groups' => $grouped,
             'filters' => $request->all(),
+            'company' => $company,
         ])->render();
 
         $mpdf = new Mpdf(['orientation' => 'L']);
@@ -207,5 +213,136 @@ class JournalEntryDetailsReportController extends Controller
             return ['name' => $entry->support_document_adjust_note->supplier->name];
         }
         return ['name' => '-'];
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $query = JournalEntryDetail::with([
+            'journalEntry.journal_prefix',
+            'journalEntry',
+            'chartOfAccount',
+            'thirdParty'
+        ]);
+
+        // Aplica los mismos filtros que en records()
+        if ($request->filled('month')) {
+            $query->whereHas('journalEntry', function($q) use ($request) {
+                $q->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$request->month]);
+            });
+        }
+        if ($request->filled('journal_prefix_id')) {
+            $query->whereHas('journalEntry', function($q) use ($request) {
+                $q->where('journal_prefix_id', $request->journal_prefix_id);
+            });
+        }
+        if ($request->filled('number_from')) {
+            $query->whereHas('journalEntry', function($q) use ($request) {
+                $q->where('number', '>=', $request->number_from);
+            });
+        }
+        if ($request->filled('number_to')) {
+            $query->whereHas('journalEntry', function($q) use ($request) {
+                $q->where('number', '<=', $request->number_to);
+            });
+        }
+
+        $details = $query->orderBy('id', 'asc')->get();
+
+        // Agrupa por comprobante (prefijo + número)
+        $grouped = [];
+        foreach ($details as $detail) {
+            $entry = $detail->journalEntry;
+            $key = $entry->journal_prefix->prefix . '-' . $entry->number;
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'prefijo_numero' => $key,
+                    'fecha' => $entry->date,
+                    'concepto' => $entry->description,
+                    'detalles' => [],
+                    'total_debito' => 0,
+                    'total_credito' => 0,
+                ];
+            }
+            // Tercero implicado
+            $thirdParty = $detail->thirdParty ?? null;
+            if ($thirdParty && isset($thirdParty->name)) {
+                $thirdPartyName = $thirdParty->name ?? null;
+            } else {
+                $tp = $this->getThirdPartyFromEntry($entry);
+                $thirdPartyName = isset($tp['name']) ? $tp['name'] : '-';
+            }
+            $detail->third_party_name = $thirdPartyName;
+
+            $grouped[$key]['detalles'][] = $detail;
+            $grouped[$key]['total_debito'] += $detail->debit;
+            $grouped[$key]['total_credito'] += $detail->credit;
+        }
+
+        // Obtén datos de la empresa
+        $company = Company::first();
+        $document_type = $company && $company->type_identity_document_id
+            ? TypeIdentityDocument::find($company->type_identity_document_id)
+            : null;
+
+        // Crea el archivo Excel
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Encabezado de empresa
+        $sheet->setCellValue('A1', $company->name ?? '');
+        $sheet->setCellValue('A2', $document_type ? $document_type->name : '');
+        $sheet->setCellValue('B2', $company->identification_number ?? '');
+        $sheet->setCellValue('A3', 'DIRECCIÓN');
+        $sheet->setCellValue('B3', $company->address ?? '');
+        $sheet->setCellValue('A4', 'EMAIL');
+        $sheet->setCellValue('B4', $company->email ?? '');
+        $sheet->setCellValue('A5', 'TELÉFONO');
+        $sheet->setCellValue('B5', $company->phone ?? '');
+
+        // Filtros
+        if ($request->filled('month')) {
+            $sheet->setCellValue('A6', 'Mes');
+            $sheet->setCellValue('B6', $request->month);
+        }
+
+        // Encabezados de columnas
+        $sheet->setCellValue('A8', 'Comprobante');
+        $sheet->setCellValue('B8', 'Fecha de creación');
+        $sheet->setCellValue('C8', 'Concepto');
+        $sheet->setCellValue('D8', 'Tercero implicado');
+        $sheet->setCellValue('E8', 'N° Cuenta Contable');
+        $sheet->setCellValue('F8', 'Débito');
+        $sheet->setCellValue('G8', 'Crédito');
+
+        // Datos
+        $row = 9;
+        foreach ($grouped as $group) {
+            foreach ($group['detalles'] as $detail) {
+                $sheet->setCellValue('A' . $row, $group['prefijo_numero']);
+                $sheet->setCellValue('B' . $row, $group['fecha']);
+                $sheet->setCellValue('C' . $row, $group['concepto']);
+                $sheet->setCellValue('D' . $row, $detail->third_party_name ?? '');
+                $sheet->setCellValue('E' . $row, $detail->chartOfAccount ? $detail->chartOfAccount->code : '');
+                $sheet->setCellValue('F' . $row, isset($detail->debit) ? $detail->debit : 0);
+                $sheet->setCellValue('G' . $row, isset($detail->credit) ? $detail->credit : 0);
+                $row++;
+            }
+            // Fila de totales por grupo
+            $sheet->setCellValue('D' . $row, 'Total para ' . $group['prefijo_numero']);
+            $sheet->setCellValue('F' . $row, $group['total_debito']);
+            $sheet->setCellValue('G' . $row, $group['total_credito']);
+            // Opcional: puedes poner un fondo diferente a la fila de totales
+            $sheet->getStyle("A{$row}:G{$row}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setARGB('FFD9D9D9');
+            $row++;
+        }
+
+        // Descargar el archivo Excel
+        $filename = 'reporte_detalles_contables.xlsx';
+        $writer = new Xlsx($spreadsheet);
+        $tempFile = tempnam(sys_get_temp_dir(), $filename);
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
     }
 }

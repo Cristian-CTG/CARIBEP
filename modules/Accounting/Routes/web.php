@@ -22,6 +22,7 @@ if($hostname) {
 
             // CRUD para Cuentas Contables
             Route::get('charts/records', 'ChartOfAccountController@records');
+            Route::get('charts/all', 'ChartOfAccountController@allAccounts');
             Route::get('charts/columns', 'ChartOfAccountController@columns');
             Route::get('charts/children/{parent_id}', 'ChartOfAccountController@getChildren');
             Route::get('charts/parent/{parent_id}', 'ChartOfAccountController@getChildren');
@@ -64,6 +65,7 @@ if($hostname) {
             Route::get('/entry-details-report/records', 'JournalEntryDetailsReportController@records');
             Route::get('/entry-details-report/columns', 'JournalEntryDetailsReportController@columns');
             Route::get('/entry-details-report/export', 'JournalEntryDetailsReportController@export');
+            Route::get('/entry-details-report/export-excel', 'JournalEntryDetailsReportController@exportExcel');
             // Reporte de Situación Financiera
             Route::get('/financial-position', 'ReportFinancialPositionController@index')->name('tenant.accounting.report.financial-position');
             Route::get('/financial-position/records', 'ReportFinancialPositionController@records');
@@ -92,6 +94,8 @@ if($hostname) {
             Route::get('/third-report/records', 'ReportThirdController@records');
             Route::get('/third-report/export', 'ReportThirdController@export');
             Route::get('/third-report/export-all', 'ReportThirdController@exportAllThirds');
+            Route::get('/third-report/export-excel', 'ReportThirdController@exportExcel');
+            Route::get('/third-report/export-all-excel', 'ReportThirdController@exportAllThirdsExcel');
 
             Route::prefix('clasification-sale')->group(function () {
                 Route::get('records', 'ChartAccountSaleConfigurationController@records');

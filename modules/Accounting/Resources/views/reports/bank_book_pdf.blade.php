@@ -92,6 +92,7 @@
                 <th>METODO</th>
                 <th>CONCEPTO</th>
                 <th>TIPO</th>
+                <th>N° COMPROBANTE</th>
                 <th>DÉBITO</th>
                 <th>CRÉDITO</th>
                 <th>SALDO</th>
@@ -99,7 +100,7 @@
         </thead>
         <tbody>
             <tr>
-                <td colspan="7" class="text-right">SALDO INICIAL</td>
+                <td colspan="8" class="text-right">SALDO INICIAL</td>
                 <td class="amount">{{ number_format($saldo_inicial, 2, ',', '.') }}</td>
             </tr>
             @php $saldo = $saldo_inicial; @endphp
@@ -110,6 +111,11 @@
                     $saldo += $debit - $credit;
                     $entry = $detail->journalEntry;
                     $account = $detail->chartOfAccount;
+                    // Tipo de egreso
+                    $tipo = '-';
+                    if($debit > 0) $tipo = 'CI';
+                    if($credit > 0) $tipo = 'CE';
+
                 @endphp
                 <tr>
                     <td>{{ $entry->date ?? '' }}</td>
@@ -151,22 +157,15 @@
                         {{ $is_refund ? 'DEVOLUCIÓN' : ($payment_name ?: 'TRANSFERENCIA') }}
                     </td>
                     <td class="text-left">{{ $entry->description ?? '' }}</td>
-                    <td>
-                        @if($debit > 0)
-                            CI
-                        @elseif($credit > 0)
-                            CE
-                        @else
-                            -
-                        @endif
-                    </td>
+                    <td>{{ $tipo }}</td>
+                    <td>{{ $entry ? $entry->getRelatedComprobanteNumber() : '-' }}</td>
                     <td class="amount">{{ number_format($debit, 2, ',', '.') }}</td>
                     <td class="amount">{{ number_format($credit, 2, ',', '.') }}</td>
                     <td class="amount">{{ number_format($saldo, 2, ',', '.') }}</td>
                 </tr>
             @endforeach
             <tr class="total-row">
-                <td colspan="7" class="text-right">SALDO FINAL</td>
+                <td colspan="8" class="text-right">SALDO FINAL</td>
                 <td class="amount">{{ number_format($saldo_final, 2, ',', '.') }}</td>
             </tr>
         </tbody>

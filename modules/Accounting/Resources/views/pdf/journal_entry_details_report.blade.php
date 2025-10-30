@@ -15,17 +15,18 @@
     </style>
 </head>
 <body>
-    {{-- @php
-        $company = \Modules\Factcolombia1\Models\Tenant\Company::active();
-    @endphp
+    @if(isset($company))
     <div class="company-info">
         <div class="company-title">{{ $company->name ?? '' }}</div>
         <div><strong>NIT:</strong> {{ $company->identification_number ?? $company->number ?? '' }}{{ $company->dv ? '-'.$company->dv : '' }}</div>
         <div><strong>Dirección:</strong> {{ $company->address ?? '' }}</div>
         <div><strong>Teléfono:</strong> {{ $company->phone ?? $company->telephone ?? '' }}</div>
         <div><strong>Email:</strong> {{ $company->email ?? '' }}</div>
-        <div><strong>Régimen:</strong> {{ optional($company->type_regime)->name ?? '' }}</div>
-    </div> --}}
+        @if(method_exists($company, 'type_regime') && $company->type_regime)
+            <div><strong>Régimen:</strong> {{ optional($company->type_regime)->name ?? '' }}</div>
+        @endif
+    </div>
+    @endif
     <h1>Reporte de Detalles Contables</h1>
     @if (!empty($filters['month']))
         <p>Mes: {{ $filters['month'] }}</p>
