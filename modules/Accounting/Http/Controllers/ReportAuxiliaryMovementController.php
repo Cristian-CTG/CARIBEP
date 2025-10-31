@@ -11,6 +11,7 @@ use Modules\Accounting\Models\JournalEntryDetail;
 use Modules\Accounting\Helpers\AccountBalanceHelper;
 use Modules\Factcolombia1\Models\Tenant\Company;
 use Modules\Factcolombia1\Models\Tenant\TypeIdentityDocument;
+use Modules\Accounting\Models\ThirdParty;
 use Carbon\Carbon;
 use Mpdf\Mpdf;
 
@@ -26,13 +27,52 @@ class ReportAuxiliaryMovementController extends Controller
         $dateStart = $request->input('date_start', now()->startOfMonth()->toDateString()) . ' 00:00:00';
         $dateEnd = $request->input('date_end', now()->endOfMonth()->toDateString()) . ' 23:59:59';
 
-        $accounts = JournalEntryDetail::whereBetween('created_at', [$dateStart, $dateEnd])
-            ->with(['chartOfAccount', 'journalEntry'])
-            ->get()
+        $accountCode = $request->input('account_code');
+        $thirdPartyType = $request->input('third_party_type');
+        $thirdPartyOriginId = $request->input('third_party_origin_id');
+
+        $query = JournalEntryDetail::whereBetween('created_at', [$dateStart, $dateEnd])
+            ->with(['chartOfAccount', 'journalEntry']);
+
+        if ($accountCode) {
+            $query->whereHas('chartOfAccount', function($q) use ($accountCode) {
+                $q->where('code', $accountCode);
+            });
+        }
+
+        if ($thirdPartyType && $request->has('third_party_origin_id')) {
+            $originId = $request->input('third_party_origin_id');
+            $thirdPartyQuery = ThirdParty::where('type', $thirdPartyType);
+            if (is_null($originId) || $originId === '' || $originId === 'null') {
+                $thirdPartyQuery->whereNull('origin_id');
+            } else {
+                $thirdPartyQuery->where('origin_id', $originId);
+            }
+            $thirdParty = $thirdPartyQuery->first();
+            if ($thirdParty) {
+                $query->where('third_party_id', $thirdParty->id);
+            } else {
+                // Si no existe, fuerza a que no devuelva nada
+                $query->whereNull('id');
+            }
+        }
+
+        $accounts = $query->get()
             ->map(function ($detail) {
                 $account = $detail->chartOfAccount;
                 $entry = $detail->journalEntry;
-                // centralizo la obtencion de datos del documento
+                // Usa el campo third_party_id si existe, si no, usa el método original
+                $thirdPartyName = null;
+                $thirdPartyNumber = null;
+                if ($detail->third_party_id && $detail->thirdParty) {
+                    $thirdPartyName = $detail->thirdParty->name;
+                    $thirdPartyNumber = $detail->thirdParty->document;
+                } else {
+                    $documentInfo = $this->getDocumentInfo($entry);
+                    $thirdPartyName = $documentInfo['third_party_name'] ?? null;
+                    $thirdPartyNumber = $documentInfo['third_party_number'] ?? null;
+                }
+
                 $documentInfo = $this->getDocumentInfo($entry);
 
                 return [
@@ -44,10 +84,12 @@ class ReportAuxiliaryMovementController extends Controller
                     'debit' => $detail->debit,
                     'credit' => $detail->credit,
                     'description' => $entry->description,
+                    'third_party_name' => $thirdPartyName,
+                    'third_party_number' => $thirdPartyNumber,
                 ];
             })
             ->groupBy('account_code')
-                ->map(function ($items, $account_code) use ($request) {
+            ->map(function ($items, $account_code) use ($request) {
                 $totalDebit = $items->sum('debit');
                 $totalCredit = $items->sum('credit');
                 $accountName = $items->first()['account_name'] ?? '';
@@ -67,8 +109,12 @@ class ReportAuxiliaryMovementController extends Controller
             })
             ->values();
 
+        // Obtén datos de la empresa para el encabezado
+        $company = Company::first();
+
         return response()->json([
             'data' => $accounts,
+            'company' => $company,
             'message' => 'Movimientos auxiliares obtenidos correctamente.',
         ]);
     }
@@ -110,17 +156,29 @@ class ReportAuxiliaryMovementController extends Controller
                 'third_party_name' => $support->supplier->name ?? '',
             ];
         }
-        // Si tienes notas de ajuste:
-        if ($entry->support_document_adjust_note) {
-            $note = $entry->support_document_adjust_note;
+
+        if ($entry->document_pos) {
+            $documentPos = $entry->document_pos;
             return [
-                'type' => 'support_document_adjust_note',
-                'id' => $note->id,
-                'number' => $note->prefix . '-' . $note->number,
-                'third_party_number' => $note->supplier->number ?? '',
-                'third_party_name' => $note->supplier->name ?? '',
+                'type' => 'document_pos',
+                'id' => $documentPos->id,
+                'number' => $documentPos->prefix . '-' . $documentPos->number,
+                'third_party_number' => $documentPos->customer->number,
+                'third_party_name' => $documentPos->customer->name,
             ];
         }
+
+        // Si tienes notas de ajuste:
+        // if ($entry->support_document_adjust_note) {
+        //     $note = $entry->support_document_adjust_note;
+        //     return [
+        //         'type' => 'support_document_adjust_note',
+        //         'id' => $note->id,
+        //         'number' => $note->prefix . '-' . $note->number,
+        //         'third_party_number' => $note->supplier->number ?? '',
+        //         'third_party_name' => $note->supplier->name ?? '',
+        //     ];
+        // }
         // TO DO - inventory - extra...
         return null;
     }
@@ -144,12 +202,14 @@ class ReportAuxiliaryMovementController extends Controller
         $dateStart = $request->date_start;
         $dateEnd = $request->date_end;
         $data = $this->records($request)->getData(true);
+        $company = Company::first();
 
         // Renderizar la vista como HTML
         $html = view('accounting::pdf.auxiliary_movement', [
             'accounts' => $data['data'],
             'dateStart' => $dateStart,
             'dateEnd' => $dateEnd,
+            'company' => $company,
         ])->render();
 
         // Configurar mPDF
@@ -179,11 +239,15 @@ class ReportAuxiliaryMovementController extends Controller
         $sheet->setCellValue('B2', $company->identification_number);
         $sheet->setCellValue('A3', 'DIRECCIÓN');
         $sheet->setCellValue('B3', $company->address);
+        $sheet->setCellValue('A4', 'EMAIL');
+        $sheet->setCellValue('B4', $company->email);
+        $sheet->setCellValue('A5', 'TELÉFONO');
+        $sheet->setCellValue('B5', $company->phone);
 
         $dateStart = $request->input('date_start');
         $dateEnd = $request->input('date_end');
-        $sheet->setCellValue('A5', 'Fechas');
-        $sheet->setCellValue('B5', ' del ' . ($dateStart ?? '-') . ' al ' . ($dateEnd ?? '-'));
+        $sheet->setCellValue('A6', 'Fechas');
+        $sheet->setCellValue('B6', ' del ' . ($dateStart ?? '-') . ' al ' . ($dateEnd ?? '-'));
 
 
         // Configurar encabezados
@@ -216,9 +280,9 @@ class ReportAuxiliaryMovementController extends Controller
                 $row++;
                 $sheet->setCellValue('A' . $row, $detail['account_code']);
                 $sheet->setCellValue('B' . $row, $detail['account_name']);
-                $sheet->setCellValue('C' . $row, $detail['document_info']['type'] ?? '');
-                $sheet->setCellValue('D' . $row, $detail['document_info']['number'] ?? '');
-                $sheet->setCellValue('E' . $row, $detail['document_info']['third_party_name'] ?? '');
+                $sheet->setCellValue('C' . $row, $detail['document_info']['number'] ?? '');
+                $sheet->setCellValue('D' . $row, $detail['third_party_number'] ?? '');
+                $sheet->setCellValue('E' . $row, $detail['third_party_name'] ?? '');
                 $sheet->setCellValue('F' . $row, $detail['description']);
                 $sheet->setCellValue('G' . $row, '0');
                 $sheet->setCellValue('H' . $row, $detail['debit']);

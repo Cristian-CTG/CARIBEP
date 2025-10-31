@@ -28,30 +28,34 @@
                     </div>
                     <div class="col-lg-3 col-md-4 col-sm-12 pb-2">
                         <label>Tipo comprobante:</label>
-                        <el-select v-model="filters.journal_prefix_id" filterable clearable placeholder="Selecciona tipo" @change="getRecords">
+                        <el-select v-model="filters.journal_prefix_id" filterable clearable placeholder="Selecciona tipo" @change="getRecords" style="width: 100%;">
                             <el-option v-for="option in journalPrefixes" :key="option.id" :value="option.id" :label="option.description"></el-option>
                         </el-select>
                     </div>
                     <div class="col-lg-3 col-md-4 col-sm-12 pb-2">
                         <label>Rango de numeración:</label>
-                        <br>
-                        <el-input
-                            v-model="filters.number_from"
-                            placeholder="Desde"
-                            style="width: 40%; display: inline-block;"
-                            @input="getRecords"
-                        ></el-input>
-                        <span style="width: 10%; display: inline-block; text-align: center;">-</span>
-                        <el-input
-                            v-model="filters.number_to"
-                            placeholder="Hasta"
-                            style="width: 40%; display: inline-block;"
-                            @input="getRecords"
-                        ></el-input>
+                        <div class="d-flex">
+                            <el-input
+                                v-model="filters.number_from"
+                                placeholder="Desde"
+                                style="width: 45%;"
+                                @input="getRecords"
+                            ></el-input>
+                            <span style="width: 10%; text-align: center; line-height: 32px;">-</span>
+                            <el-input
+                                v-model="filters.number_to"
+                                placeholder="Hasta"
+                                style="width: 45%;"
+                                @input="getRecords"
+                            ></el-input>
+                        </div>
                     </div>
-                    <div class="col-lg-3 col-md-4 col-sm-12 pb-2 d-flex align-items-end">
-                        <el-button type="danger" icon="el-icon-printer" @click="exportPdf">
+                    <div class="col-lg-3 col-md-12 col-sm-12 pb-2 d-flex align-items-end justify-content-lg-end">
+                        <el-button type="danger" icon="el-icon-printer" @click="exportPdf" class="mr-2">
                             Exportar PDF
+                        </el-button>
+                        <el-button type="success" icon="el-icon-download" @click="exportExcel">
+                            Exportar Excel
                         </el-button>
                     </div>
                 </div>
@@ -143,6 +147,10 @@ export default {
             const params = queryString.stringify({ ...this.filters, format: 'pdf' });
             window.open(`/accounting/entry-details-report/export?${params}`, '_blank');
         },
+        exportExcel() {
+            const params = queryString.stringify({ ...this.filters, format: 'excel' });
+            window.open(`/accounting/entry-details-report/export-excel?${params}`, '_blank');
+        }
         // getThirdPartyName(row) {
         //     // Tercero directo
         //     if (row.third_party && row.third_party.name)

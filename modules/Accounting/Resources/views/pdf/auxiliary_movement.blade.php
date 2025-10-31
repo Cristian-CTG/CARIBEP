@@ -31,6 +31,13 @@
 </head>
 <body>
     <h1>Reporte de Movimientos auxiliares</h1>
+    @if(isset($company))
+        <p><strong>Empresa:</strong> {{ $company->name ?? '' }}</p>
+        <p><strong>NIT:</strong> {{ $company->identification_number ?? '' }}</p>
+        <p><strong>Dirección:</strong> {{ $company->address ?? '' }}</p>
+        <p><strong>Email:</strong> {{ $company->email ?? '' }}</p>
+        <p><strong>Teléfono:</strong> {{ $company->phone ?? '' }}</p>
+    @endif
     @if ($dateStart || $dateEnd)
         <p>Rango de fechas: {{ $dateStart }} a {{ $dateEnd }}</p>
     @endif
@@ -73,8 +80,8 @@
                             <td>{{ $row['account_name'] }}</td>
                             <td>{{ $row['document_info']['number'] ?? '' }}</td>
                             <td>{{ $row['date'] }}</td>
-                            <td>{{ $row['document_info']['third_party_number'] ?? '' }}</td>
-                            <td>{{ $row['document_info']['third_party_name'] ?? '' }}</td>
+                            <td>{{ $row['third_party_number'] ?? '' }}</td>
+                            <td>{{ $row['third_party_name'] ?? '' }}</td>
                             <td>{{ $row['description'] }}</td>
                             <td class="text-right">0</td>
                             <td class="text-right">{{ NumberLetter::numberFormat($row['debit']) }}</td>
