@@ -49,6 +49,8 @@ if($hostname) {
 
             // Terceros
             Route::get('journal/thirds/third-parties', 'ThirdPartyController@index');
+            Route::post('journal/thirds/sync-from-origin', 'ThirdPartyController@syncFromOrigin');
+            Route::get('journal/thirds/all-third-parties', 'ThirdPartyController@allThirdParties');
 
             //Records
             Route::get('/bank-book/records', 'JournalEntryController@bankAccounts');
@@ -90,6 +92,11 @@ if($hostname) {
             Route::get('/bank-reconciliation/records', 'BankReconciliationController@records');
             Route::get('/bank-reconciliation/bank-accounts', 'BankReconciliationController@bankAccounts');
             Route::get('/bank-reconciliation/movements', 'BankReconciliationController@movements');
+            Route::post('/bank-reconciliation/store', 'BankReconciliationController@store');
+            Route::get('/bank-reconciliation/{id}/edit', 'BankReconciliationController@edit');
+            Route::get('/bank-reconciliation/pdf/{id}', 'BankReconciliationController@pdf');
+            Route::delete('/bank-reconciliation/{id}', 'BankReconciliationController@destroy');
+            Route::get('/bank-reconciliation/export-excel', 'BankReconciliationController@exportExcel');
             
             // Reporte de Terceros
             Route::get('/third-report', 'ReportThirdController@index')->name('tenant.accounting.report.third-report');

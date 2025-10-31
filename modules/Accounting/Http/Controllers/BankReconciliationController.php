@@ -11,6 +11,9 @@ use Modules\Accounting\Models\ChartOfAccount;
 use Modules\Accounting\Models\JournalEntryDetail;
 use Modules\Accounting\Models\BankReconciliation;
 use Modules\Accounting\Models\BankReconciliationDetail;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Mpdf\Mpdf;
 
 class BankReconciliationController extends Controller
 {
@@ -22,7 +25,7 @@ class BankReconciliationController extends Controller
     public function columns()
     {
         return [
-            'created_at' => 'Fecha de Creación',
+            'date' => 'Fecha de Creación',
             'month' => 'Mes de Conciliación',
             'bank_account' => 'Cuenta Bancaria',
         ];
@@ -70,27 +73,60 @@ class BankReconciliationController extends Controller
             ]
         ]);
     }
+    public function edit($id)
+    {
+        $reconciliation = BankReconciliation::with(['bankAccount', 'details'])->findOrFail($id);
+
+        // Separa detalles en mas/menos
+        $detalles_mas = $reconciliation->details->where('type', 'entrance')->values();
+        $detalles_menos = $reconciliation->details->where('type', 'exit')->values();
+
+        return response()->json([
+            'id' => $reconciliation->id,
+            'bank_account_id' => $reconciliation->bank_account_id,
+            'month' => $reconciliation->month,
+            'date' => $reconciliation->date,
+            'saldo_extracto' => $reconciliation->saldo_extracto,
+            'detalles_mas' => $detalles_mas,
+            'detalles_menos' => $detalles_menos,
+            // Puedes agregar movimientos y seleccionados si lo necesitas
+        ]);
+    }
 
     public function Filters(Request $request, $query)
     {
-        // Filtro por fecha de creación (rango)
+       // Filtro por fecha de creación (rango)
         if ($request->filled('column') && $request->input('column') == 'daterange' && $request->filled('value')) {
             $dates = explode('_', $request->input('value'));
             if (count($dates) == 2) {
-                $query->whereBetween('created_at', [$dates[0], $dates[1]]);
+                $query->whereBetween('date', [$dates[0], $dates[1]]);
             }
         }
 
         // Filtro por mes
-        if ($request->filled('column') && $request->input('column') == 'month' && $request->filled('value')) {
-            $query->where('month', $request->input('value'));
+        if ($request->filled('month')) {
+            $query->where('month', $request->input('month'));
         }
 
         // Filtro por cuenta bancaria
         if ($request->filled('bank_account_id')) {
-            $query->where('bank_account_id', $request->input('bank_account_id'));
+            $query->where('bank_account_id', (int)$request->input('bank_account_id'));
         }
+    }
+    public function destroy($id)
+    {
+        $reconciliation = BankReconciliation::findOrFail($id);
 
+        // Elimina los detalles asociados
+        $reconciliation->details()->delete();
+
+        // Elimina la conciliación
+        $reconciliation->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Conciliación eliminada correctamente.'
+        ]);
     }
 
     public function movements(Request $request)
@@ -145,6 +181,7 @@ class BankReconciliationController extends Controller
                 'credit' => number_format($detail->credit ?? 0, 2, ',', '.'),
                 'third_party_document' => $detail->thirdParty ? $detail->thirdParty->document : '',
                 'third_party_name' => $detail->thirdParty ? $detail->thirdParty->name : '',
+                'third_party_type' => $detail->thirdParty ? $detail->thirdParty->getTypeName() : '',
                 'cheque_number' => $detail->cheque_number ?? '',
             ];
         }
@@ -282,56 +319,243 @@ class BankReconciliationController extends Controller
         return $pdf->stream($filename . '.pdf');
     }
 
-    public function storeDraft(Request $request)
+    public function store(Request $request)
     {
         $data = $request->validate([
             'bank_account_id' => 'required|integer',
             'month' => 'required|string',
             'date' => 'required|date',
-            'saldo_libro' => 'required',
             'saldo_extracto' => 'required',
+            'saldo_libro' => 'required',      // <-- agrega esto
+            'diferencia' => 'required', 
             'detalles_mas' => 'array',
             'detalles_menos' => 'array',
         ]);
+        // 1. Validar que no exista otra conciliación para el mismo banco y mes
+        $exists = BankReconciliation::where('bank_account_id', $data['bank_account_id'])
+            ->where('month', $data['month'])
+            ->exists();
+        if ($exists) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ya existe una conciliación para este banco y mes.'
+            ], 422);
+        }
 
+        // Normaliza el saldo_extracto
+        $saldo_extracto = $this->parseNumber($data['saldo_extracto']);
+        $saldo_libro = $this->parseNumber($data['saldo_libro']);
+        $diferencia = $this->parseNumber($data['diferencia']);
+
+        // 1. Crear la conciliación bancaria
         $reconciliation = BankReconciliation::create([
             'bank_account_id' => $data['bank_account_id'],
             'month' => $data['month'],
             'date' => $data['date'],
-            'saldo_libro' => $data['saldo_libro'],
-            'saldo_extracto' => $data['saldo_extracto'],
-            'status' => 'draft', // Asegúrate de tener este campo en la tabla
+            'saldo_extracto' => $saldo_extracto,
+            'saldo_libro' => $saldo_libro,        // <-- agrega esto
+            'diferencia' => $diferencia, 
+            'status' => 'finished',
         ]);
 
-        // Guardar detalles "Más"
+        // 2. Guardar detalles "Más" (entradas)
         foreach ($data['detalles_mas'] ?? [] as $detalle) {
             BankReconciliationDetail::create([
                 'bank_reconciliation_id' => $reconciliation->id,
-                'tipo' => 'mas',
-                'fecha' => $detalle['date'] ?? null,
-                'nombre_tercero' => $detalle['nombre_tercero'] ?? null,
-                'origen' => $detalle['origen'] ?? null,
-                'n_soporte' => $detalle['n_soporte'] ?? null,
-                'cheque' => $detalle['cheque'] ?? null,
-                'concepto' => $detalle['concepto'] ?? null,
-                'valor' => $detalle['credit'] ?? 0,
+                'journal_entry_detail_id' => $detalle['journal_entry_detail_id'] ?? null, // solo si existe
+                'type' => 'entrance',
+                'date' => $detalle['date'] ?? null,
+                'third_party_name' => $detalle['nombre_tercero'] ?? null,
+                'source' => $detalle['origen'] ?? null,
+                'support_number' => $detalle['n_soporte'] ?? null,
+                'check' => $detalle['cheque'] ?? null,
+                'concept' => $detalle['concepto'] ?? null,
+                'value' => isset($detalle['credit']) ? $this->parseNumber($detalle['credit']) : 0,
             ]);
         }
-        // Guardar detalles "Menos"
+
+        // 3. Guardar detalles "Menos" (salidas)
         foreach ($data['detalles_menos'] ?? [] as $detalle) {
             BankReconciliationDetail::create([
                 'bank_reconciliation_id' => $reconciliation->id,
-                'tipo' => 'menos',
-                'fecha' => $detalle['date'] ?? null,
-                'nombre_tercero' => $detalle['nombre_tercero'] ?? null,
-                'origen' => $detalle['origen'] ?? null,
-                'n_soporte' => $detalle['n_soporte'] ?? null,
-                'cheque' => $detalle['cheque'] ?? null,
-                'concepto' => $detalle['concepto'] ?? null,
-                'valor' => $detalle['debit'] ?? 0,
+                'journal_entry_detail_id' => $detalle['journal_entry_detail_id'] ?? null, // solo si existe
+                'type' => 'exit',
+                'date' => $detalle['date'] ?? null,
+                'third_party_name' => $detalle['nombre_tercero'] ?? null,
+                'source' => $detalle['origen'] ?? null,
+                'support_number' => $detalle['n_soporte'] ?? null,
+                'check' => $detalle['cheque'] ?? null,
+                'concept' => $detalle['concepto'] ?? null,
+                'value' => isset($detalle['debit']) ? $this->parseNumber($detalle['debit']) : 0,
             ]);
         }
 
         return response()->json(['success' => true, 'id' => $reconciliation->id]);
+    }
+    public function pdf($id)
+    {
+        $reconciliation = BankReconciliation::with(['bankAccount', 'details'])->findOrFail($id);
+
+        // Aquí puedes preparar los datos que necesites para el PDF
+        $company = Company::active();
+        $detalles_mas = $reconciliation->details->where('type', 'entrance')->values();
+        $detalles_menos = $reconciliation->details->where('type', 'exit')->values();
+
+        $data = [
+            'company' => $company,
+            'reconciliation' => $reconciliation,
+            'detalles_mas' => $detalles_mas,
+            'detalles_menos' => $detalles_menos,
+        ];
+
+        $mpdf = new Mpdf();
+        $html = view('accounting::pdf.bank_reconciliation_pdf', $data)->render();
+        $mpdf->WriteHTML($html);
+        $filename = 'Conciliacion_Bancaria_' . $reconciliation->id . '.pdf';
+        return $mpdf->Output($filename, 'I');
+    }
+    private function parseNumber($value) {
+        if (is_numeric($value)) return floatval($value);
+        if (strpos($value, ',') !== false) {
+            // Formato europeo: 11.546,31
+            return floatval(str_replace(',', '.', str_replace('.', '', $value)));
+        }
+        // Formato estándar: 11546.31
+        return floatval($value);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $month = $request->input('month');
+        $bank_account_id = $request->input('bank_account_id');
+
+        // Busca la conciliación bancaria
+        $reconciliation = BankReconciliation::with(['bankAccount', 'details'])->where('month', $month)
+            ->where('bank_account_id', $bank_account_id)
+            ->first();
+
+        if (!$reconciliation) {
+            return response()->json(['error' => 'No se encontró la conciliación.'], 404);
+        }
+
+        $company = Company::active();
+        $bankAccount = $reconciliation->bankAccount;
+        $detalles_mas = $reconciliation->details->where('type', 'entrance')->values();
+        $detalles_menos = $reconciliation->details->where('type', 'exit')->values();
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Datos de la empresa
+        $sheet->setCellValue('A1', $company->name);
+        $sheet->setCellValue('A2', 'NIT:');
+        $sheet->setCellValue('B2', $company->identification_number . ($company->dv ? '-' . $company->dv : ''));
+        $sheet->setCellValue('A3', 'Dirección:');
+        $sheet->setCellValue('B3', $company->address);
+        $sheet->setCellValue('A4', 'Teléfono:');
+        $sheet->setCellValue('B4', $company->phone ?? $company->telephone ?? '');
+
+        // Datos de la conciliación
+        $sheet->setCellValue('A6', 'Conciliación Bancaria');
+        $sheet->setCellValue('A7', 'Banco:');
+        $sheet->setCellValue('B7', $bankAccount->bank->description ?? '');
+        $sheet->setCellValue('A8', 'N° Cuenta:');
+        $sheet->setCellValue('B8', $bankAccount->number ?? '');
+        $sheet->setCellValue('A9', 'Tipo de cuenta:');
+        $sheet->setCellValue('B9', $bankAccount->description ?? '');
+        $sheet->setCellValue('A10', 'Moneda:');
+        $sheet->setCellValue('B10', $bankAccount->currency->name ?? '');
+        $sheet->setCellValue('A11', 'Periodo (Mes):');
+        $sheet->setCellValue('B11', $reconciliation->month);
+
+        $sheet->setCellValue('A13', 'Saldo en extracto:');
+        $sheet->setCellValue('B13', $reconciliation->saldo_extracto);
+        $sheet->setCellValue('A14', 'Saldo en libros:');
+        $sheet->setCellValue('B14', $reconciliation->saldo_libro);
+        $sheet->setCellValue('A15', 'Diferencia a conciliar:');
+        $sheet->setCellValue('B15', $reconciliation->diferencia);
+
+        // Entradas (Más)
+        $row = 17;
+        $sheet->setCellValue('A' . $row, 'Entradas (Créditos)');
+        $row++;
+        $sheet->fromArray([
+            'Fecha', 'Tercero', 'Cheque', 'Origen', 'N° Soporte', 'Cheque', 'Concepto', 'Valor'
+        ], null, 'A' . $row);
+        $row++;
+        $total_mas = 0;
+        foreach ($detalles_mas as $detalle) {
+            $sheet->fromArray([
+                $detalle->date,
+                $detalle->third_party_name,
+                $detalle->check,
+                $detalle->source,
+                $detalle->support_number,
+                $detalle->check,
+                $detalle->concept,
+                $detalle->value,
+            ], null, 'A' . $row);
+            $total_mas += $detalle->value;
+            $row++;
+        }
+        $sheet->setCellValue('G' . $row, 'Total Entradas');
+        $sheet->setCellValue('H' . $row, $total_mas);
+        $row += 2;
+
+        // Salidas (Menos)
+        $sheet->setCellValue('A' . $row, 'Salidas (Débitos)');
+        $row++;
+        $sheet->fromArray([
+            'Fecha', 'Tercero', 'Cheque', 'Origen', 'N° Soporte', 'Cheque', 'Concepto', 'Valor'
+        ], null, 'A' . $row);
+        $row++;
+        $total_menos = 0;
+        foreach ($detalles_menos as $detalle) {
+            $sheet->fromArray([
+                $detalle->date,
+                $detalle->third_party_name,
+                $detalle->check,
+                $detalle->source,
+                $detalle->support_number,
+                $detalle->check,
+                $detalle->concept,
+                $detalle->value,
+            ], null, 'A' . $row);
+            $total_menos += $detalle->value;
+            $row++;
+        }
+        $sheet->setCellValue('G' . $row, 'Total Salidas');
+        $sheet->setCellValue('H' . $row, $total_menos);
+        $row += 2;
+
+        $diferencia_bd = round($reconciliation->diferencia, 2);
+        $diferencia_tablas = round($total_mas - $total_menos, 2);
+        $diferencia_final = $diferencia_bd + $diferencia_tablas;
+
+        // Totales finales
+        $sheet->setCellValue('G' . $row, 'Diferencia Conciliada');
+        $sheet->setCellValue('H' . $row, $diferencia_tablas);
+        $row++;
+
+        $sheet->setCellValue('G' . $row, 'Diferencia a conciliar');
+        $sheet->setCellValue('H' . $row, $diferencia_bd);
+        $row++;
+
+        $sheet->setCellValue('G' . $row, 'Diferencia a conciliar + Diferencia conciliada');
+        $sheet->setCellValue('H' . $row, $diferencia_final);
+
+        if ($diferencia_final != 0) {
+            $sheet->getStyle('H' . $row)->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED);
+        } else {
+            $sheet->getStyle('H' . $row)->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_GREEN);
+        }        
+
+        // Descargar el archivo Excel
+        $filename = 'conciliacion_bancaria_' . $reconciliation->month . '.xlsx';
+        $writer = new Xlsx($spreadsheet);
+        $tempFile = tempnam(sys_get_temp_dir(), $filename);
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
     }
 }

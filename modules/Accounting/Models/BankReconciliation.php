@@ -10,6 +10,10 @@ class BankReconciliation extends ModelTenant
         'bank_account_id',
         'month',
         'date',
+        'saldo_extracto',
+        'saldo_libro',
+        'diferencia',
+        'status',
     ];
 
     public function bankAccount()
@@ -21,4 +25,10 @@ class BankReconciliation extends ModelTenant
     {
         return BankAccount::where('status', 1)->get();
     }
+
+    public function details()
+    {
+        return $this->hasMany(BankReconciliationDetail::class);
+    }
+    
 }

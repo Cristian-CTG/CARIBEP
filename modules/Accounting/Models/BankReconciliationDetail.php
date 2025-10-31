@@ -9,14 +9,14 @@ class BankReconciliationDetail extends ModelTenant
     protected $fillable = [
         'bank_reconciliation_id',
         'journal_entry_detail_id',
-        'tipo',
-        'fecha',
-        'nombre_tercero',
-        'origen',
-        'n_soporte',
-        'cheque',
-        'concepto',
-        'valor',
+        'type',
+        'date',
+        'third_party_name',
+        'source',
+        'support_number',
+        'check',
+        'concept',
+        'value',
     ];
 
     public function bankReconciliation()

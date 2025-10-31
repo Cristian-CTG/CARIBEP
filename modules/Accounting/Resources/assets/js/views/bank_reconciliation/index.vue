@@ -23,7 +23,7 @@
                             start-placeholder="Desde"
                             end-placeholder="Hasta"
                             value-format="yyyy-MM-dd"
-                            @change="getRecords"
+                            @change="onFilterChange"
                             style="width: 100%;"
                         ></el-date-picker>
                     </div>
@@ -34,7 +34,7 @@
                             type="month"
                             placeholder="Seleccionar mes"
                             value-format="yyyy-MM"
-                            @change="getRecords"
+                            @change="onFilterChange"
                             style="width: 100%;"
                         ></el-date-picker>
                     </div>
@@ -45,7 +45,7 @@
                             filterable
                             clearable
                             placeholder="Seleccione"
-                            @change="getRecords"
+                            @change="onFilterChange"
                             style="width: 100%;"
                         >
                             <el-option
@@ -58,14 +58,15 @@
                     </div>
                 </div>
                 <!-- Tabla -->
-                <data-table :resource="resource" ref="dataTable" :applyFilter="false">
+                <data-table :resource="resource" ref="dataTable" :applyFilter="false" :customFilters="customFilters">
                     <tr slot="heading">
                         <th>Fecha de Creación</th>
                         <th>Mes de Conciliación</th>
                         <th>Cuenta Bancaria</th>
+                        <th>Acciones</th>
                     </tr>
                     <tr slot-scope="{ row }">
-                        <td>{{ row.created_at | dateFormat }}</td>
+                        <td>{{ row.date | dateFormat }}</td>
                         <td>{{ row.month }}</td>
                         <td>
                             <span v-if="row.bank_account">
@@ -73,14 +74,46 @@
                                 <small>{{ row.bank_account.number }}</small>
                             </span>
                         </td>
+                        <td>
+                            <el-button
+                                v-if="row.status === 'draft'"
+                                size="mini"
+                                @click="editarConciliacion(row)"
+                            >
+                                Editar
+                            </el-button>
+                            <el-button
+                                size="mini"
+                                type="info"
+                                @click="verPdf(row)"
+                            >
+                                PDF
+                            </el-button>
+                            <el-button
+                                size="mini"
+                                type="success"
+                                @click="exportarExcelFila(row)"
+                            >
+                                Excel
+                            </el-button>
+                            <el-button
+                                size="mini"
+                                type="danger"
+                                @click="eliminarConciliacion(row)"
+                            >
+                                Eliminar
+                            </el-button>
+                        </td>
                     </tr>
                 </data-table>
             </div>
         </div>
         <bank-reconciliation-form
+            ref="bankReconciliationForm"
             :showDialog.sync="showDialog"
             :bankAccounts="bankAccounts"
             @save="handleSave"
+            @refreshTable="getRecords"
         ></bank-reconciliation-form>
     </div>
 </template>
@@ -107,26 +140,65 @@ export default {
     computed: {
         customFilters() {
             let filters = {};
+            // Rango de fechas
             if (this.filters.daterange && this.filters.daterange.length === 2) {
                 filters.column = 'daterange';
                 filters.value = this.filters.daterange.join('_');
-            } else if (this.filters.month) {
-                filters.column = 'month';
-                filters.value = this.filters.month;
             }
-            if (this.filters.bank_account_id) {
-                filters.bank_account_id = this.filters.bank_account_id;
-            }
+            // Mes
+            filters.month = this.filters.month || '';
+            // Cuenta bancaria
+            filters.bank_account_id = this.filters.bank_account_id || '';
             return filters;
         }
     },
     filters: {
         dateFormat(value) {
             if (!value) return "";
-            return moment(value).format("YYYY-MM-DD HH:mm");
+            return moment(value).format("YYYY-MM-DD");
         }
     },
     methods: {
+        exportarExcelFila(row) {
+            if (!row.month || !row.bank_account_id) {
+                this.$message.warning('No se puede exportar: faltan datos de mes o cuenta bancaria.');
+                return;
+            }
+            const query = `month=${encodeURIComponent(row.month)}&bank_account_id=${encodeURIComponent(row.bank_account_id)}`;
+            window.open(`/accounting/bank-reconciliation/export-excel?${query}`, '_blank');
+        },
+        eliminarConciliacion(row) {
+            this.$confirm('¿Desea eliminar la conciliación y todos sus registros?', 'Eliminar', {
+                confirmButtonText: 'Eliminar',
+                cancelButtonText: 'Cancelar',
+                type: 'warning'
+            }).then(async () => {
+                try {
+                    const res = await this.$http.delete(`/accounting/bank-reconciliation/${row.id}`);
+                    if (res.data.success) {
+                        this.$message.success(res.data.message);
+                        this.getRecords();
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
+                } catch (e) {
+                    this.$message.error('Error al eliminar la conciliación.');
+                }
+            }).catch(() => {});
+        },
+        async onFilterChange() {
+            await this.$nextTick();
+            this.getRecords();
+        },
+        async editarConciliacion(row) {
+            const res = await this.$http.get(`/accounting/bank-reconciliation/${row.id}/edit`);
+            this.showDialog = true;
+            this.$nextTick(() => {
+                if (this.$refs.bankReconciliationForm && this.$refs.bankReconciliationForm.cargarConciliacion) {
+                    this.$refs.bankReconciliationForm.cargarConciliacion(res.data);
+                }
+            });
+        },
         openDialog() {
             this.showDialog = true;
         },
@@ -142,7 +214,10 @@ export default {
         },
         getRecords() {
             this.$refs.dataTable.getRecords();
-        }
+        },
+        verPdf(row) {
+            window.open(`/accounting/bank-reconciliation/pdf/${row.id}`, '_blank');
+        },
     },
     async mounted() {
         await this.getBankAccounts();
