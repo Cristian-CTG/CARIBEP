@@ -67,6 +67,7 @@ use App\Models\Tenant\DocumentPosPayment;
 use App\Models\Tenant\ConfigurationPos;
 use App\Http\Resources\Tenant\DocumentPosResource;
 use App\Models\Tenant\Cash;
+use App\Models\Tenant\CashDocument;
 use App\Models\Tenant\Seller;
 use Modules\Factcolombia1\Http\Controllers\Tenant\DocumentController;
 use Illuminate\Support\Facades\View;
@@ -760,8 +761,8 @@ class DocumentPosController extends Controller
         if ($config_pos && $config_pos->generated) {
             // Verificar si ese número ya fue usado y enviado exitosamente
             $existing_doc = DocumentPos::where('prefix', $config->prefix)
-                                     ->where('number', $config_pos->generated + 1)
-                                     ->first();
+                                    ->where('number', $config_pos->generated + 1)
+                                    ->first();
 
             if (!$existing_doc) {
                 // Si no existe documento con ese número, lo usamos
@@ -784,8 +785,24 @@ class DocumentPosController extends Controller
                 $number = ($document) ? (int)$document->number + 1 : 1;
             }
         }
-//\Log::debug($config);
-        $allowanceCharges = $inputs['allowance_charges'] ?? [];
+
+        // Normaliza $inputs a array
+        if ($inputs instanceof Request) {
+            $inputsArr = $inputs->all();
+        } elseif (is_object($inputs)) {
+            $inputsArr = (array)$inputs;
+        } else {
+            $inputsArr = $inputs;
+        }
+
+        // allowance_charges puede venir de diferentes formas
+        $allowanceCharges = [];
+        if ($inputs instanceof Request) {
+            $allowanceCharges = $inputs->input('allowance_charges', []);
+        } elseif (isset($inputsArr['allowance_charges'])) {
+            $allowanceCharges = $inputsArr['allowance_charges'];
+        }
+
         $total_discount = collect($allowanceCharges)->sum(function ($charge) {
             return isset($charge['amount']) ? (float) $charge['amount'] : 0;
         });
@@ -794,23 +811,29 @@ class DocumentPosController extends Controller
             //'automatic_date_of_issue' => $automatic_date_of_issue,
             'user_id' => auth()->id(),
             'external_id' => Str::uuid()->toString(),
-            'customer' => Person::with('typePerson', 'typeRegime', 'identity_document_type', 'country', 'department', 'city')->findOrFail($inputs['customer_id']),
-            'establishment' => EstablishmentInput::set($inputs['establishment_id']),
+            'customer' => Person::with('typePerson', 'typeRegime', 'identity_document_type', 'country', 'department', 'city')->findOrFail($inputsArr['customer_id']),
+            'establishment' => EstablishmentInput::set($inputsArr['establishment_id']),
             'soap_type_id' => $this->company->soap_type_id,
             'state_type_id' => '01',
-            'series' => $config->prefix,
+            'series' => $inputsArr['prefix'] ?? $config->prefix,
             'resolution_number' => $config->resolution_number,
             'plate_number' => $config->plate_number,
             'cash_type' => $config->cash_type,
-            'number' => $number,
-            'prefix' => $config->prefix,
+            'number' => $inputsArr['number'] ?? $number,
+            'prefix' => $inputsArr['prefix'] ?? $config->prefix,
             'electronic' => (bool)$config->electronic,
             'total_discount' => $total_discount,
-            'seller_id' => $inputs['seller_id'] ?? null,
+            'seller_id' => $inputsArr['seller_id'] ?? null,
         ];
-        unset($inputs['series_id']);
-        $inputs->merge($values);
-        return $inputs->all();
+        unset($inputsArr['series_id']);
+
+        // Si $inputs es Request, mergea, si es array, array_merge
+        if ($inputs instanceof Request) {
+            $inputs->merge($values);
+            return $inputs->all();
+        } else {
+            return array_merge($inputsArr, $values);
+        }
     }
 
 //    public function recreatePdf($sale_note_id)
@@ -1708,57 +1731,108 @@ class DocumentPosController extends Controller
 
     }
 
-    public function sincronize()
+    public function sincronize(Request $request)
     {
         try {
+            // Validar si la caja abierta es electrónica
+            $user_id = auth()->id();
+            $cash = \App\Models\Tenant\Cash::where('user_id', $user_id)
+                ->where('state', true)
+                ->first();
+
+            if ($cash && !$cash->resolution->electronic) {
+                return [
+                    "success" => false,
+                    "message" => "No puedes sincronizar documentos electrónicos porque la caja actual tiene una resolución NO electrónica. Abre una caja con resolución electrónica para continuar."
+                ];
+            }
+
             $company = ServiceTenantCompany::firstOrFail();
             $docController = new DocumentController();
             $docController->sincronize_resolutions($company->identification_number);
             $base_url = config('tenant.service_fact');
-
-            $ch2 = curl_init("{$base_url}information/{$company->identification_number}");
-            curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch2, CURLOPT_CUSTOMREQUEST, "GET");
-            curl_setopt($ch2, CURLOPT_POSTFIELDS, "");
-            curl_setopt($ch2, CURLOPT_SSL_VERIFYHOST, 0);
-            curl_setopt($ch2, CURLOPT_SSL_VERIFYPEER, 0);
-            curl_setopt($ch2, CURLOPT_HTTPHEADER, array(
-                'Content-Type: application/json',
-                'Accept: application/json',
-                "Authorization: Bearer {$company->api_token}"
-            ));
-            $response = curl_exec($ch2);
-            curl_close($ch2);
-
-            $response_decoded = json_decode($response);
-            $filteredDocuments = [];
-
-            if(!$response_decoded->success) {
-                throw new Exception("No se obtuvo datos del API");
-            }
-
-            // dd($response_decoded->data);
-            foreach ($response_decoded->data as $item) {
-                if ($item->type_document_id == 15) {
-                    $filteredDocuments = $item->documents;
-                    break;
-                }
-            }
             $i = 0;
-            foreach($filteredDocuments as $document){
-                if($document->cufe != null){
-                    $document_pos = DocumentPos::where('prefix', $document->prefix)->where('number', $document->number)->get();
-                    if(count($document_pos) == 0){
-                        $this->store_sincronize($document);
-                        $i++;
+
+            // Sincronización por fechas
+            if ($request->type === 'fecha' && $request->filled(['desde', 'hasta'])) {
+                $ch2 = curl_init("{$base_url}information/{$company->identification_number}/{$request->desde}/{$request->hasta}");
+                curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch2, CURLOPT_CUSTOMREQUEST, "GET");
+                curl_setopt($ch2, CURLOPT_SSL_VERIFYHOST, 0);
+                curl_setopt($ch2, CURLOPT_SSL_VERIFYPEER, 0);
+                curl_setopt($ch2, CURLOPT_HTTPHEADER, array(
+                    'Content-Type: application/json',
+                    'Accept: application/json',
+                    "Authorization: Bearer {$company->api_token}"
+                ));
+                $response_status = curl_exec($ch2);
+                // dd($response_status);
+                curl_close($ch2);
+
+                $response_status_decoded = json_decode($response_status);
+                if (isset($response_status_decoded->data)) {
+                    foreach ($response_status_decoded->data as $group) {
+                        if (isset($group->documents) && $group->type_document_id == 15) {
+                            foreach ($group->documents as $document) {
+                                if ($document->cufe != null && $document->type_document_id == 15) {
+                                    $document_pos = DocumentPos::where('prefix', $document->prefix)->where('number', $document->number)->get();
+                                    if (count($document_pos) == 0) {
+                                        $this->store_sincronize($document);
+                                        $i++;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
+                return [
+                    "success" => true,
+                    "message" => "Se sincronizaron satisfactoriamente, {$i} registros POS por rango de fechas.",
+                ];
             }
+
+            // Sincronización por página
+            $lastsync = 1;
+            if ($request->type === 'pagina' && $request->filled('page')) {
+                $lastsync = $request->page;
+            }
+
+            do{
+                $ch2 = curl_init("{$base_url}information/{$company->identification_number}/page/{$lastsync}/page");
+                curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch2, CURLOPT_CUSTOMREQUEST, "GET");
+                curl_setopt($ch2, CURLOPT_POSTFIELDS, "");
+                curl_setopt($ch2, CURLOPT_SSL_VERIFYHOST, 0);
+                curl_setopt($ch2, CURLOPT_SSL_VERIFYPEER, 0);
+                curl_setopt($ch2, CURLOPT_HTTPHEADER, array(
+                    'Content-Type: application/json',
+                    'Accept: application/json',
+                    "Authorization: Bearer {$company->api_token}"
+                ));
+                $response_status = curl_exec($ch2);
+                curl_close($ch2);
+
+                $response_status_decoded = json_decode($response_status);
+                if (isset($response_status_decoded->data[0]->documents)) {
+                    $documents = $response_status_decoded->data[0]->documents;
+                    foreach($documents as $document){
+                        if($document->cufe != null && $document->type_document_id == 15){
+                            $document_pos = DocumentPos::where('prefix', $document->prefix)->where('number', $document->number)->get();
+                            if(count($document_pos) == 0){
+                                $this->store_sincronize($document);
+                                $i++;
+                            }
+                        }
+                    }
+                }
+                $lastsync++;
+            }while(isset($response_status_decoded->data[0]->count) && $response_status_decoded->data[0]->count != 0 && $request->type !== 'pagina');
+
             return [
                 "success" => true,
-                "message" => $i===0?"Sin documentos por sincronizar":"Se sincronizaron satisfactoriamente, {$i} registros que se habian enviado directamente desde API...",
+                "message" => "Se sincronizaron satisfactoriamente, {$i} registros POS por página.",
             ];
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return [
                 "success" => false,
                 "message" => $e->getMessage()
@@ -1774,7 +1848,25 @@ class DocumentPosController extends Controller
         $tax_totals = [];
 
         foreach ($items as &$item) {
+            $unit_type_id = isset($item['unit_measure_id']) ? $item['unit_measure_id'] : 'NIU';
+            if ($unit_type_id == 70) {
+                $unit_type_id = 10;
+            }
             $item_search = Item::where('internal_id', $item['code'])->first();
+            if(!$item_search){
+                $item_search = new Item();
+                $item_search->internal_id = $item['code'];
+                $item_search->name = $item['description'] ?? $item['code'];
+                $item_search->description = $item['description'] ?? $item['code'];
+                $item_search->item_type_id = "01";
+                $item_search->unit_type_id = $unit_type_id;
+                $item_search->currency_type_id = 170;
+                $item_search->sale_unit_price = $item['price_amount'] ?? 0;
+                $item_search->active = 1;
+                $item_search->status = 1;
+                $item_search->quantity = $item['invoiced_quantity'] ?? 1;
+                $item_search->save();
+            }
             $total_tax = 0;
             if (isset($item['tax_totals']) && is_array($item['tax_totals'])) {
                 foreach ($item['tax_totals'] as $tax_total) {
@@ -1813,6 +1905,9 @@ class DocumentPosController extends Controller
             } else {
                 $tax->total = 0; // Si no hay acumulación para ese tax_id, el total es 0
             }
+            if (!property_exists($tax, 'retention')) {
+                $tax->retention = 0;
+            }
         }
         // dd($items);
         // dd($document->request_api);
@@ -1831,6 +1926,7 @@ class DocumentPosController extends Controller
             'paid' => 1,
             'payment_form_id' => $json_api->payment_form->payment_form_id,
             'payment_method_id' => $json_api->payment_form->payment_method_id,
+            'number' => $document->number,
             'prefix' => $document->prefix,
             'series_id' => null,
             'service_invoice' => [],
@@ -1850,7 +1946,7 @@ class DocumentPosController extends Controller
                     "document_id" => null,
                     "sale_note_id" => null,
                     "date_of_payment" => $json_api->date,
-                    "payment_method_type_id" => "01",
+                    "payment_method_id" => 10,
                     "payment_destination_id" => "cash",
                     "reference" => null,
                     "payment" => $document->total,
@@ -1867,6 +1963,17 @@ class DocumentPosController extends Controller
             $store = $this->store($request);
             if($store['success'] === false) {
                 throw new Exception($store['message']);
+            }
+
+            if ($store['success'] && isset($store['data']['id'])) {
+                $documentPosId = $store['data']['id'];
+                $cash = Cash::where('user_id', auth()->id())->where('state', true)->first();
+                if ($cash) {
+                    CashDocument::firstOrCreate([
+                        'cash_id' => $cash->id,
+                        'document_pos_id' => $documentPosId,
+                    ]);
+                }
             }
         } catch (Exception $e) {
             \Log::error('Sincronizacion POS: '.$e);

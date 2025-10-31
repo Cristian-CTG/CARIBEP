@@ -429,7 +429,7 @@ if ($hostname) {
             Route::get('document-pos/anulate/{id}', 'Tenant\DocumentPosController@anulate');
             Route::get('document-pos/voided/resolutions', 'Tenant\DocumentPosController@anulateResolutions');
             Route::post('document-pos/email', 'Tenant\DocumentPosController@email');
-            Route::get('document-pos/sincronize', 'Tenant\DocumentPosController@sincronize');
+            Route::post('document-pos/sincronize', 'Tenant\DocumentPosController@sincronize');
             Route::get('document-pos/downloadFileCoupon/{id}', 'Tenant\DocumentPosController@downloadFileCoupon');
             Route::get('document-pos/validate-cash/{resolution_id}', 'Tenant\DocumentPosController@validateCash');
 

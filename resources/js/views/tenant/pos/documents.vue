@@ -9,7 +9,7 @@
             </ol>
             <div class="right-wrapper pull-right">
                 <el-tooltip class="item" effect="dark" content="Importa las facturas con estado Aceptada en el API que no se encuentran registradas" placement="bottom">
-                    <el-button class="btn btn-custom btn-sm  mt-2 mr-2" :loading="sincronizing" @click.prevent="clickSincronize()"><i class="fas fa-sync-alt" ></i> Sincronizar Envios API</el-button>
+                    <el-button class="btn btn-custom btn-sm  mt-2 mr-2" :loading="sincronizing" @click.prevent="openSyncDialog"><i class="fas fa-sync-alt" ></i> Sincronizar Envios API</el-button>
                 </el-tooltip>
             </div>
         </div>
@@ -116,6 +116,78 @@
                           :recordId="saleNotesNewId"
                           :showClose="true"></sale-notes-options>
 
+        <!-- Modal para escoger tipo de sincronización POS -->
+        <el-dialog
+            :visible.sync="showSyncDialog"
+            width="400px"
+            :close-on-click-modal="false"
+        >
+            <div slot="title">
+                <span>
+                    <i class="fas fa-sync-alt" style="color:#409EFF;margin-right:10px;"></i>
+                    <b>Sincronizar documentos POS</b>
+                </span>
+            </div>
+            <el-alert
+                title="Importa documentos POS aceptados en el API que no se encuentran registrados en el sistema."
+                type="info"
+                show-icon
+                :closable="false"
+                style="margin-bottom: 15px;"
+            ></el-alert>
+            <el-form :model="syncForm" label-width="140px" label-position="top">
+                <el-form-item label="Tipo de sincronización">
+                    <el-radio-group v-model="syncForm.type">
+                        <el-radio label="fecha">
+                            <i class="el-icon-date"></i> Por Fechas
+                        </el-radio>
+                        <el-radio label="pagina">
+                            <i class="el-icon-document"></i> Por Página
+                        </el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <template v-if="syncForm.type === 'fecha'">
+                    <el-form-item label="Desde">
+                        <el-date-picker
+                            v-model="syncForm.desde"
+                            type="date"
+                            placeholder="Fecha inicio"
+                            style="width: 100%;"
+                        ></el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="Hasta">
+                        <el-date-picker
+                            v-model="syncForm.hasta"
+                            type="date"
+                            placeholder="Fecha fin"
+                            style="width: 100%;"
+                        ></el-date-picker>
+                    </el-form-item>
+                </template>
+                <template v-else>
+                    <el-form-item label="Página">
+                        <el-input-number
+                            v-model="syncForm.page"
+                            :min="1"
+                            style="width: 100%;"
+                        ></el-input-number>
+                        <div style="color: #909399; font-size: 0.9em; margin-top: 3px;">
+                            Ejemplo: 1 = 10 documentos por pagina.
+                        </div>
+                    </el-form-item>
+                </template>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="showSyncDialog = false" icon="el-icon-close">Cancelar</el-button>
+                <el-button
+                    type="primary"
+                    :loading="sincronizing"
+                    @click="clickSincronizeModal"
+                    icon="el-icon-refresh"
+                >Sincronizar</el-button>
+            </span>
+        </el-dialog>
+        <!-- Fin modal sincronización POS -->
 
     </div>
 </template>
@@ -191,6 +263,13 @@
                     }
                 },
                 sincronizing: false,
+                showSyncDialog: false,
+                syncForm: {
+                    type: 'fecha',
+                    desde: '',
+                    hasta: '',
+                    page: 1,
+                }
             }
         },
         created() {
@@ -337,6 +416,39 @@
                 }).then(() => {
                     this.sincronizing = false
                 })
+            },
+            openSyncDialog() {
+                this.showSyncDialog = true;
+            },
+            async clickSincronizeModal() {
+                this.sincronizing = true;
+                let payload = {
+                    type: this.syncForm.type,
+                };
+                if (this.syncForm.type === 'fecha') {
+                    payload.desde = this.syncForm.desde;
+                    payload.hasta = this.syncForm.hasta;
+                } else {
+                    payload.page = this.syncForm.page;
+                }
+                await this.$http.post(`/${this.resource}/sincronize`, payload)
+                    .then(response => {
+                        if (response.data.success) {
+                            this.$message.success(response.data.message)
+                        } else {
+                            this.$message.error(response.data.message)
+                        }
+                        this.$eventHub.$emit('reloadData')
+                    }).catch(error => {
+                        if (error.response && error.response.status === 422) {
+                            this.errors = error.response.data
+                        } else {
+                            this.$message.error(error.response?.data?.message || 'Error en la sincronización')
+                        }
+                    }).finally(() => {
+                        this.sincronizing = false
+                        this.showSyncDialog = false
+                    })
             },
             clickDownloadCoupon(id) {
                 this.$http.get(`/${this.resource}/downloadFileCoupon/${id}`).then((response) => {
