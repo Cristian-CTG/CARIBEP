@@ -50,6 +50,8 @@ if($hostname) {
 
             // Terceros
             Route::get('journal/thirds/third-parties', 'ThirdPartyController@index');
+            Route::post('journal/thirds/sync-from-origin', 'ThirdPartyController@syncFromOrigin');
+            Route::get('journal/thirds/all-third-parties', 'ThirdPartyController@allThirdParties');
 
             //Records
             Route::get('/bank-book/records', 'JournalEntryController@bankAccounts');
@@ -85,9 +87,18 @@ if($hostname) {
             Route::get('/bank-book/preview', 'ReportBankBookController@preview');
 
             // Reporte de Conciliacion Bancaria
-            Route::get('/bank-reconciliation', 'ReportBankReconciliationController@index')->name('tenant.accounting.report.bank-reconciliation');
-            Route::get('/bank-reconciliation/records', 'ReportBankReconciliationController@records');
-            Route::get('/bank-reconciliation/export', 'ReportBankReconciliationController@export');
+            Route::get('/bank-reconciliation', 'BankReconciliationController@index')->name('tenant.accounting.bank-reconciliation.index');
+            Route::get('/bank-reconciliation/records', 'BankReconciliationController@records');
+            Route::get('/bank-reconciliation/export', 'BankReconciliationController@export');
+            Route::get('/bank-reconciliation/columns', 'BankReconciliationController@columns');
+            Route::get('/bank-reconciliation/records', 'BankReconciliationController@records');
+            Route::get('/bank-reconciliation/bank-accounts', 'BankReconciliationController@bankAccounts');
+            Route::get('/bank-reconciliation/movements', 'BankReconciliationController@movements');
+            Route::post('/bank-reconciliation/store', 'BankReconciliationController@store');
+            Route::get('/bank-reconciliation/{id}/edit', 'BankReconciliationController@edit');
+            Route::get('/bank-reconciliation/pdf/{id}', 'BankReconciliationController@pdf');
+            Route::delete('/bank-reconciliation/{id}', 'BankReconciliationController@destroy');
+            Route::get('/bank-reconciliation/export-excel', 'BankReconciliationController@exportExcel');
             
             // Reporte de Terceros
             Route::get('/third-report', 'ReportThirdController@index')->name('tenant.accounting.report.third-report');

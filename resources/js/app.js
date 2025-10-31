@@ -397,10 +397,11 @@ Vue.component('system-update', require('./views/system/update/index.vue'));
 // contabilidad
 Vue.component('tenant-accounting-journal-entries-index', require('@viewsModuleAccounting/journal_entries/index.vue'));
 Vue.component('tenant-accounting-charts-index', require('@viewsModuleAccounting/chart_of_accounts/index.vue'));
+Vue.component('tenant-accounting-bank-reconciliation-index', require('@viewsModuleAccounting/bank_reconciliation/index.vue'));
 Vue.component('tenant-accounting-reports-financial-position-index', require('@viewsModuleAccounting/reports/financial_position.vue'));
 Vue.component('tenant-accounting-reports-income-statement-index', require('@viewsModuleAccounting/reports/income_statement.vue'));
 Vue.component('tenant-accounting-reports-auxiliary-movement-index', require('@viewsModuleAccounting/reports/auxiliary_movement.vue'));
-Vue.component('tenant-accounting-reports-bank-reconciliation-index', require('@viewsModuleAccounting/reports/bank_reconciliation.vue'));
+// Vue.component('tenant-accounting-reports-bank-reconciliation-index', require('@viewsModuleAccounting/reports/bank_reconciliation.vue'));
 Vue.component('tenant-accounting-bank-book-index', require('@viewsModuleAccounting/reports/bank_book.vue'));
 Vue.component('tenant-accounting-reports-third-report-index', require('@viewsModuleAccounting/reports/third_report.vue'));
 Vue.component('tenant-accounting-reports-entry-details-report', require('@viewsModuleAccounting/reports/journal_entry_details_report.vue'));

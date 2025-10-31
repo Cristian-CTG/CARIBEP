@@ -232,6 +232,9 @@ class ReportBankBookController extends Controller
             }
             if ($is_refund) $payment_method = 'DEVOLUCIÓN';
 
+            $third_party_document = $detail->thirdParty ? $detail->thirdParty->document : '';
+            $third_party_name = $detail->thirdParty ? $detail->thirdParty->name : '';
+
             $preview[] = [
                 'date' => $entry->date ?? '',
                 'document' => $document,
@@ -241,6 +244,8 @@ class ReportBankBookController extends Controller
                 'debit' => number_format($debit, 2, ',', '.'),
                 'credit' => number_format($credit, 2, ',', '.'),
                 'balance' => number_format($saldo, 2, ',', '.'),
+                'third_party_document' => $third_party_document,
+                'third_party_name' => $third_party_name,
             ];
         }
 

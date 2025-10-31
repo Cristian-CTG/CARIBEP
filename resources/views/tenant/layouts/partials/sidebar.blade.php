@@ -919,7 +919,7 @@
                                 </a>
                             </li>
                             <li class="{{(($path[0] === 'accounting') && ($path[1] == 'bank-reconciliation')) ? 'nav-active' : ''}}">
-                                <a class="nav-link" href="{{route('tenant.accounting.report.bank-reconciliation')}}">
+                                <a class="nav-link" href="{{route('tenant.accounting.bank-reconciliation.index')}}">
                                     Conciliacion Bancaria
                                 </a>
                             </li>

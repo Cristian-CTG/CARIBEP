@@ -2,108 +2,134 @@
     <div>
         <div class="page-header pr-0">
             <h2>
-                <span>Conciliación Bancaria</span>
+                <span>Conciliaciones Bancarias</span>
             </h2>
-            <ol class="breadcrumbs">
-                <li class="active"><span>Exportar reporte</span></li>
-            </ol>
+            <div class="right-wrapper pull-right">
+                <button class="btn btn-custom btn-sm mt-2 mr-2" @click="showDialog = true">
+                    <i class="fa fa-plus-circle"></i> Crear conciliación bancaria
+                </button>
+            </div>
         </div>
         <div class="card mb-0 pt-2 pt-md-0">
             <div class="card-body">
-                <div class="row mt-2">
-                    <div class="col-md-4 pb-1">
-                        <div class="form-group">
-                            <label>Mes</label>
-                            <el-date-picker
-                                v-model="form.month"
-                                type="month"
-                                value-format="yyyy-MM"
-                                format="MM/yyyy"
-                                :clearable="false"
-                            ></el-date-picker>
-                        </div>
+                <!-- Filtros -->
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label>Fecha de Creación</label>
+                        <el-date-picker
+                            v-model="filters.daterange"
+                            type="daterange"
+                            range-separator="a"
+                            start-placeholder="Desde"
+                            end-placeholder="Hasta"
+                            value-format="yyyy-MM-dd"
+                            @change="getRecords"
+                            style="width: 100%;"
+                        ></el-date-picker>
                     </div>
-                    <div class="col-md-5 pb-1">
-                        <div class="form-group">
-                            <label>Cuenta Bancaria</label>
-                            <el-select v-model="form.bank_account_id" placeholder="Seleccione" @change="onBankAccountChange">
-                                <el-option
-                                    v-for="account in bankAccounts"
-                                    :key="account.id"
-                                    :label="account.description"
-                                    :value="account.id">
-                                </el-option>
-                            </el-select>
-                        </div>
+                    <div class="col-md-3">
+                        <label>Mes</label>
+                        <el-date-picker
+                            v-model="filters.month"
+                            type="month"
+                            placeholder="Seleccionar mes"
+                            value-format="yyyy-MM"
+                            @change="getRecords"
+                            style="width: 100%;"
+                        ></el-date-picker>
                     </div>
-                    <div class="col-lg-12 mt-3">
-                        <el-button
-                            type="primary"
-                            icon="el-icon-tickets"
-                            @click.prevent="clickDownload('pdf')"
-                            :disabled="!canExport"
-                        >Exportar PDF</el-button>
-                        <el-button
-                            type="warning"
-                            icon="el-icon-tickets"
-                            @click.prevent="clickDownload('excel')"
-                            :disabled="!canExport"
-                        >Exportar Excel</el-button>
-                    </div>
-                    <div v-if="!hasAccounts" class="alert alert-warning mt-2">
-                        No hay cuentas bancarias abiertas. Por favor, cree una antes de continuar.
+                    <div class="col-md-4">
+                        <label>Cuenta Bancaria</label>
+                        <el-select
+                            v-model="filters.bank_account_id"
+                            filterable
+                            clearable
+                            placeholder="Seleccione"
+                            @change="getRecords"
+                            style="width: 100%;"
+                        >
+                            <el-option
+                                v-for="acc in bankAccounts"
+                                :key="acc.id"
+                                :label="acc.description + ' - ' + acc.number"
+                                :value="acc.id"
+                            ></el-option>
+                        </el-select>
                     </div>
                 </div>
+                <!-- Tabla -->
+                <data-table :resource="resource" ref="dataTable" :applyFilter="false">
+                    <tr slot="heading">
+                        <th>Fecha de Creación</th>
+                        <th>Mes de Conciliación</th>
+                        <th>Cuenta Bancaria</th>
+                    </tr>
+                    <tr slot-scope="{ row }">
+                        <td>{{ row.created_at | dateFormat }}</td>
+                        <td>{{ row.month }}</td>
+                        <td>
+                            <span v-if="row.bank_account">
+                                {{ row.bank_account.description }}<br>
+                                <small>{{ row.bank_account.number }}</small>
+                            </span>
+                        </td>
+                    </tr>
+                </data-table>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import queryString from 'query-string'
+import DataTable from "../components/DataTable.vue";
+import moment from "moment";
 
 export default {
+    components: { DataTable },
     data() {
         return {
-            form: {
-                month: '',
+            resource: "accounting/bank-reconciliation",
+            filters: {
+                daterange: null,
+                month: null,
                 bank_account_id: null,
             },
             bankAccounts: [],
-        }
+        };
     },
     computed: {
-        hasAccounts() {
-            return this.bankAccounts && this.bankAccounts.length > 0;
-        },
-        canExport() {
-            return this.hasAccounts && !!this.form.bank_account_id;
+        customFilters() {
+            let filters = {};
+            if (this.filters.daterange && this.filters.daterange.length === 2) {
+                filters.column = 'daterange';
+                filters.value = this.filters.daterange.join('_');
+            } else if (this.filters.month) {
+                filters.column = 'month';
+                filters.value = this.filters.month;
+            }
+            if (this.filters.bank_account_id) {
+                filters.bank_account_id = this.filters.bank_account_id;
+            }
+            return filters;
         }
     },
-    async created() {
-        await this.fetchBankAccounts()
-        this.initForm()
+    filters: {
+        dateFormat(value) {
+            if (!value) return "";
+            return moment(value).format("YYYY-MM-DD HH:mm");
+        }
     },
     methods: {
-        initForm() {
-            const today = new Date()
-            this.form.month = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0')
+        async getBankAccounts() {
+            const res = await this.$http.get('/accounting/bank-reconciliation/bank-accounts');
+            this.bankAccounts = res.data;
         },
-        async fetchBankAccounts() {
-            const response = await this.$http.get('/accounting/bank-book/records');
-            this.bankAccounts = response.data;
-            if (this.bankAccounts.length > 0) {
-                this.form.bank_account_id = this.bankAccounts[0].id
-                this.onBankAccountChange(this.form.bank_account_id)
-            }
-        },
-        onBankAccountChange(accountId) {
-            // Puedes agregar lógica adicional si necesitas cargar datos específicos
-        },
-        clickDownload(type) {
-            const params = { ...this.form, type }
-            window.open(`/accounting/bank-reconciliation/export?${queryString.stringify(params)}`, '_blank')
-        },
+        getRecords() {
+            this.$refs.dataTable.getRecords();
+        }
+    },
+    async mounted() {
+        await this.getBankAccounts();
     }
-}
+};
 </script>
