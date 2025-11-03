@@ -368,7 +368,7 @@ export default {
             this.resetFormMenos();
         },
 
-        async guardarProgreso() {
+        async guardarProgreso() { // EN PROCESO, NO SE USA AUN
             // Convierte los valores a formato decimal con punto
             const tablaMas = this.tablaMas.map(item => ({
                 ...item,
@@ -415,7 +415,7 @@ export default {
                 .map(m => ({
                     ...m,
                     origen: 'Libros',
-                    n_soporte: '',
+                    n_soporte: m.n_soporte || m.documento || '',
                     cheque: '',
                     concepto: m.concepto || m.description || '',
                     nombre_tercero: m.nombre_tercero || m.third_party_name || '',
@@ -429,7 +429,7 @@ export default {
                 .map(m => ({
                     ...m,
                     origen: 'Libros',
-                    n_soporte: '',
+                    n_soporte: m.n_soporte || m.documento || '',
                     cheque: '',
                     concepto: m.concepto || m.description || '',
                     nombre_tercero: m.nombre_tercero || m.third_party_name || '',

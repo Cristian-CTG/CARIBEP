@@ -13,7 +13,7 @@
 </head>
 <body>
     <div class="header">
-        <h2>Reporte de Terceros - {{ ucfirst($tipo) }}</h2>
+        <h2>Reporte de Terceros - {{ ucfirst($tipo) ?? '' }}</h2>
         <strong>Rango de fechas:</strong> {{ $start_date }} a {{ $end_date }}
     </div>
     <table>

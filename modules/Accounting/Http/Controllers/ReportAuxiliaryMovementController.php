@@ -31,8 +31,10 @@ class ReportAuxiliaryMovementController extends Controller
         $thirdPartyType = $request->input('third_party_type');
         $thirdPartyOriginId = $request->input('third_party_origin_id');
 
-        $query = JournalEntryDetail::whereBetween('created_at', [$dateStart, $dateEnd])
-            ->with(['chartOfAccount', 'journalEntry']);
+        $query = JournalEntryDetail::whereHas('journalEntry', function($q) use ($dateStart, $dateEnd) {
+            $q->whereBetween('date', [$dateStart, $dateEnd]);
+        })
+        ->with(['chartOfAccount', 'journalEntry']);
 
         if ($accountCode) {
             $query->whereHas('chartOfAccount', function($q) use ($accountCode) {

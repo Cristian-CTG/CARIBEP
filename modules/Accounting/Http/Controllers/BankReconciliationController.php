@@ -134,7 +134,7 @@ class BankReconciliationController extends Controller
         $month = $request->input('month'); // formato yyyy-MM
         $bank_account_id = $request->input('bank_account_id');
         $page = (int)$request->input('page', 1);
-        $perPage = (int)$request->input('per_page', 10);
+        $perPage = (int)$request->input('per_page', 15);
 
         $start_date = $month . '-01';
         $end_date = date("Y-m-t", strtotime($start_date));

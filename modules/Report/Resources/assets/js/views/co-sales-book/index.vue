@@ -91,8 +91,16 @@
                     </div>
 
                     <div class="col-lg-12 col-md-12 col-md-12 col-sm-12 mt-3">
-                        <el-button class="submit" type="danger"  icon="el-icon-tickets" @click.prevent="clickDownload('pdf')" >Exportar PDF</el-button>
-                        <el-button class="submit" type="warning"  icon="el-icon-tickets" @click.prevent="clickDownload('excel')" >Exportar Excel</el-button>
+                        <div class="d-inline-block mb-2">
+                            <el-button class="submit" type="danger" icon="el-icon-tickets" @click.prevent="clickDownload('pdf')">
+                                Exportar PDF
+                            </el-button>
+                        </div>
+                        <div class="d-inline-block mb-2 ml-2">
+                            <el-button class="submit" type="warning" icon="el-icon-tickets" @click.prevent="clickDownload('excel')">
+                                Exportar Excel
+                            </el-button>
+                        </div>
                     </div>
                 </div>
             </div>

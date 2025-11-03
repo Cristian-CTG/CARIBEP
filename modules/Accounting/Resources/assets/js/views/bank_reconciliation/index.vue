@@ -75,34 +75,42 @@
                             </span>
                         </td>
                         <td>
-                            <el-button
-                                v-if="row.status === 'draft'"
-                                size="mini"
-                                @click="editarConciliacion(row)"
-                            >
-                                Editar
-                            </el-button>
-                            <el-button
-                                size="mini"
-                                type="info"
-                                @click="verPdf(row)"
-                            >
-                                PDF
-                            </el-button>
-                            <el-button
-                                size="mini"
-                                type="success"
-                                @click="exportarExcelFila(row)"
-                            >
-                                Excel
-                            </el-button>
-                            <el-button
-                                size="mini"
-                                type="danger"
-                                @click="eliminarConciliacion(row)"
-                            >
-                                Eliminar
-                            </el-button>
+                            <div class="d-inline-block">
+                                <el-button
+                                    v-if="row.status === 'draft'"
+                                    size="mini"
+                                    @click="editarConciliacion(row)"
+                                >
+                                    Editar
+                                </el-button>
+                            </div>
+                            <div class="d-inline-block ml-1">
+                                <el-button
+                                    size="mini"
+                                    type="info"
+                                    @click="verPdf(row)"
+                                >
+                                    PDF
+                                </el-button>
+                            </div>
+                            <div class="d-inline-block ml-1">
+                                <el-button
+                                    size="mini"
+                                    type="success"
+                                    @click="exportarExcelFila(row)"
+                                >
+                                    Excel
+                                </el-button>
+                            </div>
+                            <div class="d-inline-block ml-1">
+                                <el-button
+                                    size="mini"
+                                    type="danger"
+                                    @click="eliminarConciliacion(row)"
+                                >
+                                    Eliminar
+                                </el-button>
+                            </div>
                         </td>
                     </tr>
                 </data-table>

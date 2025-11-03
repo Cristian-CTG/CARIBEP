@@ -31,15 +31,14 @@
                                 range-separator="a"
                                 start-placeholder="Fecha inicio"
                                 end-placeholder="Fecha fin"
-                                @change="onDateChange"
                                 format="yyyy-MM-dd"
                                 value-format="yyyy-MM-dd"
                                 class="date-picker"
                             />
                         </div>
                     </div>
-                    <div class="col-3">
-                        <el-select v-model="account_code" placeholder="Cuenta contable" filterable clearable @change="onDateChange">
+                    <div class="col-2">
+                        <el-select v-model="account_code" placeholder="Cuenta contable" filterable clearable>
                             <el-option
                                 v-for="item in accountsList"
                                 :key="item.code"
@@ -57,7 +56,7 @@
                         </el-select>
                     </div>
                     <div class="col-2">
-                        <el-select v-model="third_party_id" placeholder="Tercero" filterable clearable @change="onDateChange">
+                        <el-select v-model="third_party_id" placeholder="Tercero" filterable clearable>
                             <el-option
                                 v-for="item in thirdParties"
                                 :key="item.id"
@@ -67,6 +66,9 @@
                         </el-select>
                     </div>
                     <div class="col-1 text-right">
+                        <el-button type="primary" @click="onDateChange">Buscar</el-button>
+                    </div>
+                    <div class="col-1 text-right">
                         <el-button type="primary" @click="ReportDownload('pdf')">Pdf</el-button>
                     </div>
                     <div class="col-1 text-right">
@@ -74,7 +76,10 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="table-responsive">
+                    <div v-if="loading" class="w-100 text-center my-3">
+                        <el-spinner type="circle" /> Cargando...
+                    </div>
+                    <div v-else class="table-responsive">
                         <table class="table table-bordered">
                             <tr>
                                 <th class="font-weight-bold">Codigo</th>
@@ -154,12 +159,13 @@ export default {
             third_party_id: '',
             accountsList: [],
             thirdParties: [],
+            loading: false,
         }
     },
     mounted() {
         this.fetchAccounts();
         this.fetchThirdParties();
-        this.onDateChange();
+        // this.onDateChange();
     },
     methods: {
         async fetchAccounts() {
@@ -188,9 +194,16 @@ export default {
             this.third_party_id = '';
         },
         async fetchData(params = {}) {
-            const response = await this.$http.get('/accounting/auxiliary-movement/records', { params });
-            if(response.data.data.length > 0) {
-                this.accounts = response.data.data;
+            this.loading = true;
+            try {
+                const response = await this.$http.get('/accounting/auxiliary-movement/records', { params });
+                if(response.data.data.length > 0) {
+                    this.accounts = response.data.data;
+                } else {
+                    this.accounts = [];
+                }
+            } finally {
+                this.loading = false;
             }
         },
         onDateChange() {

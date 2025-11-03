@@ -72,7 +72,7 @@
             </el-form>
 
             <div class="row mb-2">
-                <div class="col-md-2">
+                <div class="col-md-4">
                     <el-alert
                         :title="'Saldo Inicial: ' + saldo_inicial"
                         type="info"
@@ -245,7 +245,7 @@ export default {
         refreshTable() {
             this.$emit('refreshTable');
         },
-        async cargarConciliacion(data) {
+        async cargarConciliacion(data) { // EN PROCESO, NO SE USA AUN
             // 1. Carga los datos principales
             this.form = {
                 date: data.date,
@@ -286,7 +286,8 @@ export default {
                 ),
                 numero_cheque: mov.cheque_number || '',
                 debit: mov.debit,
-                credit: mov.credit
+                credit: mov.credit,
+                n_soporte: mov.document || '',
             }));
 
             // 4. Marca como seleccionados los movimientos que están en detalles_mas y detalles_menos
@@ -452,7 +453,8 @@ export default {
                     ),
                     numero_cheque: mov.cheque_number || '',
                     debit: mov.debit,
-                    credit: mov.credit
+                    credit: mov.credit,
+                    n_soporte: mov.document || '',
                 }));
 
                 this.movimientosPagination = res.data.pagination || {
@@ -533,7 +535,8 @@ export default {
                 ),
                 numero_cheque: mov.cheque_number || '',
                 debit: mov.debit,
-                credit: mov.credit
+                credit: mov.credit,
+                n_soporte: mov.document || '',
             }));
 
             // 2. Pasa todos los movimientos y los seleccionados al segundo form

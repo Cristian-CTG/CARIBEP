@@ -33,9 +33,23 @@
             <!-- <div class="card-header bg-info">
                 <h3 class="my-0">Listado de Cuentas Contables</h3>
             </div> -->
-            <div class="card-body">
+            <div class="card-body" style="position: relative;">
+                <label class="control-label">Buscar por código de cuenta:</label>
+                <div class="mb-3">
+                    <el-input
+                        v-model="searchCode"
+                        placeholder="Buscar por código de cuenta"
+                        clearable
+                        @input="filterTree"
+                        style="width: 300px;"
+                    />
+                </div>
+                <div v-if="loading" class="spinner-overlay">
+                    <i class="el-icon-loading spinner-icon"></i>
+                </div>
                 <el-tree
-                    :data="treeData"
+                    v-else
+                    :data="filteredTreeData"
                     :props="defaultProps"
                     node-key="id"
                     default-expand-all
@@ -61,6 +75,22 @@
 </template>
 
 <style scoped>
+    .spinner-overlay {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255,255,255,0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
+    .spinner-icon {
+        font-size: 48px;
+        color: #409EFF;
+    }
     /* Compactar los nodos */
     .el-tree--compact .el-tree-node__content {
         padding: 4px 8px !important;
@@ -103,6 +133,9 @@ export default {
             resource: "accounting/charts",
             recordId: null,
             treeData: [], // Aquí irá el árbol de cuentas
+            filteredTreeData: [],
+            searchCode: "",
+            loading: false,
             defaultProps: {
                 children: 'children',
                 label: 'label',
@@ -124,7 +157,7 @@ export default {
             this.showDialog = true;
         },
         openAccountSetting() {
-            console.log("AQUI")
+            // console.log("AQUI")
             this.showDialogSetting = true;
         },
         deleteRecord(id) {
@@ -146,7 +179,36 @@ export default {
             await this.$http.get(`/${this.resource}/tree`)
                 .then(response => {
                     this.treeData = response.data
+                    this.filteredTreeData = response.data
                 });
+        },
+        filterTree() {
+            this.loading = true;
+            if (!this.searchCode) {
+                this.filteredTreeData = this.treeData;
+                this.loading = false;
+                return;
+            }
+            // Filtra el árbol recursivamente
+            const filterRecursive = (nodes) => {
+                return nodes
+                    .map(node => {
+                        let children = node.children ? filterRecursive(node.children) : [];
+                        if (
+                            node.code.includes(this.searchCode) ||
+                            children.length > 0
+                        ) {
+                            return {
+                                ...node,
+                                children
+                            };
+                        }
+                        return null;
+                    })
+                    .filter(node => node !== null);
+            };
+            this.filteredTreeData = filterRecursive(this.treeData);
+            this.loading = false;
         }
     },
 };

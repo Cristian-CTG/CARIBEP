@@ -28,7 +28,8 @@
           <div class="col-md-3 pb-1">
             <div class="form-group">
               <label>Tipo de tercero</label>
-              <el-select v-model="filters.type" placeholder="Seleccione" @change="fetchThirds">
+              <el-select v-model="filters.type" placeholder="Seleccione" @change="fetchThirds" clearable>
+                <el-option label="Todos" value="all"></el-option>
                 <el-option label="Cliente" value="customers"></el-option>
                 <el-option label="Proveedor" value="suppliers"></el-option>
                 <el-option label="Empleado" value="employee"></el-option>
@@ -36,7 +37,7 @@
               </el-select>
             </div>
           </div>
-          <div class="col-md-5 pb-1">
+          <div class="col-md-5 pb-1" v-if="filters.type !== 'all' && filters.type ">
             <div class="form-group">
               <label>Tercero</label>
               <el-select v-model="filters.third_id" placeholder="Seleccione" filterable :disabled="thirds.length === 0">
@@ -62,19 +63,30 @@
             </div>
           </div> -->
           <div class="col-lg-12 mt-3">
-            <el-button
-              type="primary"
-              icon="el-icon-tickets"
-              @click.prevent="filters.third_id === 'all' ? exportAllThirds() : exportReport()"
-              :disabled="!filters.third_id"
-            >Exportar PDF</el-button>
-            <el-button
-              type="success"
-              icon="el-icon-document"
-              @click.prevent="filters.third_id === 'all' ? exportAllThirdsExcel() : exportExcel()"
-              :disabled="!filters.third_id"
-              style="margin-left: 10px;"
-            >Exportar Excel</el-button>
+            <div class="d-inline-block mb-2">
+              <el-button
+                type="primary"
+                icon="el-icon-search"
+                @click="onBuscar"
+                :disabled="!canSearch"
+              >Buscar</el-button>
+            </div>
+            <div class="d-inline-block mb-2 ml-2">
+              <el-button
+                type="primary"
+                icon="el-icon-tickets"
+                @click.prevent="handleExport('pdf')"
+                :disabled="!canExport"
+              >Exportar PDF</el-button>
+            </div>
+            <div class="d-inline-block mb-2 ml-2">
+              <el-button
+                type="success"
+                icon="el-icon-document"
+                @click.prevent="handleExport('excel')"
+                :disabled="!canExport"
+              >Exportar Excel</el-button>
+            </div>
             <!-- <el-button
               type="success"
               icon="el-icon-document"
@@ -82,6 +94,33 @@
               style="margin-left: 10px;"
             >Reporte de todos los terceros</el-button> -->
           </div>
+        </div>
+        <div v-if="previewRows.length > 0" class="mt-4" v-loading="loading">
+            <el-table :data="previewRows" style="width: 100%" size="mini">
+              <el-table-column
+                prop="nombre"
+                label="Nombre"
+                width="200"
+              />
+              <el-table-column
+                prop="documento"
+                label="Documento"
+                width="140"
+              />
+              <el-table-column prop="codigo" label="Código" width="120"/>
+              <el-table-column prop="cuenta" label="Cuenta"/>
+              <el-table-column prop="debito" label="Débito" width="120"/>
+              <el-table-column prop="credito" label="Crédito" width="120"/>
+            </el-table>
+            <el-pagination
+              class="mt-2"
+              background
+              layout="prev, pager, next, total"
+              :total="previewTotal"
+              :page-size="previewPerPage"
+              :current-page.sync="previewPage"
+              @current-change="fetchPreview"
+            />
         </div>
       </div>
     </div>
@@ -106,9 +145,78 @@ export default {
       },
       thirds: [],
       loading: false,
+      previewRows: [],
+      previewTotal: 0,
+      previewPerPage: 10,
+      previewPage: 1,
+      hasSearched: false,
     };
   },
+  computed: {
+    canSearch() {
+      // Si tipo es "all", solo requiere fechas
+      if (this.filters.type === 'all') {
+        return this.filters.dates.length === 2;
+      }
+      // Si hay tipo y tercero seleccionado
+      return this.filters.type && this.filters.third_id && this.filters.dates.length === 2;
+    },
+    canExport() {
+      return this.previewRows.length > 0;
+    },
+  },
   methods: {
+    onBuscar() {
+      this.previewPage = 1;
+      this.hasSearched = true;
+      this.fetchPreview(1);
+    },
+    handleExport(format) {
+      // Si el select de tercero es "Todos", exporta todos los terceros del tipo seleccionado
+      if (this.filters.third_id === 'all' || this.filters.type === 'all') {
+        if (format === 'pdf') {
+          this.exportAllThirds();
+        } else {
+          this.exportAllThirdsExcel();
+        }
+      } else {
+        if (format === 'pdf') {
+          this.exportReport();
+        } else {
+          this.exportExcel();
+        }
+      }
+    },
+    async fetchPreview(page = 1) {
+      if (
+        (this.filters.type !== 'all' && (!this.filters.third_id || this.filters.dates.length !== 2)) ||
+        (this.filters.type === 'all' && this.filters.dates.length !== 2)
+      ) {
+        this.previewRows = [];
+        this.previewTotal = 0;
+        return;
+      }
+      this.previewPage = page;
+      const params = {
+        type: this.filters.type === 'all' ? '' : this.filters.type, // <-- aquí
+        third_id: this.filters.type === 'all' ? 'all' : this.filters.third_id,
+        start_date: this.filters.dates[0],
+        end_date: this.filters.dates[1],
+        page: this.previewPage,
+        per_page: this.previewPerPage,
+        search: this.filters.search,
+      };
+      this.loading = true;
+      try {
+        const res = await this.$http.get('/accounting/third-report/preview-records', { params });
+        this.previewRows = res.data.data;
+        this.previewTotal = res.data.total;
+      } catch (e) {
+        this.previewRows = [];
+        this.previewTotal = 0;
+      }
+      this.loading = false;
+    },
     async fetchThirds() {
       if (!this.filters.type) {
         this.thirds = [];
@@ -121,10 +229,8 @@ export default {
           type: this.filters.type,
           search: this.filters.search,
         };
-        // Cambia la URL para consultar los terceros registrados en third_parties
         const response = await this.$http.get('/accounting/third-report/records', { params });
         this.thirds = response.data.data || [];
-        // Si el tercero seleccionado ya no está en la lista, lo deselecciona
         if (!this.thirds.find(t => t.id === this.filters.third_id)) {
           this.filters.third_id = "";
         }
@@ -135,7 +241,8 @@ export default {
       this.loading = false;
     },
     exportReport() {
-      if (!this.filters.third_id || !this.filters.dates.length === 2) return;
+      // Exporta solo un tercero específico
+      if (!this.filters.third_id || this.filters.third_id === 'all' || this.filters.dates.length !== 2) return;
       const params = {
         ...this.filters,
         start_date: this.filters.dates[0],
@@ -145,17 +252,20 @@ export default {
       window.open(`/accounting/third-report/export?${queryString.stringify(params)}`, '_blank');
     },
     exportAllThirds() {
+      // Exporta todos los terceros del tipo seleccionado
       if (!this.filters.type || this.filters.dates.length !== 2) return;
       const params = {
         type: this.filters.type,
         start_date: this.filters.dates[0],
         end_date: this.filters.dates[1],
+        search: this.filters.search,
         export: 'pdf'
       };
       window.open(`/accounting/third-report/export-all?${queryString.stringify(params)}`, '_blank');
     },
     exportExcel() {
-      if (!this.filters.third_id || this.filters.dates.length !== 2) return;
+      // Exporta solo un tercero específico
+      if (!this.filters.third_id || this.filters.third_id === 'all' || this.filters.dates.length !== 2) return;
       const params = {
         ...this.filters,
         start_date: this.filters.dates[0],
@@ -165,19 +275,41 @@ export default {
       window.open(`/accounting/third-report/export-excel?${queryString.stringify(params)}`, '_blank');
     },
     exportAllThirdsExcel() {
+      // Exporta todos los terceros del tipo seleccionado
       if (!this.filters.type || this.filters.dates.length !== 2) return;
       const params = {
         type: this.filters.type,
         start_date: this.filters.dates[0],
         end_date: this.filters.dates[1],
+        search: this.filters.search,
         export: 'excel'
       };
       window.open(`/accounting/third-report/export-all-excel?${queryString.stringify(params)}`, '_blank');
     },
   },
-  watch: {
-    'filters.type': 'fetchThirds'
-  },
+  // watch: {
+  //   'filters.third_id'(val) {
+  //     if (this.filters.type !== 'all' && val && this.filters.dates.length === 2) {
+  //       this.fetchPreview(1);
+  //     } else if (this.filters.type === 'all' && this.filters.dates.length === 2) {
+  //       this.fetchPreview(1);
+  //     } else {
+  //       this.previewRows = [];
+  //       this.previewTotal = 0;
+  //     }
+  //   },
+  //   'filters.dates'(val) {
+  //     if (
+  //       (this.filters.type !== 'all' && this.filters.third_id && val.length === 2) ||
+  //       (this.filters.type === 'all' && val.length === 2)
+  //     ) {
+  //       this.fetchPreview(1);
+  //     } else {
+  //       this.previewRows = [];
+  //       this.previewTotal = 0;
+  //     }
+  //   }
+  // },
   mounted() {
     // Si quieres cargar clientes por defecto, descomenta:
     // this.filters.type = 'customers';

@@ -895,7 +895,7 @@
                             </li>
                             <li class="{{(($path[0] === 'accounting') && ($path[1] == 'entry-details-report')) ? 'nav-active' : ''}}">
                                 <a class="nav-link" href="{{route('tenant.accounting.report.entry-details-report')}}">
-                                    Reporte Detalle de Asientos
+                                    Reporte de Detalles Contables
                                 </a>
                             </li>
                             <li class="{{(($path[0] === 'accounting') && ($path[1] == 'financial-position')) ? 'nav-active' : ''}}">
@@ -913,15 +913,23 @@
                                     Reporte de Movimiento auxiliar
                                 </a>
                             </li>
-                            <li class="{{(($path[0] === 'accounting') && ($path[1] == 'bank-book')) ? 'nav-active' : ''}}">
-                                <a class="nav-link" href="{{route('tenant.accounting.report.bank-book')}}">
-                                    Reporte Libro Bancos
+                            <li class="nav-parent
+                                {{(($path[0] === 'accounting') && in_array($path[1], ['bank-book', 'bank-reconciliation'])) ? 'nav-active nav-expanded' : ''}}">
+                                <a class="nav-link" href="#">
+                                    Gestión Bancaria
                                 </a>
-                            </li>
-                            <li class="{{(($path[0] === 'accounting') && ($path[1] == 'bank-reconciliation')) ? 'nav-active' : ''}}">
-                                <a class="nav-link" href="{{route('tenant.accounting.bank-reconciliation.index')}}">
-                                    Conciliacion Bancaria
-                                </a>
+                                <ul class="nav nav-children">
+                                    <li class="{{(($path[0] === 'accounting') && ($path[1] == 'bank-book')) ? 'nav-active' : ''}}">
+                                        <a class="nav-link" href="{{route('tenant.accounting.report.bank-book')}}">
+                                            Libro de bancos
+                                        </a>
+                                    </li>
+                                    <li class="{{(($path[0] === 'accounting') && ($path[1] == 'bank-reconciliation')) ? 'nav-active' : ''}}">
+                                        <a class="nav-link" href="{{route('tenant.accounting.bank-reconciliation.index')}}">
+                                            Conciliación bancaria
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                             <li class="{{(($path[0] === 'accounting') && ($path[1] == 'third-report')) ? 'nav-active' : ''}}">
                                 <a class="nav-link" href="{{route('tenant.accounting.report.third-report')}}">

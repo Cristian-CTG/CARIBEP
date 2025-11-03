@@ -39,8 +39,12 @@
                         </div>
                     </div>
                     <div class="col-6 text-right">
-                        <el-button type="primary" @click="ReportDownload('pdf')">Pdf</el-button>
-                        <el-button type="success" @click="ReportDownload('excel')">Excel</el-button>
+                        <div class="d-inline-block mb-2">
+                            <el-button type="primary" @click="ReportDownload('pdf')">Pdf</el-button>
+                        </div>
+                        <div class="d-inline-block mb-2 ml-2">
+                            <el-button type="success" @click="ReportDownload('excel')">Excel</el-button>
+                        </div>
                     </div>
                 </div>
                 <data-table-report title="Ingresos" :data="revenueAccounts" :columns="columns" :total="totals.revenue"/>

@@ -42,18 +42,22 @@
                         </div>
                     </div>
                     <div class="col-lg-12 mt-3">
-                        <el-button
-                            type="danger"
-                            icon="el-icon-tickets"
-                            @click.prevent="clickDownload('pdf')"
-                            :disabled="!canExport"
-                        >Exportar PDF</el-button>
-                        <el-button
-                            type="warning"
-                            icon="el-icon-tickets"
-                            @click.prevent="clickDownload('excel')"
-                            :disabled="!canExport"
-                        >Exportar Excel</el-button>
+                        <div class="d-inline-block mb-2">
+                            <el-button
+                                type="danger"
+                                icon="el-icon-tickets"
+                                @click.prevent="clickDownload('pdf')"
+                                :disabled="!canExport"
+                            >Exportar PDF</el-button>
+                        </div>
+                        <div class="d-inline-block mb-2 ml-2">
+                            <el-button
+                                type="warning"
+                                icon="el-icon-tickets"
+                                @click.prevent="clickDownload('excel')"
+                                :disabled="!canExport"
+                            >Exportar Excel</el-button>
+                        </div>
                     </div>
                     <div v-if="!hasAccounts" class="alert alert-warning mt-2">
                         No hay cuentas bancarias ni cajas abiertas. Por favor, cree una antes de continuar.

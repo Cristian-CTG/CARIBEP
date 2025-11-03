@@ -23,7 +23,8 @@ class ReportThirdController extends Controller
 
         $query = ThirdParty::query();
 
-        if ($type) {
+        // Solo filtra por tipo si viene uno seleccionado y no es "all"
+        if ($type && $type !== 'all') {
             $query->where('type', $type);
         }
 
@@ -46,6 +47,136 @@ class ReportThirdController extends Controller
 
         return response()->json([
             'data' => $thirds
+        ]);
+    }
+
+    public function previewRecords(Request $request)
+    {
+        $type = $request->input('type');
+        $third_id = $request->input('third_id');
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
+        $per_page = $request->input('per_page', 10);
+
+        // Si es "todos" los terceros
+        if ($third_id === 'all' || !$third_id) {
+            $thirds = ThirdParty::query();
+            if ($type && $type !== 'all') {
+                $thirds->where('type', $type);
+            }
+            if ($request->filled('search')) {
+                $search = $request->input('search');
+                $thirds->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%$search%")
+                    ->orWhere('document', 'like', "%$search%");
+                });
+            }
+            $thirds = $thirds->get();
+            $rows = [];
+            foreach ($thirds as $third) {
+                $details = JournalEntryDetail::where('third_party_id', $third->id)
+                    ->whereHas('journalEntry', function($q) use ($start_date, $end_date) {
+                        $q->whereBetween('date', [$start_date, $end_date])
+                        ->where('status', 'posted');
+                    })
+                    ->with('chartOfAccount')
+                    ->get();
+                // Agrupa por cuenta
+                $grouped = [];
+                foreach ($details as $d) {
+                    $key = $d->chartOfAccount->code . '|' . ($d->chartOfAccount->name ?? '');
+                    if (!isset($grouped[$key])) {
+                        $grouped[$key] = [
+                            'codigo' => $d->chartOfAccount->code,
+                            'cuenta' => $d->chartOfAccount->name ?? '',
+                            'debito' => 0,
+                            'credito' => 0,
+                        ];
+                    }
+                    $grouped[$key]['debito'] += $d->debit;
+                    $grouped[$key]['credito'] += $d->credit;
+                }
+
+                foreach ($grouped as $g) {
+                    if ($g['debito'] > 0 || $g['credito'] > 0) {
+                        $rows[] = [
+                            'nombre' => $third->name,
+                            'documento' => $third->document,
+                            'codigo' => $g['codigo'],
+                            'cuenta' => $g['cuenta'],
+                            'debito' => $g['debito'],
+                            'credito' => $g['credito'],
+                        ];
+                    }
+                }
+            }
+
+            // Paginación manual
+            $page = (int) $request->input('page', 1);
+            $total = count($rows);
+            $rows_paginated = array_slice($rows, ($page - 1) * $per_page, $per_page);
+
+            return response()->json([
+                'data' => $rows_paginated,
+                'total' => $total,
+                'per_page' => $per_page,
+                'current_page' => $page,
+                'last_page' => ceil($total / $per_page),
+            ]);
+        }
+
+        // Si es un tercero específico
+        $third = ThirdParty::find($third_id);
+
+        $details = JournalEntryDetail::where('third_party_id', $third ? $third->id : null)
+            ->whereHas('journalEntry', function($q) use ($start_date, $end_date) {
+                $q->whereBetween('date', [$start_date, $end_date])
+                ->where('status', 'posted');
+            })
+            ->with(['journalEntry', 'chartOfAccount'])
+            ->orderBy('id');
+
+        // Agrupa y arma filas igual que en PDF
+        $grouped = [];
+        foreach ($details->get() as $d) {
+            $key = $d->chartOfAccount->code . '|' . ($d->chartOfAccount->name ?? '');
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'codigo' => $d->chartOfAccount->code,
+                    'cuenta' => $d->chartOfAccount->name ?? '',
+                    'debito' => 0,
+                    'credito' => 0,
+                ];
+            }
+            $grouped[$key]['debito'] += $d->debit;
+            $grouped[$key]['credito'] += $d->credit;
+        }
+
+        $rows = [];
+        foreach ($grouped as $g) {
+            if ($g['debito'] > 0 || $g['credito'] > 0) {
+                $rows[] = [
+                    'nombre' => $third ? $third->name : '',
+                    'documento' => $third ? $third->document : '',
+                    'codigo' => $g['codigo'],
+                    'cuenta' => $g['cuenta'],
+                    'debito' => $g['debito'],
+                    'credito' => $g['credito'],
+                ];
+            }
+        }
+
+        // Paginación manual
+        $page = (int) $request->input('page', 1);
+        $total = count($rows);
+        $rows_paginated = array_slice($rows, ($page - 1) * $per_page, $per_page);
+
+        return response()->json([
+            'data' => $rows_paginated,
+            'total' => $total,
+            'per_page' => $per_page,
+            'current_page' => $page,
+            'last_page' => ceil($total / $per_page),
         ]);
     }
 
@@ -128,8 +259,15 @@ class ReportThirdController extends Controller
 
         // Filtra los terceros por tipo
         $thirds = ThirdParty::query();
-        if ($type) {
+        if ($type && $type !== 'all') {
             $thirds->where('type', $type);
+        }
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $thirds->where(function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                ->orWhere('document', 'like', "%$search%");
+            });
         }
         $thirds = $thirds->get();
 
@@ -178,7 +316,7 @@ class ReportThirdController extends Controller
         }
 
         $tipo_nombre = '';
-        if ($type) {
+        if ($type && $type !== 'all') {
             $tipo_nombre = (new ThirdParty(['type' => $type]))->getTypeName();
         }
 
@@ -269,8 +407,15 @@ class ReportThirdController extends Controller
         $end_date = $request->input('end_date');
 
         $thirds = ThirdParty::query();
-        if ($type) {
+        if ($type && $type !== 'all') {
             $thirds->where('type', $type);
+        }
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $thirds->where(function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                ->orWhere('document', 'like', "%$search%");
+            });
         }
         $thirds = $thirds->get();
 
@@ -316,7 +461,7 @@ class ReportThirdController extends Controller
         }
 
         $tipo_nombre = '';
-        if ($type) {
+        if ($type && $type !== 'all') {
             $tipo_nombre = (new ThirdParty(['type' => $type]))->getTypeName();
         }
 
