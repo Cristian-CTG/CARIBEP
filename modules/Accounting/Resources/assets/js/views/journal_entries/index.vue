@@ -20,6 +20,12 @@
                 </li>
             </ol>
             <div class="right-wrapper pull-right">
+                <button type="button" class="btn btn-custom btn-sm mt-2 mr-2" @click.prevent="showExportModal = true">
+                    <i class="fa fa-download"></i> Exportación masiva
+                </button>
+                <button type="button" class="btn btn-custom btn-sm mt-2 mr-2" @click.prevent="showImportModal = true">
+                    <i class="fa fa-upload"></i> Importación masiva
+                </button>
                 <button type="button" class="btn btn-custom btn-sm mt-2 mr-2" @click.prevent="clickCreate()">
                     <i class="fa fa-plus-circle"></i> Nuevo Asiento
                 </button>
@@ -93,6 +99,14 @@
             :showDialog.sync="showDialogDetail"
             :recordId="recordId"
             :journal-prefixes="journalPrefixes"></journal-entry-detail>
+        
+        <journal-entries-export-modal
+            :showDialog.sync="showExportModal">
+        </journal-entries-export-modal>
+
+        <journal-entries-import-modal
+            :showDialog.sync="showImportModal">
+        </journal-entries-import-modal>
     </div>
 </template>
 
@@ -101,14 +115,18 @@ import JournalEntryForm from "./form.vue";
 import DataTable from "../components/DataTable.vue";
 import { deletable } from "@mixins/deletable";
 import JournalEntryDetail from "./partials/details.vue";
+import JournalEntriesExportModal from "./partials/JournalEntriesExportModal.vue";
+import JournalEntriesImportModal from "./partials/JournalEntriesImportModal.vue";
 
 export default {
     mixins: [deletable],
-    components: { JournalEntryForm, DataTable,JournalEntryDetail },
+    components: { JournalEntryForm, DataTable, JournalEntryDetail, JournalEntriesExportModal, JournalEntriesImportModal },
     data() {
         return {
             showDialog: false,
             showDialogDetail: false,
+            showExportModal: false,
+            showImportModal: false,
             resource: "accounting/journal/entries",
             recordId: null,
             isAdmin: true, // Esto debería venir desde el backend con la sesión
