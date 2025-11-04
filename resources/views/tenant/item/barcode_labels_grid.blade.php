@@ -53,9 +53,11 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            font-weight: bold;
         }
         .company {
             font-size: {{ 0.10 * $height }}mm;
+            font-weight: bold;
         }
         .details {
             font-size: {{ 0.08 * $height }}mm;
@@ -77,9 +79,8 @@
             flex: 0 0 auto;
         }
         .barcode img {
-            max-width: 80%;
-            max-height: 100%;
-            height: auto;
+            width: 60px;
+            height: 20px;
             display: block;
             margin: 0 auto;
             box-sizing: border-box;
@@ -142,7 +143,7 @@
                                             $barcodeHeight = max(40, round($height * 0.7));
                                             $colour = [0,0,0];
                                             $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
-                                            echo '<img style="max-width:95%;max-height:95%;height:auto;display:block;margin:0 auto; padding: 5px;" src="data:image/png;base64,' .
+                                            echo '<img style="width:60px; height:20px; display:block; margin:0 auto; padding:5px;" src="data:image/png;base64,' .
                                                 base64_encode($generator->getBarcode($currentItem->internal_id, $generator::TYPE_CODE_128, 1.2, 30, $colour)) .
                                                 '">';
                                         @endphp
