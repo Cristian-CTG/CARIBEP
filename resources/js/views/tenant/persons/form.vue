@@ -35,15 +35,7 @@
                                     </div>
                                 </template>
                             </el-input>
-                            <!-- <div v-if="isProduction" class="form-group mb-2">
-                                <el-checkbox v-model="searchByCedula">
-                                    Buscar por Cédula de Ciudadanía
-                                </el-checkbox>
-                            </div> -->
                             <small class="form-control-feedback" v-if="errors.number" v-text="errors.number[0]"></small>
-                            <!-- <div v-if="searchError" class="alert alert-danger mt-2">
-                                {{ searchError }}
-                            </div> -->
                         </div>
                     </div>
                     <div class="col-md-2">
@@ -65,8 +57,8 @@
 
                 <div class="row align-items-center">
                     <div class="col-md-8">
-                        <div class="form-group" :class="{'has-danger': errors.email}">
-                            <label class="control-label">Correo electrónico <span style="color:red">*</span></label>
+                        <div class="form-group" >
+                            <label class="control-label">Correo electrónico</label>
                             <el-input v-model="form.email" dusk="email"></el-input>
                             <small class="form-control-feedback" v-if="errors.email" v-text="errors.email[0]"></small>
                         </div>
