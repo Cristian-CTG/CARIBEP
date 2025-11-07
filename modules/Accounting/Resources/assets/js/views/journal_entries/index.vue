@@ -21,10 +21,10 @@
             </ol>
             <div class="right-wrapper pull-right">
                 <button type="button" class="btn btn-custom btn-sm mt-2 mr-2" @click.prevent="showExportModal = true">
-                    <i class="fa fa-download"></i> Exportación masiva
+                    <i class="fa fa-upload"></i> Exportación masiva
                 </button>
                 <button type="button" class="btn btn-custom btn-sm mt-2 mr-2" @click.prevent="showImportModal = true">
-                    <i class="fa fa-upload"></i> Importación masiva
+                    <i class="fa fa-download"></i> Importación masiva
                 </button>
                 <button type="button" class="btn btn-custom btn-sm mt-2 mr-2" @click.prevent="clickCreate()">
                     <i class="fa fa-plus-circle"></i> Nuevo Asiento

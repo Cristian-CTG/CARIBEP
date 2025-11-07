@@ -17,6 +17,17 @@
                     </a>
                 </div>
             </div>
+            <div class="row pb-2">
+                <div class="col-md-12">
+                    <el-alert
+                        title="Ingrese el codigo y el nombre de las cuentas contables que desee registrar en el Formato Excel."
+                        type="info"
+                        show-icon
+                        :closable="false"
+                        class="mb-2"
+                    />
+                </div>
+            </div>
             <div class="row pb-4">
                 <div class="col-md-12 mt-3">
                     <div class="form-group" :class="{'has-danger': errors.file}">

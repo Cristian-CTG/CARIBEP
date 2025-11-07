@@ -13,6 +13,7 @@ use Modules\Accounting\Models\JournalPrefix;
 use Modules\Accounting\Models\ChartOfAccount;
 use Modules\Accounting\Models\ThirdParty;
 use App\Models\Tenant\BankAccount;
+use Modules\Factcolombia1\Models\Tenant\PaymentMethod;
 
 // Modelos de origen para terceros
 use App\Models\Tenant\Person;                 // customers / suppliers
@@ -148,7 +149,7 @@ class JournalEntriesImport implements ToCollection, WithHeadingRow
                         $thirdPartyId = $this->resolveThirdParty(
                             isset($r['third_party_type']) ? $r['third_party_type'] : 'customers',
                             $r['third_party_document'],
-                            isset($r['third_party_name']) ? $r['third_party_name'] : null
+                            $r['third_party_document']
                         );
                         if ($thirdPartyId === false || $thirdPartyId === null) {
                             foreach ($lines as $rr) {
@@ -227,7 +228,7 @@ class JournalEntriesImport implements ToCollection, WithHeadingRow
                         $thirdPartyId = $this->resolveThirdParty(
                             isset($r['third_party_type']) ? $r['third_party_type'] : 'customers',
                             $r['third_party_document'],
-                            isset($r['third_party_name']) ? $r['third_party_name'] : null
+                            $r['third_party_document']
                         );
                         if ($thirdPartyId === false || $thirdPartyId === null) {
                             // Marca error y omite TODO el asiento
@@ -246,13 +247,30 @@ class JournalEntriesImport implements ToCollection, WithHeadingRow
                         if ($bank) $bankAccountId = $bank->id;
                     }
 
+                    // Método de pago (opcional) por código o nombre
+                    $paymentMethodName = null;
+                    if (isset($r['payment_method']) && $r['payment_method'] !== '') {
+                        $paymentMethod = PaymentMethod::where(function($q) use ($r) {
+                            $q->where('code', $r['payment_method'])
+                            ->orWhere('name', $r['payment_method']);
+                        })->first();
+                        if ($paymentMethod) {
+                            $paymentMethodName = $paymentMethod->name;
+                        } else {
+                            // Si no existe, guarda el valor tal como viene en el Excel
+                            if (!is_numeric($r['payment_method'])) {
+                                $paymentMethodName = $r['payment_method'];
+                            }
+                        }
+                    }
+
                     $debit  = isset($r['debit'])  ? number_format((float)$r['debit'], 2, '.', '')  : '0.00';
                     $credit = isset($r['credit']) ? number_format((float)$r['credit'], 2, '.', '') : '0.00';
 
                     $entry->details()->create(array(
                         'chart_of_account_id' => $account->id,
                         'third_party_id'      => $thirdPartyId,
-                        'payment_method_name' => isset($r['payment_method']) ? $r['payment_method'] : null,
+                        'payment_method_name' => $paymentMethodName,
                         'bank_account_id'     => $bankAccountId,
                         'debit'               => $debit,
                         'credit'              => $credit,
