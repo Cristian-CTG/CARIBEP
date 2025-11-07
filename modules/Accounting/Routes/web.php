@@ -42,6 +42,7 @@ if($hostname) {
             Route::get('journal/entries/columns', 'JournalEntryController@columns');
             Route::get('journal/entries/records', 'JournalEntryController@records');
             // Exportar e Importar Asientos Contables
+            Route::get('journal/entries/import-format', 'JournalEntryExportImportController@downloadImportFormat');
             Route::get('journal/entries/export-excel', 'JournalEntryExportImportController@exportExcel');
             Route::post('journal/entries/import-excel', 'JournalEntryExportImportController@importExcel');
             Route::apiResource('journal/entries', 'JournalEntryController')->names([

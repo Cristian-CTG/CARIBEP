@@ -50,6 +50,12 @@ class ChartOfAccountImport implements ToCollection, WithHeadingRow
                     continue;
                 }
 
+                if (ChartOfAccount::where('code', $code)->exists()) {
+                    $skipped++;
+                    $errors[] = "Fila " . ($index + 1) . ": la cuenta con código $code ya existe y fue omitida.";
+                    continue;
+                }
+
                 $level = $this->getLevelByCode($code);
                 $type = $typeMap[substr($code, 0, 1)] ?? 'Asset';
 
@@ -62,22 +68,20 @@ class ChartOfAccountImport implements ToCollection, WithHeadingRow
                     if ($parent) $parentId = $parent->id;
                 }
 
-                $account = ChartOfAccount::updateOrCreate(
-                    ['code' => $code],
-                    [
-                        'name' => $name,
-                        'type' => $type,
-                        'level' => $level,
-                        'parent_id' => $parentId,
-                        'status' => 1,
-                    ]
-                );
+                ChartOfAccount::create([
+                    'code' => $code,
+                    'name' => $name,
+                    'type' => $type,
+                    'level' => $level,
+                    'parent_id' => $parentId,
+                    'status' => 1,
+                ]);
 
-                $account->wasRecentlyCreated ? $created++ : $updated++;
+                $created++;
             }
         });
 
-        \Log::info("Importación completada: {$created} creados, {$updated} actualizados, {$skipped} omitidos.", $errors);
+        \Log::info("Importación completada: {$created} creados, {$skipped} omitidos.", $errors);
     }
 
     private function getLevelByCode($code)

@@ -9,6 +9,7 @@ use Modules\Accounting\Models\JournalPrefix;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\Accounting\Exports\JournalEntriesExport;
 use Modules\Accounting\Imports\JournalEntriesImport;
+use Modules\Accounting\Exports\JournalEntriesImportFormatExport;
 
 class JournalEntryExportImportController extends Controller
 {
@@ -40,6 +41,17 @@ class JournalEntryExportImportController extends Controller
 
         // Exportar usando un Export personalizado (debes crearlo)
         return Excel::download(new JournalEntriesExport($entries), 'asientos_contables.xlsx');
+    }
+
+    /**
+     * Descarga el formato de ejemplo para importar asientos contables
+     */
+    public function downloadImportFormat()
+    {
+        return Excel::download(
+            new JournalEntriesImportFormatExport(),
+            'formato_importacion_asientos.xlsx'
+        );
     }
 
     /**
