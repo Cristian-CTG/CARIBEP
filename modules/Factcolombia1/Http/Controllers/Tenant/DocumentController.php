@@ -498,7 +498,7 @@ class DocumentController extends Controller
                 $request->date_expiration = $service_invoice['payment_form']['payment_due_date'];
                 $request->date_issue = $service_invoice['date'];
                 $request->observation = (key_exists('notes', $service_invoice)) ? $service_invoice['notes'] : "";
-                $request->sale = $service_invoice['legal_monetary_totals']['payable_amount'];
+                $request->sale = $service_invoice['legal_monetary_totals']['line_extension_amount'];
                 $request->total = $service_invoice['legal_monetary_totals']['payable_amount'];
                 if(isset($service_invoice['legal_monetary_totals']['allowance_total_amount']))
                     $request->total_discount = $service_invoice['legal_monetary_totals']['allowance_total_amount'];
@@ -578,6 +578,7 @@ class DocumentController extends Controller
     'taxes' => $request->taxes
 ]);
             $this->document = DocumentHelper::createDocument($request, $nextConsecutive, $correlative_api, $this->company, $response, $response_status, $company->type_environment_id);
+            (new DocumentHelper())->savePayments($this->document, [], $request);
 //        } catch (\Exception $e) {
 //            DB::connection('tenant')->rollBack();
 //            return [
@@ -588,6 +589,18 @@ class DocumentController extends Controller
 //            ];
 //        }
 //        DB::connection('tenant')->commit();
+
+        // Crear asiento contable después de crear el documento
+        if ($this->document->type_document_id == 3) { // Nota de crédito
+            $this->registerAccountingCreditNoteEntries($this->document);
+            $this->registerAccountingCreditNotePaymentRefund($this->document);
+        } elseif ($this->document->type_document_id == 2) { // Nota de débito
+            // Si tienes un método para notas de débito, llámalo aquí
+            $this->registerAccountingSaleEntries($this->document);
+        } else { // Factura normal
+            $this->registerAccountingSaleEntries($this->document);
+        }
+
         $document_helper = new DocumentHelper();
         $document_helper->updateStateDocument(self::ACCEPTED, $this->document);
         return [
