@@ -15,16 +15,22 @@ class ThirdPartyController extends Controller
     {
         $search = $request->input('search');
         $type = $request->input('type');
+        $page = max(1, (int)$request->input('page', 1));
+        $perPage = min(100, (int)$request->input('per_page', 20)); // máximo 50 por página
 
         $results = collect();
+        $total = 0;
 
         if ($type === 'customers' || $type === 'suppliers') {
-            $persons = Person::where('type', $type)
+            $query = Person::where('type', $type)
                 ->when($search, function($q) use ($search) {
                     $q->where('name', 'like', "%$search%")
                     ->orWhere('number', 'like', "%$search%");
-                })
-                ->limit(20)
+                });
+
+            $total = $query->count();
+            $persons = $query->skip(($page - 1) * $perPage)
+                ->take($perPage)
                 ->get()
                 ->map(function($p) {
                     return [
@@ -36,12 +42,15 @@ class ThirdPartyController extends Controller
         }
 
         if ($type === 'employee') {
-            $workers = Worker::when($search, function($q) use ($search) {
+            $query = Worker::when($search, function($q) use ($search) {
                     $q->where('first_name', 'like', "%$search%")
                     ->orWhere('surname', 'like', "%$search%")
                     ->orWhere('identification_number', 'like', "%$search%");
-                })
-                ->limit(20)
+                });
+
+            $total = $query->count();
+            $workers = $query->skip(($page - 1) * $perPage)
+                ->take($perPage)
                 ->get()
                 ->map(function($w) {
                     return [
@@ -53,11 +62,14 @@ class ThirdPartyController extends Controller
         }
 
         if ($type === 'seller') {
-            $sellers = Seller::when($search, function($q) use ($search) {
+            $query = Seller::when($search, function($q) use ($search) {
                     $q->where('full_name', 'like', "%$search%")
                     ->orWhere('document_number', 'like', "%$search%");
-                })
-                ->limit(20)
+                });
+
+            $total = $query->count();
+            $sellers = $query->skip(($page - 1) * $perPage)
+                ->take($perPage)
                 ->get()
                 ->map(function($s) {
                     return [
@@ -68,7 +80,12 @@ class ThirdPartyController extends Controller
             $results = $results->merge($sellers);
         }
 
-        return response()->json(['data' => $results->values()]);
+        return response()->json([
+            'data' => $results->values(),
+            'total' => $total,
+            'page' => $page,
+            'per_page' => $perPage,
+        ]);
     }
 
     public function store(Request $request)

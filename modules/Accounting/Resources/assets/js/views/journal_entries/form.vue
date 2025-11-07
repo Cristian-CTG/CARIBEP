@@ -78,9 +78,12 @@
                                 <el-select
                                     v-model="row.third_party_id"
                                     filterable
+                                    remote
                                     clearable
-                                    placeholder="Seleccionar"
+                                    placeholder="Buscar tercero"
+                                    :remote-method="query => fetchThirdParties(row, query)"
                                     :loading="row.loadingThirdParties"
+                                    @scroll.native="onThirdPartyScroll(row)"
                                     style="width: 100%;"
                                 >
                                     <el-option
@@ -210,6 +213,42 @@ export default {
                 details: [],
             };
         },
+        async fetchThirdParties(row, query) {
+            row.loadingThirdParties = true;
+            row.thirdPartyPage = 1;
+            row.thirdParties = [];
+            await this.loadThirdParties(row, query, 1);
+            row.loadingThirdParties = false;
+        },
+        async loadThirdParties(row, query, page) {
+            await this.$http.get('/accounting/journal/thirds/third-parties', {
+                params: {
+                    type: row.third_party_type,
+                    search: query,
+                    page: page,
+                    per_page: 50
+                }
+            }).then(response => {
+                if (page === 1) {
+                    row.thirdParties = response.data.data;
+                } else {
+                    row.thirdParties = row.thirdParties.concat(response.data.data);
+                }
+                row.thirdPartyTotal = response.data.total;
+                row.thirdPartyPage = page;
+            });
+        },
+        async onThirdPartyScroll(row, event) {
+            const el = event.target;
+            if (el.scrollTop + el.clientHeight >= el.scrollHeight - 10) {
+                // Si hay más resultados, carga la siguiente página
+                if (row.thirdParties.length < row.thirdPartyTotal) {
+                    row.loadingThirdParties = true;
+                    await this.loadThirdParties(row, '', row.thirdPartyPage + 1);
+                    row.loadingThirdParties = false;
+                }
+            }
+        },
         async loadBanks() {
             await this.$http.get('/accounting/bank-book/records')
                 .then(response => {
@@ -226,15 +265,12 @@ export default {
         async onThirdPartyTypeChange(row) {
             row.third_party_id = null;
             row.thirdParties = [];
+            row.thirdPartyPage = 1;
+            row.thirdPartyTotal = 0;
             row.loadingThirdParties = true;
 
-            await this.$http.get('/accounting/journal/thirds/third-parties', { params: { type: row.third_party_type } })
-                .then(response => {
-                    row.thirdParties = response.data.data;
-                })
-                .finally(() => {
-                    row.loadingThirdParties = false;
-                });
+            await this.loadThirdParties(row, '', 1);
+            row.loadingThirdParties = false;
         },
         // async loadPrefixes() {
         //     await this.$http.get("/accounting/journal/prefixes").then((response) => {
@@ -254,7 +290,19 @@ export default {
                 .finally(() => this.loadingAccounts = false);
         },
         addDetail() {
-            this.form.details.push({ chart_of_account_id: null, debit: 0, credit: 0, third_party_type: null, third_party_id: null, thirdParties: [], loadingThirdParties: false , bank_account_id: null, payment_method_name: null });
+            this.form.details.push({
+                chart_of_account_id: null,
+                debit: 0,
+                credit: 0,
+                third_party_type: null,
+                third_party_id: null,
+                thirdParties: [],
+                loadingThirdParties: false,
+                thirdPartyPage: 1,
+                thirdPartyTotal: 0,
+                bank_account_id: null,
+                payment_method_name: null
+            });
         },
         removeDetail(index) {
             this.form.details.splice(index, 1);
