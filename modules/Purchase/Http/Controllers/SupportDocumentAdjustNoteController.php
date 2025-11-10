@@ -109,7 +109,7 @@ class SupportDocumentAdjustNoteController extends Controller
                 ],
             ];
             
-        } catch (Exception $e)
+        } catch (\Exception $e)
         {
             return $this->getErrorFromException($e->getMessage(), $e);
         }

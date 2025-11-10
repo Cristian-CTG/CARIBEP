@@ -1216,55 +1216,125 @@ class DocumentController extends Controller
     private function registerAccountingSaleEntries($document)
     {
         try {
+
             $config_accounts = AccountingChartAccountConfiguration::first();
-            $accountIdCash = ChartOfAccount::where('code','110505')->first();
-            $accountIdIncome = ChartOfAccount::where('code','413595')->first();
+            if (!$config_accounts) {
+                \Log::error('No existe configuración contable global');
+                return;
+            }
+
+            // Cuentas predeterminadas
+            $accountIdCash = ChartOfAccount::where('code', '110505')->first();
+            $accountDefaultIncome = ChartOfAccount::where('code', '413595')->first(); //$config_accounts->retained_earning_account
+            $accountReceivableCustomer = ChartOfAccount::where('code', $config_accounts->customer_receivable_account)->first();
+
+            if (!$accountIdCash || !$accountDefaultIncome || !$accountReceivableCustomer) {
+                \Log::error('Faltan cuentas contables predeterminadas');
+                return;
+            }
+
             $document_type = TypeDocument::find($document->type_document_id);
-            $accountReceibableCustomer = ChartOfAccount::where('code', $config_accounts->customer_receivable_account)->first(); // cuenta clientes
             $is_credit = $document->payment_form_id == 2 ? true : false;
 
+            // Crear o recuperar el tercero contable
             $person = Person::find($document->customer_id);
             $thirdPartyId = null;
             $documentType = null;
-            if ($person->identity_document_type_id) {
+
+            if ($person && $person->identity_document_type_id) {
                 $typeDoc = TypeIdentityDocument::find($person->identity_document_type_id);
                 $documentType = $typeDoc ? $typeDoc->code : null;
             }
 
             if ($person) {
-                // Busca o crea el tercer implicado en la tabla de terceros
                 $thirdParty = ThirdParty::updateOrCreate(
                     ['document' => $person->number, 'type' => $person->type],
-                    ['name' => $person->name, 'email' => $person->email, 'address' => $person->address, 'phone' => $person->telephone, 'document_type' => $documentType, 'origin_id' => $person->id]
+                    [
+                        'name' => $person->name,
+                        'email' => $person->email,
+                        'address' => $person->address,
+                        'phone' => $person->telephone,
+                        'document_type' => $documentType,
+                        'origin_id' => $person->id
+                    ]
                 );
                 $thirdPartyId = $thirdParty->id;
             }
 
-            // Obtener método de pago si es al contado
             $payment_method_name = !$is_credit ? 'Contado' : null;
 
+            /**
+             * Agrupar ítems por cuenta contable de ingreso
+             */
+            $items = $document->items()->with('relation_item.chart_account_sale_configuration')->get();
+
+            $groupedAccounts = [];
+
+            foreach ($items as $itemLine) {
+                $item = $itemLine->relation_item;
+                $quantity = (float) $itemLine->quantity;
+                $subtotal = (float) ($itemLine->total - $itemLine->total_tax); // valor sin impuestos
+
+                // Cuenta del ítem
+                $incomeCode = null;
+
+                if ($item && $item->chart_account_sale_configuration) {
+                    $incomeCode = $item->chart_account_sale_configuration->income_account;
+                }
+
+                // Si el producto no tiene cuenta asignada, usar la predeterminada
+                if (!$incomeCode && $accountDefaultIncome) {
+                    $incomeCode = $accountDefaultIncome->code;
+                }
+
+                if (!$incomeCode) {
+                    \Log::warning('Producto sin cuenta de ingreso ni cuenta por defecto: ' . ($item ? $item->name : 'Sin nombre'));
+                    continue;
+                }
+
+                if (!isset($groupedAccounts[$incomeCode])) {
+                    $groupedAccounts[$incomeCode] = 0;
+                }
+
+                $groupedAccounts[$incomeCode] += $subtotal;
+            }
+
+            // Construir movimientos contables
+            $movements = [];
+
+            // 1️⃣ Débito: Caja o CxC (por el total)
+            $movements[] = [
+                'account_id' => $is_credit ? $accountReceivableCustomer->id : $accountIdCash->id,
+                'debit' => $document->total,
+                'credit' => 0,
+                'affects_balance' => true,
+                'third_party_id' => $thirdPartyId,
+                'payment_method_name' => $payment_method_name,
+            ];
+
+            // 2️⃣ Créditos agrupados por cuenta de ingreso
+            foreach ($groupedAccounts as $accountCode => $amount) {
+                $account = ChartOfAccount::where('code', $accountCode)->first();
+                if (!$account) {
+                    \Log::warning("Cuenta contable no encontrada para código {$accountCode}");
+                    continue;
+                }
+
+                $movements[] = [
+                    'account_id' => $account->id,
+                    'debit' => 0,
+                    'credit' => $amount,
+                    'affects_balance' => true,
+                    'third_party_id' => $thirdPartyId,
+                ];
+            }
+
+            // Registrar el asiento
             AccountingEntryHelper::registerEntry([
                 'prefix_id' => 1,
                 'description' => $document_type->name . ' #' . $document->prefix . '-' . $document->number,
                 'document_id' => $document->id,
-                'movements' => [
-                    [
-                        'account_id' => $is_credit ? $accountReceibableCustomer->id : $accountIdCash->id,
-                        'debit' => $document->total,
-                        'credit' => 0,
-                        'affects_balance' => true,
-                        'third_party_id' => $thirdPartyId,
-                        'payment_method_name' => $payment_method_name,
-                    ],
-                    [
-                        'account_id' => $accountIdIncome->id,
-                        'debit' => 0,
-                        'credit' => $document->sale,
-                        'affects_balance' => true,
-                        'third_party_id' => $thirdPartyId, //Caso a investigar si es correcto!!
-                        // 'payment_method_name' => $payment_method_name,
-                    ],
-                ],
+                'movements' => $movements,
                 'taxes' => $document->taxes ?? [],
                 'tax_config' => [
                     'tax_field' => 'chart_account_sale',
@@ -1273,11 +1343,11 @@ class DocumentController extends Controller
                     'retention_debit' => true,
                     'retention_credit' => false,
                     'third_party_id' => $thirdPartyId,
-                    // 'payment_method_name' => $payment_method_name,
                 ],
             ]);
-        } catch (\Exception $e) {
-            \Log::error('insert Entry '.$e->getMessage());
+
+        } catch (Exception $e) {
+            \Log::error('Error creando asiento contable de venta: ' . $e->getMessage());
         }
     }
 
@@ -1762,46 +1832,120 @@ class DocumentController extends Controller
     private function registerAccountingCreditNoteEntries($document)
     {
         try {
-            $accountConfiguration = AccountingChartAccountConfiguration::first();
-            $accountIdCustomer = ChartOfAccount::where('code',$accountConfiguration->customer_returns_account)->first();
-            $accountIdIncome = ChartOfAccount::where('code','417505')->first();
-            $document_type = TypeDocument::find($document->type_document_id);
 
+            $accountConfiguration = AccountingChartAccountConfiguration::first();
+            if (!$accountConfiguration) {
+                \Log::error('No existe configuración contable global');
+                return;
+            }
+
+            // 🧾 Cuentas predeterminadas
+            $accountCustomerReturns = ChartOfAccount::where('code', $accountConfiguration->customer_returns_account)->first(); // Clientes (CxC)
+            $accountDefaultIncome = ChartOfAccount::where('code', '417505')->first(); // Ingreso por devoluciones
+            if (!$accountCustomerReturns || !$accountDefaultIncome) {
+                \Log::error('Faltan cuentas contables predeterminadas para nota de crédito');
+                return;
+            }
+
+            $document_type = TypeDocument::find($document->type_document_id);
             $person = Person::find($document->customer_id);
+
+            // 🧍 Crear o recuperar tercero contable
             $thirdPartyId = null;
             $documentType = null;
-            if ($person->identity_document_type_id) {
-                $typeDoc = TypeIdentityDocument::find($person->identity_document_type_id);
-                $documentType = $typeDoc ? $typeDoc->code : null;
-            }
             if ($person) {
+                if ($person->identity_document_type_id) {
+                    $typeDoc = TypeIdentityDocument::find($person->identity_document_type_id);
+                    $documentType = $typeDoc ? $typeDoc->code : null;
+                }
+
                 $thirdParty = ThirdParty::updateOrCreate(
                     ['document' => $person->number, 'type' => $person->type],
-                    ['name' => $person->name, 'email' => $person->email, 'address' => $person->address, 'phone' => $person->telephone, 'document_type' => $documentType, 'origin_id' => $person->id]
+                    [
+                        'name' => $person->name,
+                        'email' => $person->email,
+                        'address' => $person->address,
+                        'phone' => $person->telephone,
+                        'document_type' => $documentType,
+                        'origin_id' => $person->id
+                    ]
                 );
                 $thirdPartyId = $thirdParty->id;
             }
 
+            /**
+             * 🔄 Agrupar ítems por cuenta de ingreso configurada
+             * (cada producto puede tener cuenta distinta)
+             */
+            $items = $document->items()->with('relation_item.chart_account_sale_configuration')->get();
+            $groupedAccounts = [];
+
+            foreach ($items as $itemLine) {
+                $item = $itemLine->relation_item;
+                $subtotal = (float) ($itemLine->total - $itemLine->total_tax);
+
+                $incomeCode = null;
+                if ($item && $item->chart_account_sale_configuration) {
+                    $incomeCode = $item->chart_account_sale_configuration->sales_returns_account;
+                }
+
+                // Si no tiene cuenta definida, usar la de devoluciones genérica
+                if (!$incomeCode && $accountDefaultIncome) {
+                    $incomeCode = $accountDefaultIncome->code;
+                }
+
+                if (!$incomeCode) {
+                    \Log::warning('Producto sin cuenta contable para nota de crédito: ' . ($item ? $item->name : 'Desconocido'));
+                    continue;
+                }
+
+                if (!isset($groupedAccounts[$incomeCode])) {
+                    $groupedAccounts[$incomeCode] = 0;
+                }
+
+                // ✅ Acumular subtotal neto (sin impuestos)
+                $groupedAccounts[$incomeCode] += $subtotal;
+            }
+
+            /**
+             * 🧮 Construir movimientos contables
+             * Créditos → disminuyen CxC del cliente
+             * Débitos  → disminuyen ingresos (reversan venta)
+             */
+            $movements = [];
+
+            // 1️⃣ Crédito a Clientes (reduce la CxC)
+            $movements[] = [
+                'account_id' => $accountCustomerReturns->id,
+                'debit' => 0,
+                'credit' => $document->total,
+                'affects_balance' => true,
+                'third_party_id' => $thirdPartyId,
+            ];
+
+            // 2️⃣ Débitos agrupados por cuentas de ingreso (reverso del ingreso)
+            foreach ($groupedAccounts as $accountCode => $amount) {
+                $account = ChartOfAccount::where('code', $accountCode)->first();
+                if (!$account) {
+                    \Log::warning("Cuenta no encontrada para código {$accountCode} en nota de crédito");
+                    continue;
+                }
+
+                $movements[] = [
+                    'account_id' => $account->id,
+                    'debit' => $amount,
+                    'credit' => 0,
+                    'affects_balance' => true,
+                    'third_party_id' => $thirdPartyId,
+                ];
+            }
+
+            // Registrar asiento contable
             AccountingEntryHelper::registerEntry([
                 'prefix_id' => 1,
                 'description' => $document_type->name . ' #' . $document->prefix . '-' . $document->number,
                 'document_id' => $document->id,
-                'movements' => [
-                    [
-                        'account_id' => $accountIdCustomer->id,
-                        'debit' => 0,
-                        'credit' => $document->total,
-                        'affects_balance' => true,
-                        'third_party_id' => $thirdPartyId,
-                    ],
-                    [
-                        'account_id' => $accountIdIncome->id,
-                        'debit' => $document->sale,
-                        'credit' => 0,
-                        'affects_balance' => true,
-                        'third_party_id' => $thirdPartyId, //Caso a investigar si es correcto!!
-                    ],
-                ],
+                'movements' => $movements,
                 'taxes' => $document->taxes ?? [],
                 'tax_config' => [
                     'tax_field' => 'chart_account_return_sale',
@@ -1812,8 +1956,9 @@ class DocumentController extends Controller
                     'third_party_id' => $thirdPartyId,
                 ],
             ]);
+
         } catch (\Exception $e) {
-            \Log::error('insert Entry '.$e->getMessage());
+            \Log::error('Error creando asiento contable de nota de crédito: ' . $e->getMessage());
         }
     }
 
@@ -1830,9 +1975,9 @@ class DocumentController extends Controller
             return; // No hay pagos, no se crea asiento
         }
 
-        // 3. Configuración de cuentas
-        $config = AccountingChartAccountConfiguration::first();
-        $accountReceivable = ChartOfAccount::where('code', $config->customer_receivable_account)->first();
+        // // 3. Configuración de cuentas
+        // $config = AccountingChartAccountConfiguration::first();
+        // $accountReceivable = ChartOfAccount::where('code', $config->customer_receivable_account)->first();
 
         // 3. Configuración de cuentas
         $config = AccountingChartAccountConfiguration::first();
@@ -1868,6 +2013,7 @@ class DocumentController extends Controller
                 if ($payment->global_payment->destination_type === BankAccount::class) {
                     $bankAccount = BankAccount::find($payment->global_payment->destination_id);
                     $accountDestinationID = $bankAccount ? $bankAccount->chart_of_account_id : null;
+                    $BankID = $bankAccount ? $bankAccount->id : null;
                 } elseif ($payment->global_payment->destination_type === Cash::class) {
                     $accountCash = ChartOfAccount::where('code', '110505')->first();
                     $accountDestinationID = $accountCash ? $accountCash->id : null;
@@ -1886,6 +2032,7 @@ class DocumentController extends Controller
                         'credit' => $payment->payment, // Sale el dinero
                         'affects_balance' => true,
                         'third_party_id' => $thirdPartyId,
+                        'bank_account_id' => $BankID ?? null,
                         'payment_method_name' => $payment_method_name,
                     ],
                     [

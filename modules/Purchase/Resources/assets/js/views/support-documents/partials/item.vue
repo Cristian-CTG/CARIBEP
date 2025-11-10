@@ -355,7 +355,9 @@
             async changeItem()
             {
                 this.form.item = _.find(this.items, {'id': this.form.item_id});
-                this.form.unit_type_id = this.form.item.unit_type_id
+                this.form.unit_type_id = this.form.item.unit_type_id;
+                // Cargar cuenta contable de inventario si existe
+                this.form.chart_of_account_code = this.form.item.chart_of_account_code || null;
 
                 if(!this.isFromAdjustNote)
                 {

@@ -418,6 +418,8 @@
                 // Establecer el precio de venta inicial al cambiar item
                 this.form.sale_unit_price = this.form.item.sale_unit_price
                 
+                // Cargar cuenta contable de inventario si existe
+                this.form.chart_of_account_code = this.form.item.chart_of_account_code || null;
                 // Si applyWeightedPrice está activo, calcular el precio ponderado
                 // después de establecer los valores iniciales
                 if(this.applyWeightedPrice && this.form.item.stock) {

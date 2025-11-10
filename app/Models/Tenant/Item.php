@@ -11,6 +11,7 @@ use Modules\Item\Models\Category;
 use Modules\Item\Models\Brand;
 use Modules\Item\Models\ItemLot;
 use Modules\Item\Models\ItemLotsGroup;
+use Modules\Accounting\Models\ChartAccountSaleConfiguration;
 
 use Modules\Factcolombia1\Models\Tenant\TypeUnit;
 use Modules\Factcolombia1\Models\Tenant\Tax;
@@ -22,7 +23,7 @@ use Modules\Item\Models\Size;
 
 class Item extends ModelTenant
 {
-    protected $with = ['item_type', 'unit_type', 'warehouses','item_unit_types', 'tags'];
+    protected $with = ['item_type', 'unit_type', 'warehouses','item_unit_types', 'tags', 'chart_account_sale_configuration'];
 
     protected $fillable = [
         'warehouse_id',
@@ -152,6 +153,14 @@ class Item extends ModelTenant
     public function purchase_item()
     {
         return $this->hasMany(PurchaseItem::class);
+    }
+
+    /**
+     * Relación con la configuración de cuentas contables de ventas.
+     */
+    public function chart_account_sale_configuration()
+    {
+        return $this->belongsTo(ChartAccountSaleConfiguration::class, 'chart_account_sale_configuration_id');
     }
 
     // public function sale_affectation_igv_type()
@@ -368,6 +377,9 @@ class Item extends ModelTenant
             'unit_type_id' => $this->unit_type_id,
             'calculate_quantity' => (bool) $this->calculate_quantity,
             'active' => (bool) $this->active,
+            'chart_of_account_code' => $this->chart_account_sale_configuration
+                ? $this->chart_account_sale_configuration->inventory_account
+                : null,
             'item_unit_types' => collect($this->item_unit_types)->transform(function($row) {
                 return [
                     'id' => $row->id,

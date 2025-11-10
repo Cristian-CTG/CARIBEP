@@ -714,6 +714,9 @@ class PurchaseController extends Controller
                         'has_perception' => (bool) $row->has_perception,
                         'lots_enabled' => (bool) $row->lots_enabled,
                         'percentage_perception' => $row->percentage_perception,
+                        'chart_of_account_code' => $row->chart_account_sale_configuration
+                        ? $row->chart_account_sale_configuration->inventory_account
+                        : null,
                         'item_unit_types' => collect($row->item_unit_types)->transform(function($row) {
                             return [
                                 'id' => $row->id,
@@ -809,6 +812,9 @@ class PurchaseController extends Controller
                 'sale_unit_price' => $row->sale_unit_price,
                 'purchase_unit_price' => $row->purchase_unit_price,
                 'unit_type_id' => $row->unit_type_id,
+                'chart_of_account_code' => $row->chart_account_sale_configuration
+                    ? $row->chart_account_sale_configuration->inventory_account
+                    : null,
                 'purchase_tax_id' => $row->purchase_tax_id,
                 'purchase_affectation_igv_type_id' => $row->purchase_affectation_igv_type_id,
                 'has_perception' => (bool) $row->has_perception,
