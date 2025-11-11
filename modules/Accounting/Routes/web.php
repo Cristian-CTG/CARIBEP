@@ -41,6 +41,7 @@ if($hostname) {
             // CRUD para Asientos Contables
             Route::get('journal/entries/columns', 'JournalEntryController@columns');
             Route::get('journal/entries/records', 'JournalEntryController@records');
+            Route::get('journal/search-accounts', 'JournalEntryController@searchAccounts');
             // Exportar e Importar Asientos Contables
             Route::get('journal/entries/import-format', 'JournalEntryExportImportController@downloadImportFormat');
             Route::get('journal/entries/export-excel', 'JournalEntryExportImportController@exportExcel');

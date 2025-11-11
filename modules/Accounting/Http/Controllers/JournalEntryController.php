@@ -10,6 +10,7 @@ use Modules\Accounting\Models\JournalEntry;
 use Modules\Accounting\Models\JournalPrefix;
 use Modules\Accounting\Models\ThirdParty;
 use App\Models\Tenant\Person;
+use Modules\Accounting\Models\ChartOfAccount;
 use Modules\Payroll\Models\Worker;
 use App\Models\Tenant\Seller;
 use Modules\Accounting\Http\Resources\JournalEntryDetailResource;
@@ -180,10 +181,31 @@ class JournalEntryController extends Controller
 
     public function show($id)
     {
-        $entry = JournalEntry::with('journal_prefix', 'details.thirdParty', 'details.chartOfAccount')->findOrFail($id);
+        $entry = JournalEntry::with([
+            'journal_prefix',
+            'details.chartOfAccount',
+            'details.thirdParty',
+            'details.bankAccount'
+        ])->findOrFail($id);
 
-        // Usar el resource para los detalles
-        $details = JournalEntryDetailResource::collection($entry->details);
+        // Mapear detalles con cuenta y tercero completos
+        $details = $entry->details->map(function ($detail) {
+            $account = $this->getAccountInfo($detail->chart_of_account_id);
+            $third = $this->getThirdPartyInfo(optional($detail->thirdParty)->origin_id, optional($detail->thirdParty)->type);
+
+            return [
+                'id' => $detail->id,
+                'chart_of_account_id' => $detail->chart_of_account_id,
+                'chart_of_account_label' => $account['label'] ?? null,
+                'debit' => $detail->debit,
+                'credit' => $detail->credit,
+                'third_party_id' => $third['id'] ?? null,
+                'third_party_label' => $third['name'] ?? null,
+                'third_party_type' => optional($detail->thirdParty)->type,
+                'bank_account_id' => $detail->bank_account_id,
+                'payment_method_name' => $detail->payment_method_name,
+            ];
+        });
 
         return response()->json([
             'success' => true,
@@ -384,5 +406,81 @@ class JournalEntryController extends Controller
         $methods = PaymentMethod::all();
 
         return response()->json($methods);
+    }
+    /**
+     * Retorna datos resumidos de una cuenta contable.
+     */
+    private function getAccountInfo($id)
+    {
+        $account = ChartOfAccount::find($id);
+        if (!$account) return null;
+
+        return [
+            'id' => $account->id,
+            'label' => $account->code . ' - ' . $account->name
+        ];
+    }
+
+    /**
+     * Retorna datos resumidos del tercero según su tipo y origen.
+     */
+    private function getThirdPartyInfo($originId, $type)
+    {
+        if (!$originId || !$type) return null;
+
+        switch ($type) {
+            case 'customers':
+            case 'suppliers':
+                $person = Person::find($originId);
+                return $person
+                    ? ['id' => 'person_' . $person->id, 'name' => $person->name . ' (' . $person->number . ')']
+                    : null;
+
+            case 'employee':
+                $worker = Worker::find($originId);
+                return $worker
+                    ? ['id' => 'worker_' . $worker->id, 'name' => $worker->full_name . ' (' . $worker->identification_number . ')']
+                    : null;
+
+            case 'seller':
+                $seller = Seller::find($originId);
+                return $seller
+                    ? ['id' => 'seller_' . $seller->id, 'name' => $seller->full_name . ' (' . $seller->document_number . ')']
+                    : null;
+
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Buscar cuentas contables por código, nombre o prefijo numérico
+     * Permite que si se escribe "9" retorne todas las cuentas que comiencen con 9.
+     */
+    public function searchAccounts(Request $request)
+    {
+        $query = trim($request->input('search', ''));
+        $limit = $request->input('limit', 50);
+
+        $accounts = ChartOfAccount::query()
+            ->when($query, function ($q) use ($query) {
+                // Si es un número (como "9"), buscar códigos que empiecen con ese prefijo
+                if (is_numeric($query)) {
+                    $q->where('code', 'like', "{$query}%");
+                } else {
+                    // Buscar por coincidencia parcial en código o nombre
+                    $q->where(function ($sub) use ($query) {
+                        $sub->where('code', 'like', "%{$query}%")
+                            ->orWhere('name', 'like', "%{$query}%");
+                    });
+                }
+            })
+            ->orderBy('code')
+            ->limit($limit)
+            ->get(['id', 'code', 'name']);
+
+        return response()->json([
+            'data' => $accounts
+        ]);
     }
 }

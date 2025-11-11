@@ -277,17 +277,16 @@ export default {
         //         this.prefixes = response.data;
         //     });
         // },
-        async loadAccounts(query = null) {
+        async loadAccounts(query = '') {
             this.loadingAccounts = true;
-
-            const params = {
-                column: query ? 'code' : 'level',
-                value: query || 4
-            };
-
-            await this.$http.get(`/accounting/charts/records`, { params })
-                .then(response => this.accounts = response.data.data)
-                .finally(() => this.loadingAccounts = false);
+            try {
+                const res = await this.$http.get('/accounting/journal/search-accounts', {
+                    params: { search: query, limit: 50 }
+                });
+                this.accounts = res.data.data;
+            } finally {
+                this.loadingAccounts = false;
+            }
         },
         addDetail() {
             this.form.details.push({
@@ -309,49 +308,70 @@ export default {
         },
         async create() {
             this.titleDialog = this.recordId ? "Editar Asiento" : "Nuevo Asiento";
+
             if (this.recordId) {
-                await this.$http.get(`/${this.resource}/${this.recordId}`).then(async (response) => {
-                    this.form = response.data.data;
+                const response = await this.$http.get(`/${this.resource}/${this.recordId}`);
+                this.form = response.data.data;
 
-                    // Verifica si algún detalle tiene banco/caja o método de pago
-                    let hasBankOrPayment = false;
+                let hasBankOrPayment = false;
 
-                    // Asegúrate de que cada detalle tenga las propiedades necesarias
-                    for (const row of this.form.details) {
-                        // Inicializa arrays y flags si no existen
-                        this.$set(row, 'thirdParties', []);
-                        this.$set(row, 'loadingThirdParties', false);
+                for (const row of this.form.details) {
+                    this.$set(row, 'thirdParties', []);
+                    this.$set(row, 'loadingThirdParties', false);
+                    this.$set(row, 'thirdPartyPage', 1);
+                    this.$set(row, 'thirdPartyTotal', 0);
 
-                        // Si ya tiene tipo de tercero, carga la lista de terceros y selecciona el actual
-                        if (row.third_party_type) {
-                            row.loadingThirdParties = true;
-                            await this.$http.get('/accounting/journal/thirds/third-parties', { params: { type: row.third_party_type } })
-                                .then(res => {
-                                    row.thirdParties = res.data.data;
-                                    const match = row.thirdParties.find(tp => {
-                                        // El id del select es tipo_id (ej: person_5)
-                                        // row.origin_id es el id real de la tabla de origen
-                                        if (!row.origin_id) return false;
-                                        return tp.id.endsWith('_' + row.origin_id);
-                                    });
-                                    if (match) {
-                                        row.third_party_id = match.id;
-                                    } else {
-                                        row.third_party_id = null;
-                                    }
-                                })
-                                .finally(() => {
-                                    row.loadingThirdParties = false;
-                                });
-                        }
-                        // Detecta si hay banco/caja o método de pago
-                        if (row.bank_account_id || row.payment_method_name) {
-                            hasBankOrPayment = true;
+                    // Precarga la cuenta contable
+                    if (row.chart_of_account_id && row.chart_of_account_label) {
+                        const accountExists = this.accounts.some(a => a.id === row.chart_of_account_id);
+                        if (!accountExists) {
+                            this.accounts.push({
+                                id: row.chart_of_account_id,
+                                code: row.chart_of_account_label.split(' - ')[0],
+                                name: row.chart_of_account_label.split(' - ')[1],
+                            });
                         }
                     }
-                    // Activa el checkbox si corresponde
-                    this.showBankAndPaymentColumn = hasBankOrPayment;
-                });
+
+                    // Precarga el tercero actual
+                    if (row.third_party_id && row.third_party_label) {
+                        row.thirdParties.push({
+                            id: row.third_party_id,
+                            name: row.third_party_label,
+                        });
+                    }
+
+                    // NUEVO: carga la lista completa del tipo existente
+                    if (row.third_party_type) {
+                        try {
+                            const res = await this.$http.get('/accounting/journal/thirds/third-parties', {
+                                params: {
+                                    type: row.third_party_type,
+                                    page: 1,
+                                    per_page: 50,
+                                },
+                            });
+                            // Mezcla el tercero actual con el listado
+                            const fetched = res.data.data || [];
+                            const existingIds = row.thirdParties.map(t => t.id);
+                            const merged = [
+                                ...row.thirdParties,
+                                ...fetched.filter(t => !existingIds.includes(t.id))
+                            ];
+                            row.thirdParties = merged;
+                            row.thirdPartyTotal = res.data.total;
+                        } catch (err) {
+                            console.error("Error cargando terceros:", err);
+                        }
+                    }
+
+                    // Detectar si hay banco o método de pago
+                    if (row.bank_account_id || row.payment_method_name) {
+                        hasBankOrPayment = true;
+                    }
+                }
+
+                this.showBankAndPaymentColumn = hasBankOrPayment;
             } else {
                 this.initForm();
             }
