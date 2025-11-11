@@ -154,8 +154,9 @@ export const operations_api = {
         },
         getInvoiceLines()
         {
-            return this.form.items.map(x => {
+            return this.form.items.map((x, idx) => {
                 return {
+                    line_id: idx,
                     unit_measure_id: x.item.unit_type.code, //codigo api dian de unidad
                     invoiced_quantity: x.quantity,
                     line_extension_amount: this.stringDecimals((Number(x.price) * Number(x.quantity)) - x.discount),

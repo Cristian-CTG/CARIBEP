@@ -472,7 +472,7 @@
             },
             close() {
 //                location.href = (this.is_contingency) ? `/contingencies` : `/${this.resource}`
-                location.href = (this.is_contingency) ? `/contingencies` : `/${this.resource}`
+                location.href = (this.is_contingency) ? `/contingencies` : `/support-documents`
             },
             reloadDataSuppliers(supplier_id)
             {
