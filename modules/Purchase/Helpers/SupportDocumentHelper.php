@@ -108,6 +108,10 @@ class SupportDocumentHelper
         else
                 $params['invoice_lines'] = $new_invoice_lines;
 
+        // Debug: volcar los parámetros que se enviarán a la API antes de la petición
+        // Esto detendrá la ejecución y mostrará la estructura de $params para su inspección.
+        \Log::info('Params for API:', $params);
+
         $send_request_to_api = $connection_api->sendRequestToApi($url, $params, 'POST');
         // dd($send_request_to_api);
 
@@ -307,9 +311,17 @@ class SupportDocumentHelper
             return null;
         }
         
-        foreach($items as $item) {
-            if(isset($item['item']['name']) && $item['item']['name'] === $line['description']) {
-                return $item;
+        if (isset($line['line_id'])) {
+            foreach ($items as $idx => $item) {
+                if ($idx === $line['line_id']) {
+                    return $item;
+                }
+            }
+        } else {
+            foreach($items as $item) {
+                if(isset($item['item']['name']) && $item['item']['name'] === $line['description']) {
+                    return $item;
+                }
             }
         }
         return null;
