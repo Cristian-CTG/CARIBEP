@@ -46,16 +46,13 @@
 
 * Linux - Ubuntu 20 -Docker<br>
 [ver pasos](https://git.buho.la/facturalatam/co-facturadorpro3/-/blob/master/proceso_de_actualizacion_docker.md "ver")
-[ver pasos](https://git.buho.la/facturalatam/co-facturadorpro3/-/blob/master/proceso_de_actualizacion_docker.md "ver")
 * Windows - Laragon - entorno local<br>
-[ver pasos](https://git.buho.la/facturalatam/co-facturadorpro3/-/snippets/5#user-content-pasos-para-actualizar "ver")
 [ver pasos](https://git.buho.la/facturalatam/co-facturadorpro3/-/snippets/5#user-content-pasos-para-actualizar "ver")
 
 ### Actualización del SSL
 
 * Docker<br>
-[ver pasos y script](https://git.buho.la/facturalatam/co-facturadorpro3/-/snippets/1 "ver")
-[ver pasos y script](https://git.buho.la/facturalatam/co-facturadorpro3/-/snippets/1 "ver")
+[ver pasos y script](https://git.buho.la/facturalatam/co-facturadorpro3/-/snippets/45 "ver")
 
 
 
