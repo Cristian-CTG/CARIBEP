@@ -62,13 +62,16 @@
                                 :limit="1"
                                 :on-success="successUpload"
                                 accept=".xlsx, .xls">
-                                <el-button slot="trigger" type="primary">Seleccione un archivo (xls, xlsx) con la información a cargar...</el-button>
+                                <el-button slot="trigger" type="primary">Seleccione un archivo</el-button>
                             </el-upload>
+                            <small class="text-muted d-block mt-1">
+                              Formatos permitidos: .xls, .xlsx
+                            </small>
                         </div>
                         <small class="form-control-feedback" v-if="errors.file" v-text="errors.file[0]"></small>
                     </div>
                 </div>
-                <span slot="footer">
+                <span slot="footer" class="d-flex justify-content-end">
                     <el-button @click="clickClose">Cerrar</el-button>
                     <el-button type="primary" native-type="submit" :loading="loading_submit">Procesar</el-button>
                 </span>

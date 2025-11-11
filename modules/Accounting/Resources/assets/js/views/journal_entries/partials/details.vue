@@ -46,7 +46,7 @@
                                                 {{ row.bank_account_name ? row.bank_account_name : row.bank_account_id }}
                                                 <span v-if="row.bank_account_number"> - {{ row.bank_account_number }}</span>
                                             </span>
-                                            <span v-else-if="row.payment_method_name">
+                                            <span v-else-if="row.payment_method_name && row.chart_account_code === '110505'">
                                                 Caja
                                             </span>
                                             <span v-else>-</span>

@@ -1,0 +1,144 @@
+code,name,type,level,parent_code
+7,COSTOS DE PRODUCCIÓN O DE OPERACIÓN,ProductionCost,1,
+71,Materia prima,ProductionCost,2,7
+72,Mano de obra directa,ProductionCost,2,7
+73,Costos indirectos,ProductionCost,2,7
+74,Contratos de servicios,ProductionCost,2,7
+8,CUENTAS DE ORDEN DEUDORAS,OrderDebit,1,
+81,Derechos contingentes,OrderDebit,2,8
+8105,Bienes y valores entregados en custodia,OrderDebit,3,81
+810505,Valores mobiliarios,OrderDebit,4,8105
+810510,Bienes muebles,OrderDebit,4,8105
+810599,Ajustes por inflación,OrderDebit,4,8105
+8110,Bienes y valores entregados en garantía,OrderDebit,3,81
+811005,Valores mobiliarios,OrderDebit,4,8110
+811010,Bienes muebles,OrderDebit,4,8110
+811015,Bienes inmuebles,OrderDebit,4,8110
+811020,Contratos de ganado en participación,OrderDebit,4,8110
+811099,Ajustes por inflación,OrderDebit,4,8110
+8115,Bienes y valores en poder de terceros,OrderDebit,3,81
+811505,En arrendamiento,OrderDebit,4,8115
+811510,En préstamo,OrderDebit,4,8115
+811515,En depósito,OrderDebit,4,8115
+811520,En consignación,OrderDebit,4,8115
+811599,Ajustes por inflación,OrderDebit,4,8115
+8120,Litigios y/o demandas,OrderDebit,3,81
+812005,Ejecutivos,OrderDebit,4,8120
+812010,Incumplimiento de contratos,OrderDebit,4,8120
+8125,Promesas de compraventa,OrderDebit,3,81
+8195,Diversas,OrderDebit,3,81
+819505,Valores adquiridos por recibir,OrderDebit,4,8195
+819595,Otras,OrderDebit,4,8195
+819599,Ajustes por inflación,OrderDebit,4,8195
+82,Deudoras fiscales,OrderDebit,2,8
+83,Deudoras de control,OrderDebit,2,8
+8305,Bienes recibidos en arrendamiento financiero,OrderDebit,3,83
+830505,Bienes muebles,OrderDebit,4,8305
+830510,Bienes inmuebles,OrderDebit,4,8305
+830599,Ajustes por inflación,OrderDebit,4,8305
+8310,Títulos de inversión no colocados,OrderDebit,3,83
+831005,Acciones,OrderDebit,4,8310
+831010,Bonos,OrderDebit,4,8310
+831095,Otros,OrderDebit,4,8310
+8315,"Propiedades planta y equipo totalmente depreciados, agotados y/o amortizados",OrderDebit,3,83
+831506,Materiales proyectos petroleros,OrderDebit,4,8315
+831516,Construcciones y edificaciones,OrderDebit,4,8315
+831520,Maquinaria y equipo,OrderDebit,4,8315
+831524,Equipo de oficina,OrderDebit,4,8315
+831528,Equipo de computación y comunicación,OrderDebit,4,8315
+831532,Equipo médico - científico,OrderDebit,4,8315
+831536,Equipo de hoteles y restaurantes,OrderDebit,4,8315
+831540,Flota y equipo de transporte,OrderDebit,4,8315
+831544,Flota y equipo fluvial y/o marítimo,OrderDebit,4,8315
+831548,Flota y equipo aéreo,OrderDebit,4,8315
+831552,Flota y equipo férreo,OrderDebit,4,8315
+831556,"Acueductos, plantas y redes",OrderDebit,4,8315
+831560,Armamento de vigilancia,OrderDebit,4,8315
+831562,Envases y empaques,OrderDebit,4,8315
+831564,Plantaciones agrícolas y forestales,OrderDebit,4,8315
+831568,Vías de comunicación,OrderDebit,4,8315
+831572,Minas y canteras,OrderDebit,4,8315
+831576,Pozos artesianos,OrderDebit,4,8315
+831580,Yacimientos,OrderDebit,4,8315
+831584,Semovientes,OrderDebit,4,8315
+831599,Ajustes por inflación,OrderDebit,4,8315
+8320,Créditos a favor no utilizados,OrderDebit,3,83
+832005,País,OrderDebit,4,8320
+832010,Exterior,OrderDebit,4,8320
+8325,Activos castigados,OrderDebit,3,83
+832505,Inversiones,OrderDebit,4,8325
+832510,Deudores,OrderDebit,4,8325
+832595,Otros activos,OrderDebit,4,8325
+8330,Títulos de inversión amortizados,OrderDebit,3,83
+833005,Bonos,OrderDebit,4,8330
+833095,Otros,OrderDebit,4,8330
+8335,Capitalización por revalorización de patrimonio,OrderDebit,3,83
+8395,Otras cuentas deudoras de control,OrderDebit,3,83
+839505,Cheques postfechados,OrderDebit,4,8395
+839510,Certificados de depósito a término,OrderDebit,4,8395
+839515,Cheques devueltos,OrderDebit,4,8395
+839520,Bienes y valores en fideicomiso,OrderDebit,4,8395
+839525,Intereses sobre deudas vencidas,OrderDebit,4,8395
+839595,Diversas,OrderDebit,4,8395
+839599,Ajustes por inflación,OrderDebit,4,8395
+8399,Ajustes por inflación activos,OrderDebit,3,83
+839905,Inversiones,OrderDebit,4,8399
+839910,Inventarios,OrderDebit,4,8399
+839915,Propiedades planta y equipo,OrderDebit,4,8399
+839920,Intangibles,OrderDebit,4,8399
+839925,Cargos diferidos,OrderDebit,4,8399
+839995,Otros activos,OrderDebit,4,8399
+84,Derechos contingentes por contra (cr),OrderDebit,2,8
+85,Deudoras fiscales por contra (cr),OrderDebit,2,8
+86,Deudoras de control por contra (cr),OrderDebit,2,8
+9,CUENTAS DE ORDEN ACREEDORAS,OrderCredit,1,
+91,Responsabilidades contingentes,OrderCredit,2,9
+9105,Bienes y valores recibidos en custodia,OrderCredit,3,91
+910505,Valores mobiliarios,OrderCredit,4,9105
+910510,Bienes muebles,OrderCredit,4,9105
+910599,Ajustes por inflación,OrderCredit,4,9105
+9110,Bienes y valores recibidos en garantía,OrderCredit,3,91
+911005,Valores mobiliarios,OrderCredit,4,9110
+911010,Bienes muebles,OrderCredit,4,9110
+911015,Bienes inmuebles,OrderCredit,4,9110
+911020,Contratos de ganado en participación,OrderCredit,4,9110
+911099,Ajustes por inflación,OrderCredit,4,9110
+9115,Bienes y valores recibidos de terceros,OrderCredit,3,91
+911505,En arrendamiento,OrderCredit,4,9115
+911510,En préstamo,OrderCredit,4,9115
+911515,En depósito,OrderCredit,4,9115
+911520,En consignación,OrderCredit,4,9115
+911525,En comodato,OrderCredit,4,9115
+911599,Ajustes por inflación,OrderCredit,4,9115
+9120,Litigios y/o demandas,OrderCredit,3,91
+912005,Laborales,OrderCredit,4,9120
+912010,Civiles,OrderCredit,4,9120
+912015,Administrativos o arbitrales,OrderCredit,4,9120
+912020,Tributarios,OrderCredit,4,9120
+9125,Promesas de compraventa,OrderCredit,3,91
+9130,Contratos de administración delegada,OrderCredit,3,91
+9135,Cuentas en participación,OrderCredit,3,91
+9195,Otras responsabilidades contingentes,OrderCredit,3,91
+92,Acreedoras fiscales,OrderCredit,2,9
+93,Acreedoras de control,OrderCredit,2,9
+9305,Contratos de arrendamiento financiero,OrderCredit,3,93
+930505,Bienes muebles,OrderCredit,4,9305
+930510,Bienes inmuebles,OrderCredit,4,9305
+9395,Otras cuentas de orden acreedoras de control,OrderCredit,3,93
+939505,Documentos por cobrar descontados,OrderCredit,4,9395
+939510,Convenios de pago,OrderCredit,4,9395
+939515,Contratos de construcciones e instalaciones por ejecutar,OrderCredit,4,9395
+939520,Pedidos colocados,OrderCredit,4,9395
+939525,Adjudicaciones pendientes de legalizar,OrderCredit,4,9395
+939530,Reserva artículo 3o. ley 4/80,OrderCredit,4,9395
+939535,Reserva costo reposición semovientes,OrderCredit,4,9395
+939599,Ajustes por inflación,OrderCredit,4,9395
+9399,Ajustes por inflación patrimonio,OrderCredit,3,93
+939905,Capital social,OrderCredit,4,9399
+939910,Superávit de capital,OrderCredit,4,9399
+939915,Reservas,OrderCredit,4,9399
+939925,"Dividendos o participaciones decretadas en acciones, cuotas o partes de interés social",OrderCredit,4,9399
+939930,Resultados de ejercicios anteriores,OrderCredit,4,9399
+94,Responsabilidades contingentes por contra (db),OrderCredit,2,9
+95,Acreedoras fiscales por contra (db),OrderCredit,2,9
+96,Acreedoras de control por contra (db),OrderCredit,2,9

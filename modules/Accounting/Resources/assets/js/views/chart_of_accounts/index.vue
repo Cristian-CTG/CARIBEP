@@ -26,6 +26,9 @@
                 <button type="button" class="btn btn-custom btn-sm mt-2 mr-2" @click.prevent="openForm()">
                     <i class="fa fa-plus-circle"></i> Nueva Cuenta
                 </button>
+                <button type="button" class="btn btn-custom btn-sm mt-2 mr-2" @click.prevent="openImportModal()">
+                    <i class="fa fa-upload"></i> Importar Cuentas Contables
+                </button>
             </div>
         </div>
 
@@ -34,15 +37,17 @@
                 <h3 class="my-0">Listado de Cuentas Contables</h3>
             </div> -->
             <div class="card-body" style="position: relative;">
-                <label class="control-label">Buscar por código de cuenta:</label>
-                <div class="mb-3">
-                    <el-input
-                        v-model="searchCode"
-                        placeholder="Buscar por código de cuenta"
-                        clearable
-                        @input="filterTree"
-                        style="width: 300px;"
-                    />
+                <label class="control-label">Consultar cuentas contables</label>
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <el-input
+                            v-model="searchCode"
+                            placeholder="Buscar por código o nombre de cuenta"
+                            clearable
+                            @input="filterTree"
+                            style="width: 100%;"
+                        />
+                    </div>
                 </div>
                 <div v-if="loading" class="spinner-overlay">
                     <i class="el-icon-loading spinner-icon"></i>
@@ -71,6 +76,8 @@
         <chart-account-form :showDialog.sync="showDialog" :recordId="recordId"></chart-account-form>
 
         <chart-account-setting :showDialog.sync="showDialogSetting" ></chart-account-setting>
+
+        <chart-accounts-import-modal :showDialog.sync="showImportModal"></chart-accounts-import-modal>
     </div>
 </template>
 
@@ -123,13 +130,15 @@
 import ChartAccountForm from "./form.vue";
 import DataTable from "../components/DataTable.vue";
 import ChartAccountSetting from "./partials/setting.vue";
+import ChartAccountsImportModal from "./partials/ChartAccountsImportModal.vue";
 
 export default {
-    components: { ChartAccountForm, DataTable, ChartAccountSetting },
+    components: { ChartAccountForm, DataTable, ChartAccountSetting, ChartAccountsImportModal },
     data() {
         return {
             showDialog: false,
             showDialogSetting: false,
+            showImportModal: false,
             resource: "accounting/charts",
             recordId: null,
             treeData: [], // Aquí irá el árbol de cuentas
@@ -155,6 +164,9 @@ export default {
         openForm(recordId = null) {
             this.recordId = recordId;
             this.showDialog = true;
+        },
+        openImportModal() {
+            this.showImportModal = true;
         },
         openAccountSetting() {
             // console.log("AQUI")
@@ -189,13 +201,14 @@ export default {
                 this.loading = false;
                 return;
             }
-            // Filtra el árbol recursivamente
+            // Filtra el árbol recursivamente por código o nombre
             const filterRecursive = (nodes) => {
                 return nodes
                     .map(node => {
                         let children = node.children ? filterRecursive(node.children) : [];
                         if (
                             node.code.includes(this.searchCode) ||
+                            (node.label && node.label.toLowerCase().includes(this.searchCode.toLowerCase())) ||
                             children.length > 0
                         ) {
                             return {

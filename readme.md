@@ -1,7 +1,5 @@
 # **Facturador PRO 3**
-# **Facturador PRO 3**
 
-### Instalación de PRO3 (con api incluido)
 ### Instalación de PRO3 (con api incluido)
 
  Linux - Docker - SSL opcional <br>
@@ -10,7 +8,6 @@
 * [script para ubuntu 20](https://git.buho.la/facturalatam/co-facturadorpro3/-/snippets/44#L1) <br>
 * [script para ubuntu 22](https://git.buho.la/facturalatam/co-facturadorpro3/-/snippets/44#L2) <br>
 
-### Instalación de PRO3 (sin api incluido)
 ### Instalación de PRO3 (sin api incluido)
 
 * Linux - Ubuntu 20 - Docker - SSL opcional<br>
@@ -45,8 +42,6 @@
 [ver](* "Clic")<br>(proximante)
 
 
-
-### Actualización del PRO 3
 ### Actualización del PRO 3
 
 * Linux - Ubuntu 20 -Docker<br>

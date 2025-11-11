@@ -23,9 +23,13 @@
                                         <span v-if="!row.modifiable" style="color: #888;">(Automático)</span>
                                     </td>
                                     <td>
-                                        <el-button type="primary" size="mini" @click="edit(row)">Editar</el-button>
+                                        <div class="d-inline-block mr-1">
+                                            <el-button type="primary" size="mini" @click="edit(row)">Editar</el-button>
+                                        </div>
                                         <template v-if="row.modifiable">
-                                            <el-button type="danger" size="mini" @click="remove(row.id)">Eliminar</el-button>
+                                            <div class="d-inline-block">
+                                                <el-button type="danger" size="mini" @click="remove(row.id)">Eliminar</el-button>
+                                            </div>
                                         </template>
                                     </td>
                                 </template>
@@ -43,10 +47,14 @@
                             <el-input v-model="form.description"></el-input>
                         </el-form-item>
                         <el-form-item>
-                            <el-button type="primary" @click="submitForm">
-                            {{ form.id ? 'Actualizar' : 'Agregar' }}
-                            </el-button>
-                            <el-button @click="resetForm">Cancelar</el-button>
+                            <div class="d-inline-block mr-2">
+                                <el-button type="primary" @click="submitForm">
+                                    {{ form.id ? 'Actualizar' : 'Agregar' }}
+                                </el-button>
+                            </div>
+                            <div class="d-inline-block">
+                                <el-button @click="resetForm">Cancelar</el-button>
+                            </div>
                         </el-form-item>
                         </el-form>
                     </div>

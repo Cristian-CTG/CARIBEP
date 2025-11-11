@@ -8,6 +8,10 @@ use Illuminate\Routing\Controller;
 use Modules\Accounting\Models\ChartOfAccount;
 use Modules\Accounting\Models\ChartAccountSaleConfiguration;
 use Modules\Accounting\Models\AccountingChartAccountConfiguration;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\HeadingRowImport;
+use Modules\Accounting\Imports\ChartOfAccountImport;
 
 /*
  * Clase ChartOfAccountController
@@ -103,7 +107,7 @@ class ChartOfAccountController extends Controller
                 }
             },
             'name' => 'required|string|max:255',
-            'type' => 'required|in:Asset,Liability,Equity,Revenue,Expense,Cost',
+            'type' => 'required|in:Asset,Liability,Equity,Revenue,Expense,Cost,ProductionCost,OrderDebit,OrderCredit',
             'parent_id' => 'nullable',
             'level' => 'required|integer|min:1|max:6'
         ]);
@@ -179,7 +183,7 @@ class ChartOfAccountController extends Controller
         $request->validate([
             'code' => 'required|max:8',
             'name' => 'required|string|max:255',
-            'type' => 'required|in:Asset,Liability,Equity,Revenue,Expense,Cost',
+            'type' => 'required|in:Asset,Liability,Equity,Revenue,Expense,Cost,ProductionCost,OrderDebit,OrderCredit',
             'parent_id' => 'nullable',
             'level' => 'required|integer|min:1|max:6'
         ]);
@@ -366,5 +370,28 @@ class ChartOfAccountController extends Controller
                 "total" => $entries->total(),
             ]
         ]);
+    }
+
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv,txt|max:2048',
+        ]);
+
+        try {
+            Excel::import(new ChartOfAccountImport, $request->file('file'));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Importación completada correctamente.'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error al importar PUC: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error al procesar el archivo. Verifique el formato.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

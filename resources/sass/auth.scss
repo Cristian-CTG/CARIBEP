@@ -165,7 +165,7 @@ $montserrat: "Montserrat", sans-serif;
 }
 @media (max-width: 800px) {
     .auth__image {
-        display: none;
+        display: none !important;
     }
     .auth__form {
         padding-left: 2rem;

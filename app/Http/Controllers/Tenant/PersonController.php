@@ -27,6 +27,7 @@ use Modules\Factcolombia1\Models\Tenant\{
 use App\Exports\PersonExport;
 use Carbon\Carbon;
 use Goutte\Client as ClientScrap;
+use Modules\Factcolombia1\Models\TenantService\Company;
 
 
 
@@ -69,6 +70,9 @@ class PersonController extends Controller
         // $departments = Department::whereActive()->orderByDescription()->get();
         // $provinces = Province::whereActive()->orderByDescription()->get();
         // $districts = District::whereActive()->orderByDescription()->get();
+        $company = Company::first();
+        $isProduction = ($company && $company->type_environment_id == 1);
+
         $identity_document_types = IdentityDocumentType::whereActive()->get();
         $person_types = PersonType::get();
         // $locations = $this->getLocationCascade();
@@ -80,7 +84,7 @@ class PersonController extends Controller
         $typeObligations = TypeObligation::all();
         $countries = CoCountry::all();
 
-        return compact('countries', 'identity_document_types','person_types','api_service_token', 'typeIdentityDocuments', 'typeRegimes',
+        return compact('countries', 'identity_document_types','person_types', 'isProduction','api_service_token', 'typeIdentityDocuments', 'typeRegimes',
                         'typePeople', 'typeObligations');
     }
 
@@ -284,32 +288,33 @@ class PersonController extends Controller
         $this->nameclient = $name;
     }
 
-    public function searchName($nit)
+    public function searchName($nit, $document_type_id = 31)
     {
-        $client = new ClientScrap();
-        $crawler = $client->request('GET', "https://www.einforma.co/servlet/app/portal/ENTP/prod/LISTA_EMPRESAS/razonsocial/{$nit}");
-        $crawler->filter('h1[class="title01"]')->each(function($node) {
-            // dd($node->text());
-            $text = $node->text();
-            $marker = 'Situación de la empresa:';
-            if (strpos($text, $marker) !== false) {
-                $name = substr($text, 0, strpos($text, $marker));
-            } else {
-                $name = $text;
-            }
-            $name = trim($name);
-            $this->setNameClient($name);
-        });
+        $company = Company::first();
+        if ($company && $company->type_environment_id == 1) { // Producción
+            // Llama al método del DocumentController
+            $docController = app(\Modules\Factcolombia1\Http\Controllers\Api\Tenant\DocumentController::class);
+            return $docController->searchNameApi($nit, $document_type_id);
+        } else {
+            // Modo test: sigue usando scraping
+            $client = new ClientScrap();
+            $crawler = $client->request('GET', "https://www.einforma.co/servlet/app/portal/ENTP/prod/LISTA_EMPRESAS/razonsocial/{$nit}");
+            $crawler->filter('h1[class="title01"]')->each(function($node) {
+                $text = $node->text();
+                $marker = 'Situación de la empresa:';
+                if (strpos($text, $marker) !== false) {
+                    $name = substr($text, 0, strpos($text, $marker));
+                } else {
+                    $name = $text;
+                }
+                $name = trim($name);
+                $this->setNameClient($name);
+            });
 
-        /*each(function ($node) use ($datos) {
-          //  print $node->text()."\n";
-            array_push($datos, $node->html());
-            dd($node->text());
-        });*/
-
-        return [
-            'data' => $this->nameclient
-        ];
+            return [
+                'data' => $this->nameclient
+            ];
+        }
     }
 
 

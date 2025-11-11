@@ -29,6 +29,7 @@ if($hostname) {
             Route::get('charts/tree', 'ChartOfAccountController@tree');
             Route::get('charts/tables', 'ChartOfAccountController@tables');
             Route::get('charts/records-by-groups', 'ChartOfAccountController@recordsByGroups');
+            Route::post('charts/import-excel', 'ChartOfAccountController@importExcel');
             Route::post('charts/accounts-configuration', 'ChartOfAccountController@accountConfiguration');
             Route::apiResource('charts', 'ChartOfAccountController')->names([
                 'index'   => 'tenant.accounting.charts.index',
@@ -40,6 +41,10 @@ if($hostname) {
             // CRUD para Asientos Contables
             Route::get('journal/entries/columns', 'JournalEntryController@columns');
             Route::get('journal/entries/records', 'JournalEntryController@records');
+            // Exportar e Importar Asientos Contables
+            Route::get('journal/entries/import-format', 'JournalEntryExportImportController@downloadImportFormat');
+            Route::get('journal/entries/export-excel', 'JournalEntryExportImportController@exportExcel');
+            Route::post('journal/entries/import-excel', 'JournalEntryExportImportController@importExcel');
             Route::apiResource('journal/entries', 'JournalEntryController')->names([
                 'index'   => 'tenant.accounting.journal.entries.index',
             ]);
@@ -107,6 +112,11 @@ if($hostname) {
             Route::get('/third-report/export-all', 'ReportThirdController@exportAllThirds');
             Route::get('/third-report/export-excel', 'ReportThirdController@exportExcel');
             Route::get('/third-report/export-all-excel', 'ReportThirdController@exportAllThirdsExcel');
+
+            // Reporte de Balance de Prueba General
+            Route::get('/trial-balance', 'ReportTrialBalanceController@index')->name('tenant.accounting.report.trial-balance');
+            Route::get('/trial-balance/records', 'ReportTrialBalanceController@records');
+            Route::get('/trial-balance/export', 'ReportTrialBalanceController@export');
 
             Route::prefix('clasification-sale')->group(function () {
                 Route::get('records', 'ChartAccountSaleConfigurationController@records');

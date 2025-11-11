@@ -2526,6 +2526,23 @@ html.sidebar-left-big-icons .sidebar-left.sidebar-system .nano > .nano-content{
 .subdomain-input .el-input-group__append{
     padding: 0 5px;
 }
+.header .toggle-sidebar-left,
+.sidebar-left .sidebar-header .close-sidebar-mobile{
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    color: var(--black-dark);
+    font-size: 18px;
+}
+.header .toggle-sidebar-left:hover,
+.sidebar-left .sidebar-header .close-sidebar-mobile:hover {
+    background-color: var(--black-highlight);
+    color: var(--black-dark);
+}
 /* ESTILOS MODO OSCURO */
 html.dark .header, html.header-dark .header {
     background: var(--black-bg-dark);
@@ -3334,9 +3351,35 @@ html.dark .product-item .card-footer{
     .sidebar-left{
         margin: 0px;
         border-radius: 0px;
+        position: fixed !important;
     }
     html.dark .nav-main-mobile li a,
     html.dark .border.rounded-circle.text-center, .navigation-options {
         color: var(--black-light) !important;
+    }
+    .page-header h2{
+        display: none;
+    }
+    .page-header {
+        display: flow-root;
+        position: relative;
+        box-shadow: none;
+        background: #fff;
+        left: 15px;
+        height: auto;
+        padding-bottom: 8px;
+        padding-left: 8px;
+    }
+    .btn.btn-sm{
+        height: 35px;
+    }
+    .page-header .right-wrapper {
+        display: flex;
+        justify-content: end;
+        flex-wrap: wrap; /* aquí ocurre la magia */
+        gap: 0.5rem;     
+    }
+    #main-wrapper {
+        padding-top: 9px;
     }
 }

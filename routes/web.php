@@ -159,7 +159,7 @@ if ($hostname) {
             Route::post('persons/import', 'Tenant\PersonController@import');
             Route::get('persons/enabled/{type}/{person}', 'Tenant\PersonController@enabled');
             Route::get('persons/co-export/{type}', 'Tenant\PersonController@coExport');
-            Route::get('/persons/searchName/{nit}', 'Tenant\PersonController@searchName');
+            Route::get('/persons/searchName/{nit}/{document_type_id?}', 'Tenant\PersonController@searchName');
             Route::delete('persons/delete/all/{type}', 'Tenant\PersonController@deleteAll');
             Route::get('persons-search-customers', 'Tenant\PersonController@searchCustomers');
             Route::get('customer-by-id/{id}', 'Tenant\PersonController@searchCustomerById');

@@ -3,12 +3,37 @@
         <form autocomplete="off" @submit.prevent="submit">
             <div class="form-body">
                 <div class="row">
-                    <div class="col-md-5">
+                    <div class="col-md-6">
                         <div class="form-group" :class="{'has-danger': errors.number}">
-                            <label class="control-label">N° Identificación <span style="color:red">*</span></label>
+                            <label class="control-label">N° Identificación<span style="color:red">*</span></label>
                             <el-input v-model="form.number" :maxlength="maxLength" dusk="number">
-                                <el-button type="primary" slot="append" :loading="loading_search" icon="el-icon-search" @click.prevent="changeNumberIdentification">
-                                </el-button>
+                                <template #append>
+                                    <div style="display: flex; align-items: center;">
+                                        <el-select
+                                            v-model="form.identity_document_type_id"
+                                            style="min-width: 90px; max-width: 150px; margin-right: 23px;"
+                                            placeholder="Tipo de identificación"
+                                            :popper-append-to-body="false"
+                                            :clearable="false"
+                                        >
+                                            <el-option
+                                                v-for="option in typeIdentityDocumentOptions"
+                                                :key="option.id"
+                                                :value="option.id"
+                                                :label="option.name"
+                                            >
+                                                <span>{{ option.name }}</span>
+                                            </el-option>
+                                        </el-select>
+                                        <el-button
+                                            type="primary"
+                                            :loading="loading_search"
+                                            icon="el-icon-search"
+                                            @click.prevent="changeNumberIdentification"
+                                            style="min-width: 36px;"
+                                        ></el-button>
+                                    </div>
+                                </template>
                             </el-input>
                             <small class="form-control-feedback" v-if="errors.number" v-text="errors.number[0]"></small>
                         </div>
@@ -21,7 +46,7 @@
                         </div>
                     </div>
 
-                     <div class="col-md-5">
+                     <div class="col-md-4">
                         <div class="form-group" :class="{'has-danger': errors.name}">
                             <label class="control-label">Nombre <span style="color:red">*</span></label>
                             <el-input v-model="form.name" ></el-input>
@@ -32,8 +57,8 @@
 
                 <div class="row align-items-center">
                     <div class="col-md-8">
-                        <div class="form-group" :class="{'has-danger': errors.email}">
-                            <label class="control-label">Correo electrónico <span style="color:red">*</span></label>
+                        <div class="form-group" >
+                            <label class="control-label">Correo electrónico</label>
                             <el-input v-model="form.email" dusk="email"></el-input>
                             <small class="form-control-feedback" v-if="errors.email" v-text="errors.email[0]"></small>
                         </div>
@@ -49,7 +74,7 @@
 
                 <div v-if="showAdditionalFields">
                     <div class="row">
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <div class="form-group" :class="{'has-danger': errors.type_person_id}">
                                 <label class="control-label">Tipo de persona</label>
                                 <el-select v-model="form.type_person_id" filterable>
@@ -59,7 +84,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <div class="form-group" :class="{'has-danger': errors.type_regime_id}">
                                 <label class="control-label">Tipo de régimen</label>
                                 <el-select v-model="form.type_regime_id" filterable>
@@ -69,7 +94,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-3">
+                        <!-- <div class="col-md-3">
                             <div class="form-group" :class="{'has-danger': errors.identity_document_type_id}">
                                 <label class="control-label">Tipo de identificación</label>
                                 <el-select v-model="form.identity_document_type_id"  filterable>
@@ -77,9 +102,9 @@
                                 </el-select>
                                 <small class="form-control-feedback" v-if="errors.identity_document_type_id" v-text="errors.identity_document_type_id[0]"></small>
                             </div>
-                        </div>
+                        </div> -->
 
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <div class="form-group" :class="{'has-danger': errors.type_obligation_id}">
                                 <label class="control-label">Tipo de obligación</label>
                                 <el-select v-model="form.type_obligation_id"  filterable>
@@ -212,6 +237,11 @@
 </template>
 
 <style>
+.responsive-select {
+    min-width: 90px;
+    max-width: 120px;
+    flex: 1 1 auto;
+}
 .aling-div {
 margin-top: 25px;
 }
@@ -263,6 +293,18 @@ export default {
             loading_submit: false,
             titleDialog: null,
             resource: 'persons',
+            typeIdentityDocumentOptions: [
+                { id: 3, code: '13', sigla: 'CC', name: 'CC' }, // Primero
+                { id: 6, code: '31', sigla: 'NIT', name: 'NIT' },                 // Segundo
+                { id: 1, code: '11', sigla: 'RC', name: 'Registro civil' },
+                { id: 2, code: '12', sigla: 'TI', name: 'Tarjeta de identidad' },
+                { id: 4, code: '21', sigla: 'TE', name: 'Tarjeta de extranjería' },
+                { id: 5, code: '22', sigla: 'CE', name: 'Cédula de extranjería' },
+                { id: 7, code: '41', sigla: 'PAS', name: 'Pasaporte' },
+                { id: 8, code: '42', sigla: 'DIE', name: 'Documento de identificación extranjero' },
+                { id: 9, code: '50', sigla: 'NIT-EXT', name: 'NIT de otro país' },
+                { id: 10, code: '91', sigla: 'NUIP', name: 'NUIP' },
+            ],
             additional_emails: [],
             temp_email: '',
             errors: {},
@@ -284,7 +326,10 @@ export default {
             departments: [],
             cities: [],
             loading_search: false,
-            showAdditionalFields: false // Checkbox state for additional fields
+            showAdditionalFields: false, // Checkbox state for additional fields
+            searchError: null,
+            searchByCedula: false,
+            isProduction: false,
         }
     },
     async created() {
@@ -299,19 +344,29 @@ export default {
                 this.type_regimes = response.data.typeRegimes;
                 this.type_obligations = response.data.typeObligations;
                 this.identity_document_types = response.data.typeIdentityDocuments;
+                this.isProduction = !!response.data.isProduction;
             });
     },
     computed: {
         maxLength: function () {
-            if (this.form.identity_document_type_id === '6') {
+            if (this.form.identity_document_type_id === '31') {
                 return 11
             }
-            if (this.form.identity_document_type_id === '1') {
-                return 8
+            if (this.form.identity_document_type_id === '13') {
+                return 10
             }
+            return 15
         }
     },
     methods: {
+        getSiglaById(id) {
+            const found = this.typeIdentityDocumentOptions.find(opt => opt.id === id)
+            return found ? found.sigla : ''
+        },
+        getCodeById(id) {
+            const found = this.typeIdentityDocumentOptions.find(opt => opt.id === id)
+            return found ? found.code : ''
+        },
         addAdditionalEmail() {
             const email = this.temp_email.trim();
             if (email && this.validateEmail(email) && !this.additional_emails.includes(email)) {
@@ -339,11 +394,24 @@ export default {
             if (this.form.number.length < 8) {
                 return
             }
-            await this.$http.get(`/${this.resource}/searchName/${this.form.number}`).then(response => {
+            this.searchError = null;
+            let code = this.getCodeById(this.form.identity_document_type_id) || '31';
+
+            await this.$http.get(`/${this.resource}/searchName/${this.form.number}/${code}`).then(response => {
                 if (response.data.data) {
                     this.form.name = response.data.data
                 }
-            }).catch(error => {}).then(() => {});
+                if (response.data.email) {
+                    this.form.email = response.data.email
+                }
+                if (response.data.error) {
+                    this.searchError = response.data.error
+                    this.$message.error(response.data.error)
+                }
+            }).catch(error => {
+                this.searchError = 'Error al consultar el nombre y correo.'
+                console.error(error)
+            });
         },
         getDepartment(val) {
             return axios.post(`/departments/${val}`).then(response => {

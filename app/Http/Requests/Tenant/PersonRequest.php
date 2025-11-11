@@ -58,7 +58,7 @@ class PersonRequest extends FormRequest
                 'required',
             ],
             'email' => [
-                'required',
+                'nullable',
                 'email',
             ],
             'telephone' => [

@@ -329,4 +329,56 @@ class DocumentController extends Controller
 
         return $service_invoice;
     }
+    public function searchNameApi($nit, $document_type_id = 31)
+    {
+        $company = \Modules\Factcolombia1\Models\TenantService\Company::first();
+        if ($company && $company->type_environment_id == 1) { // Producción
+            $token = $company->api_token;
+            $base_url = config('tenant.service_fact');
+            $url = "{$base_url}customer/{$document_type_id}/{$nit}";
+
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0); // igual que otras consultas
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0); // igual que otras consultas
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json',
+                'Accept: application/json',
+                "Authorization: Bearer {$token}"
+            ));
+
+            $response = curl_exec($ch);
+            $curl_error = curl_error($ch);
+            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($response === false) {
+                \Log::error('Error al consultar la API de adquirente: '.$curl_error);
+                return [
+                    'error' => 'No se pudo conectar con el servicio de adquirentes.'
+                ];
+            }
+
+            $data = json_decode($response);
+
+            if ($http_code == 200 && isset($data->success) && $data->success === true && isset($data->ResponseDian->GetAcquirerResponse->GetAcquirerResult->StatusCode) && $data->ResponseDian->GetAcquirerResponse->GetAcquirerResult->StatusCode == "200") {
+                $name = $data->ResponseDian->GetAcquirerResponse->GetAcquirerResult->ReceiverName ?? null;
+                $email = $data->ResponseDian->GetAcquirerResponse->GetAcquirerResult->ReceiverEmail ?? null;
+                return [
+                    'data' => $name,
+                    'email' => $email
+                ];
+            } else {
+                $message = isset($data->message) ? $data->message : 'No se encontró el adquirente';
+                \Log::error('API adquirente error: '.$message);
+                return [
+                    'error' => $message
+                ];
+            }
+        }
+        return [
+            'error' => 'No está en ambiente de producción.'
+        ];
+    }
 }

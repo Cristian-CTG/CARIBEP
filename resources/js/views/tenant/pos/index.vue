@@ -291,7 +291,7 @@
                                 <tr v-for="(item,index) in form.items" :key="index" class="pos-product-row">
                                     <td width="20%" class="td-main">
                                         <div class="row-main">
-                                            <div style="width: 45%;">
+                                            <div style="width: 70%;">
                                                 <div class="product-info">
                                                     <div class="product-name">
                                                         <span v-html="clearText(item.item.name)"></span>
@@ -307,17 +307,27 @@
                                                         </template>
                                                         <small> {{nameSets(item.item_id)}} </small>
                                                     </div>
+                                                    <div class="d-flex">
+                                                        <div class="d-flex align-items-center">
+                                                            <button type="button" class="btn btn-sm btn-secondary px-2 py-1" @click="decrementQuantity(item, index)" :disabled="item.item.aux_quantity <= 1">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-minus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /></svg>
+                                                            </button>
+                                                            <el-input v-model="item.item.aux_quantity" :readonly="scale.connected" class="input-qty mx-1 input-quantity" @focus="startContinuousWeight(item, index)" @blur="stopContinuousWeight(item, index)" @change="onQuantityInput(item, index)" @keyup.enter="onEnterQuantity(item, index)" style="width: 60px;"></el-input>
+                                                            <button type="button" class="btn btn-sm btn-secondary px-2 py-1" @click="incrementQuantity(item, index)">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+                                                            </button>
+                                                        </div>
+                                                        <el-input v-model="item.sale_unit_price_with_tax" class="input-price input-text-right ml-2" @input="clickAddItem(item,index,true)" :readonly="item.item.calculate_quantity" style="max-width: 120px; min-width: 75px;"></el-input>
+                                                    </div>
                                                 </div>                                                
                                             </div>
-                                            <div class="row-secondary">
-                                                <el-input v-model="item.item.aux_quantity" :readonly="scale.connected" class="input-qty" @focus="startContinuousWeight(item, index)" @blur="stopContinuousWeight(item, index)" @change="onQuantityInput(item, index)" @keyup.enter="onEnterQuantity(item, index)"></el-input>
-                                                <el-input v-model="item.sale_unit_price_with_tax" class="input-price input-text-right" @input="clickAddItem(item,index,true)" :readonly="item.item.calculate_quantity"></el-input>
-                                                <span class="input-text-right">
-                                                  {{currency.symbol}} {{ item.total }}
-                                                </span>
-                                                <a class="btn btn-sm btn-default btn-trash text-danger" @click="clickDeleteItem(index)">
+                                            <div class="row-secondary d-flex flex-column">             
+                                                <a class="btn btn-sm btn-default btn-trash text-danger p-1" @click="clickDeleteItem(index)">
                                                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash text-danger"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
-                                                </a>
+                                                </a>                                   
+                                                <span class="input-text-right ml-auto pr-1">
+                                                  {{currency.symbol}} {{ item.total }}
+                                                </span>                                                
                                             </div>
                                         </div>                                        
                                     </td>
@@ -362,7 +372,11 @@
                                         <small> {{nameSets(item.item_id)}} </small>
                                     </td>
                                     <td width="20%">
-                                        <el-input v-model="item.item.aux_quantity" :readonly="scale.connected" class="input-qty" @focus="startContinuousWeight(item, index)" @blur="stopContinuousWeight(item, index)" @change="onQuantityInput(item, index)" @keyup.enter="onEnterQuantity(item, index)"></el-input>
+                                        <div class="d-flex align-items-center justify-content-center">
+                                            <button type="button" class="btn btn-sm btn-secondary px-2 py-1" @click="decrementQuantity(item, index)" :disabled="item.item.aux_quantity <= 1" style="height: 32px; min-width: 32px;">-</button>
+                                            <el-input v-model="item.item.aux_quantity" :readonly="scale.connected" class="input-qty mx-1" @focus="startContinuousWeight(item, index)" @blur="stopContinuousWeight(item, index)" @change="onQuantityInput(item, index)" @keyup.enter="onEnterQuantity(item, index)" style="max-width: 80px;"></el-input>
+                                            <button type="button" class="btn btn-sm btn-secondary px-2 py-1" @click="incrementQuantity(item, index)" style="height: 32px; min-width: 32px;">+</button>
+                                        </div>
                                     </td>                                    
                                     <td width="20%">
                                         <p class="font-weight-semibold m-0 text-center">
@@ -489,7 +503,7 @@
                             <span class="font-weight-semibold">PAGO</span>
                         </div>
                         <div class="col-6 text-center">
-                            <h5 class="font-weight-semibold h5">{{ form.total | numberFormat }}</h5>
+                            <h5 class="font-weight-semibold h5 text-white">{{ form.total | numberFormat }}</h5>
                         </div>
                     </button>
                     </div>
@@ -630,7 +644,10 @@
 .product-pos-container {
     display: grid;
 }
-
+.product-pos-container>* {
+    max-width: 300px;
+    width: 100%;
+}
 .product-pos-container.default {
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
     gap: 1rem;
@@ -650,7 +667,9 @@
     grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
     gap: 0.25rem;
 }
-
+.input-quantity input{
+    text-align: center;
+}
 /* --- INICIO: Responsive para listado de items --- */
 @media (max-width: 1000px) {
   .row.pos-items > div[class^="col-"], 
@@ -731,10 +750,10 @@
   .table-pos-products .row-secondary {
     display: flex;
     align-items: center;
-    width: 55%;
+    width: 30%;
     gap: 8px;
     margin-top: 2px;
-    min-width: 256px !important;
+    min-width: 100px !important;
   }
   .table-pos-products .row-secondary input{
     padding: 0 5px !important;
@@ -2157,6 +2176,52 @@ export default {
         },
         getFormatDecimal(value) {
             return Math.round(Number(value));
+        },
+        incrementQuantity(item, index) {
+            let currentQty = Number(item.item.aux_quantity) || 0;
+            let newQty = currentQty + 1;
+            
+            // Validar stock si está activa la opción
+            if (
+                !this.type_refund &&
+                this.advanced_configuration &&
+                this.advanced_configuration.validate_min_stock &&
+                item.item.warehouses &&
+                item.item.unit_type_id !== 'ZZ'
+            ) {
+                const warehouse = item.item.warehouses.find(w => w.checked) || item.item.warehouses[0];
+                const stock = warehouse ? Number(warehouse.stock) : 0;
+                const stock_min = item.item.stock_min !== undefined ? Number(item.item.stock_min) : 0;
+                
+                if (stock < stock_min) {
+                    this.$message.error('El stock actual es menor al stock mínimo para este producto.');
+                    return;
+                }
+                if (newQty > stock) {
+                    this.$message.error('No hay stock suficiente para este producto.');
+                    return;
+                }
+            }
+            
+            item.item.aux_quantity = newQty;
+            item.quantity = newQty;
+            this.calculateTotal();
+            this.setFormPosLocalStorage();
+        },
+        decrementQuantity(item, index) {
+            let currentQty = Number(item.item.aux_quantity) || 1;
+            
+            // No permitir bajar de 1
+            if (currentQty <= 1) {
+                return;
+            }
+            
+            let newQty = currentQty - 1;
+            
+            item.item.aux_quantity = newQty;
+            item.quantity = newQty;
+            this.calculateTotal();
+            this.setFormPosLocalStorage();
         },
     }
 };
