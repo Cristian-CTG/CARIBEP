@@ -1852,7 +1852,7 @@ class DocumentController extends Controller
                 return;
             }
 
-            // 🧾 Cuentas predeterminadas
+            // Cuentas predeterminadas
             $accountCustomerReturns = ChartOfAccount::where('code', $accountConfiguration->customer_returns_account)->first(); // Clientes (CxC)
             $accountDefaultIncome = ChartOfAccount::where('code', '417505')->first(); // Ingreso por devoluciones
             if (!$accountCustomerReturns || !$accountDefaultIncome) {
@@ -1863,7 +1863,7 @@ class DocumentController extends Controller
             $document_type = TypeDocument::find($document->type_document_id);
             $person = Person::find($document->customer_id);
 
-            // 🧍 Crear o recuperar tercero contable
+            // Crear o recuperar tercero contable
             $thirdPartyId = null;
             $documentType = null;
             if ($person) {
@@ -1887,7 +1887,7 @@ class DocumentController extends Controller
             }
 
             /**
-             * 🔄 Agrupar ítems por cuenta de ingreso configurada
+             * Agrupar ítems por cuenta de ingreso configurada
              * (cada producto puede tener cuenta distinta)
              */
             $items = $document->items()->with('relation_item.chart_account_sale_configuration')->get();
@@ -1916,18 +1916,18 @@ class DocumentController extends Controller
                     $groupedAccounts[$incomeCode] = 0;
                 }
 
-                // ✅ Acumular subtotal neto (sin impuestos)
+                // Acumular subtotal neto (sin impuestos)
                 $groupedAccounts[$incomeCode] += $subtotal;
             }
 
             /**
-             * 🧮 Construir movimientos contables
+             * Construir movimientos contables
              * Créditos → disminuyen CxC del cliente
              * Débitos  → disminuyen ingresos (reversan venta)
              */
             $movements = [];
 
-            // 1️⃣ Crédito a Clientes (reduce la CxC)
+            // 1 Crédito a Clientes (reduce la CxC)
             $movements[] = [
                 'account_id' => $accountCustomerReturns->id,
                 'debit' => 0,
@@ -1936,7 +1936,7 @@ class DocumentController extends Controller
                 'third_party_id' => $thirdPartyId,
             ];
 
-            // 2️⃣ Débitos agrupados por cuentas de ingreso (reverso del ingreso)
+            // 2 Débitos agrupados por cuentas de ingreso (reverso del ingreso)
             foreach ($groupedAccounts as $accountCode => $amount) {
                 $account = ChartOfAccount::where('code', $accountCode)->first();
                 if (!$account) {

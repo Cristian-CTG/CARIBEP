@@ -113,6 +113,11 @@ if($hostname) {
             Route::get('/third-report/export-excel', 'ReportThirdController@exportExcel');
             Route::get('/third-report/export-all-excel', 'ReportThirdController@exportAllThirdsExcel');
 
+            // Reporte de Balance de Prueba General
+            Route::get('/trial-balance', 'ReportTrialBalanceController@index')->name('tenant.accounting.report.trial-balance');
+            Route::get('/trial-balance/records', 'ReportTrialBalanceController@records');
+            Route::get('/trial-balance/export', 'ReportTrialBalanceController@export');
+
             Route::prefix('clasification-sale')->group(function () {
                 Route::get('records', 'ChartAccountSaleConfigurationController@records');
                 Route::get('record/{id}', 'ChartAccountSaleConfigurationController@record');
