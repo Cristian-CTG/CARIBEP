@@ -405,7 +405,6 @@ class ItemController extends Controller
 
     public function import(Request $request)
     {
-        \Log::debug("A");
         if ($request->hasFile('file')) {
             try {
                 $import = new ItemsImport();
