@@ -25,6 +25,12 @@ use Modules\Finance\Traits\FinanceTrait;
 use Modules\Factcolombia1\Models\Tenant\{
     Currency,
 };
+use Modules\Accounting\Helpers\AccountingEntryHelper;
+use Modules\Accounting\Models\AccountingChartAccountConfiguration;
+use Modules\Accounting\Models\ChartOfAccount;
+use Modules\Accounting\Models\JournalPrefix;
+use Modules\Accounting\Models\ThirdParty;
+use Modules\Factcolombia1\Models\Tenant\TypeIdentityDocument;
 
 
 class ExpenseController extends Controller
@@ -105,6 +111,7 @@ class ExpenseController extends Controller
 
                 $this->createGlobalPayment($record_payment, $row);
             }
+            $this->registerAccountingExpenseEntries($doc);
 
             return $doc;
         });
@@ -115,6 +122,82 @@ class ExpenseController extends Controller
                 'id' => $expense->id,
             ],
         ];
+    }
+
+    private function registerAccountingExpenseEntries($expense)
+    {
+        $config = AccountingChartAccountConfiguration::first();
+        $accountPayable = ChartOfAccount::where('code', $config->supplier_payable_account)->first(); // CxP Proveedores
+        $prefix = JournalPrefix::where('prefix', 'GD')->first();
+
+        // Crear o buscar el tercero (proveedor)
+        $person = Person::find($expense->supplier_id);
+        $thirdPartyId = null;
+        if ($person) {
+            $documentType = null;
+            if (isset($person->identity_document_type_id)) {
+                $typeDoc = TypeIdentityDocument::find($person->identity_document_type_id);
+                $documentType = $typeDoc ? $typeDoc->code : null;
+            }
+            $thirdParty = ThirdParty::updateOrCreate(
+                ['document' => $person->number, 'type' => $person->type],
+                [
+                    'name' => $person->name,
+                    'email' => $person->email,
+                    'address' => $person->address,
+                    'phone' => $person->telephone,
+                    'document_type' => $documentType,
+                    'origin_id' => $person->id,
+                ]
+            );
+            $thirdPartyId = $thirdParty->id;
+        }
+
+        // Agrupar ítems por cuenta contable y totalizar
+        $grouped = [];
+        foreach ($expense->items as $item) {
+            // Si no tiene cuenta contable, usa la predeterminada 5195 (gastos varios)
+            $account_id = $item->chart_of_account_id ?: ChartOfAccount::where('code', '5195')->value('id');
+            if (!isset($grouped[$account_id])) {
+                $grouped[$account_id] = 0;
+            }
+            $grouped[$account_id] += $item->total;
+        }
+
+        // Construir los movimientos (débito por cada cuenta, crédito único)
+        $movements = [];
+
+        // Débitos (gastos)
+        foreach ($grouped as $account_id => $total) {
+            $movements[] = [
+                'account_id' => $account_id,
+                'debit' => $total,
+                'credit' => 0,
+                'affects_balance' => true,
+                'third_party_id' => $thirdPartyId,
+            ];
+        }
+
+        // Crédito total (Cuentas por pagar)
+        $movements[] = [
+            'account_id' => $accountPayable->id,
+            'debit' => 0,
+            'credit' => $expense->total,
+            'affects_balance' => true,
+            'third_party_id' => $thirdPartyId,
+        ];
+
+        // Registrar asiento contable
+        $description = 'Registro de gasto #' . $expense->number;
+
+        AccountingEntryHelper::registerEntry([
+            'prefix_id' => $prefix ? $prefix->id : null,
+            'description' => $description,
+            'expense_id' => $expense->id,
+            'movements' => $movements,
+            'taxes' => [],
+            'tax_config' => [],
+        ]);
     }
 
     public static function merge_inputs($inputs)
@@ -183,6 +266,31 @@ class ExpenseController extends Controller
                 'message' => 'Falló al anular',
             ];
         }
+    }
+
+    public function searchChartOfAccounts(Request $request)
+    {
+        $query = trim($request->input('search', ''));
+        $limit = $request->input('limit', 50);
+
+        $accounts = ChartOfAccount::query()
+            ->when($query, function ($q) use ($query) {
+                // Si el texto ingresado es numérico, busca por prefijo del código
+                if (is_numeric($query)) {
+                    $q->where('code', 'like', "{$query}%");
+                } else {
+                    // Si es texto, busca en nombre o código
+                    $q->where(function ($sub) use ($query) {
+                        $sub->where('name', 'like', "%{$query}%")
+                            ->orWhere('code', 'like', "%{$query}%");
+                    });
+                }
+            })
+            ->orderBy('code')
+            ->limit($limit)
+            ->get(['id', 'code', 'name']);
+
+        return response()->json(['data' => $accounts]);
     }
 
 }

@@ -6,6 +6,7 @@ use App\Models\Tenant\Cash;
 use App\Models\Tenant\BankAccount;
 use App\Models\Tenant\Company;
 use Carbon\Carbon;
+use Modules\Accounting\Models\JournalPrefix;
 use Modules\Expense\Models\ExpensePayment;
 use App\Models\Tenant\{
     DocumentPayment,
@@ -109,11 +110,16 @@ trait FinanceTrait
         elseif ($model instanceof SupportDocumentPayment) {
             $document = $model->support_document;
         }
+        elseif ($model instanceof ExpensePayment) {
+            $document = $model->expense;
+        }
 
         if ($model instanceof PurchasePayment) {
             if ($is_credit) {
                 $this->generateJournalEntry($model, $document, $destination);
             }
+        } elseif ($model instanceof ExpensePayment) {
+            $this->generateJournalEntry($model, $document, $destination);
         } else {
             // Para otros módulos, sigue la lógica anterior (por ejemplo, payment_form_id)
             if ($document && isset($document->payment_form_id) && $document->payment_form_id == 2) {
@@ -228,6 +234,9 @@ trait FinanceTrait
             $document_type = DocumentType::find($document->document_type_id);
             $description .= $document_type ? $document_type->description : '';
             $description .= ' #' . ($document->series ?? '') . '-' . ($document->number ?? '');
+        } elseif ($model instanceof ExpensePayment) {
+            // Para gastos, usa Gasto #
+            $description .= 'Gasto #' . ($document->number ?? '');
         } else {
             // Para otros módulos, usa TypeDocument
             $documentType = TypeDocument::find($document->type_document_id);
@@ -263,21 +272,21 @@ trait FinanceTrait
         if ($model instanceof PurchasePayment) {
             $isCreditNote = false;
             if (isset($model->purchase) && $model->purchase && isset($model->purchase->document_type_id)) {
-                $isCreditNote = $model->purchase->document_type_id == '07'; // Ajusta el ID si es diferente en tu sistema
+                $isCreditNote = $model->purchase->document_type_id == '07';
             }
             if ($isCreditNote) {
-                // Reembolso: el proveedor te paga
+
                 return [
                     'prefix_id' => 4,
-                    'debit' => $model->payment, // Bancos
+                    'debit' => $model->payment,
                     'credit' => 0,
-                    'counter_account_id' => $accountPayable->id, // Proveedores
+                    'counter_account_id' => $accountPayable->id,
                     'counter_debit' => 0,
                     'counter_credit' => $model->payment,
                     'reference_field' => 'purchase_id',
                 ];
             } else {
-                // Pago normal: tú pagas al proveedor
+
                 return [
                     'prefix_id' => 4,
                     'debit' => 0,
@@ -292,13 +301,26 @@ trait FinanceTrait
 
         if ($model instanceof SupportDocumentPayment) {
             return [
-                'prefix_id' => 4, //Cual es el prefijo?
+                'prefix_id' => 4,
                 'debit' => 0,
                 'credit' => $model->payment,
                 'counter_account_id' => $accountPayable->id,
                 'counter_debit' => $model->payment,
                 'counter_credit' => 0,
                 'reference_field' => 'support_document_id',
+            ];
+        }
+
+        if ($model instanceof ExpensePayment) {
+            $prefix_id = JournalPrefix::where('prefix', 'GD')->first();
+            return [
+                'prefix_id' => 4,
+                'debit' => 0,
+                'credit' => $model->payment,
+                'counter_account_id' => $accountPayable->id,
+                'counter_debit' => $model->payment,
+                'counter_credit' => 0,
+                'reference_field' => 'expense_id',
             ];
         }
 

@@ -20,6 +20,7 @@ if($current_hostname) {
                 Route::post('', 'ExpenseController@store');
                 Route::get('record/{expense}', 'ExpenseController@record');
                 Route::get('{record}/voided', 'ExpenseController@voided');
+                Route::get('search-chart-accounts', 'ExpenseController@searchChartOfAccounts');
 
             });
 
