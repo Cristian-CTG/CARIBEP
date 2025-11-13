@@ -38,6 +38,20 @@
         .third-party-block { font-size: 9px; color: #444; margin-top: 2px; line-height: 1.5; }
         .third-party-label { font-weight: bold; display: inline-block; width: 90px; }
         .third-party-row { margin-bottom: 2px; }
+        .details {
+            page-break-inside: auto;
+        }
+        .details tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+        table.details {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+            table-layout: fixed; /* ✅ evita que se expanda por contenido */
+            word-wrap: break-word;
+        }
     </style>
 </head>
 <body>
@@ -84,16 +98,21 @@
 
     <table class="details">
         <thead>
+            @php
+                $column_widths = $showBankOrPayment
+                    ? ['12%', '20%', '26%', '8%', '16%', '9%', '9%'] // con banco/método
+                    : ['12%', '24%', '34%', '10%', '10%', '10%'];     // sin banco/método
+            @endphp
             <tr>
-                <th style="width: 12%;">Código de cuenta</th>
-                <th style="width: 22%;">Nombre de cuenta</th>
-                <th style="width: 34%;">Tercer Implicado</th>
-                <th style="width: 10%;">Tipo</th>
+                <th style="width: {{ $column_widths[0] }}">Código de cuenta</th>
+                <th style="width: {{ $column_widths[1] }}">Nombre de cuenta</th>
+                <th style="width: {{ $column_widths[2] }}">Tercer Implicado</th>
+                <th style="width: {{ $column_widths[3] }}">Tipo</th>
                 @if($showBankOrPayment)
-                    <th style="width: 18%;">Banco/Caja y Método de Pago</th>
+                    <th style="width: {{ $column_widths[4] }}">Banco/Caja y Método de Pago</th>
                 @endif
-                <th class="text-right" style="width: 11%;">Debe</th>
-                <th class="text-right" style="width: 11%;">Haber</th>
+                <th style="width: {{ $column_widths[$showBankOrPayment ? 5 : 4] }}" class="text-right">Debe</th>
+                <th style="width: {{ $column_widths[$showBankOrPayment ? 6 : 5] }}" class="text-right">Haber</th>
             </tr>
         </thead>
         <tbody>

@@ -8,6 +8,7 @@ use Illuminate\Routing\Controller;
 use Modules\Accounting\Models\ChartOfAccount;
 use Modules\Accounting\Models\ChartAccountSaleConfiguration;
 use Modules\Accounting\Models\AccountingChartAccountConfiguration;
+use Modules\Accounting\Models\PayrollAccountConfiguration;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\HeadingRowImport;
@@ -285,6 +286,7 @@ class ChartOfAccountController extends Controller
             'chart_accounts_purchases' => ChartOfAccount::where('level','>=',4)->get(),
             'account_sale_configurations' => $account_sale_configurations,
             'chart_account_configurations' => AccountingChartAccountConfiguration::first(),
+            'payroll_account_configurations' => PayrollAccountConfiguration::first(),
         ];
     }
 
@@ -303,6 +305,7 @@ class ChartOfAccountController extends Controller
             'lost_period_account' => 'nullable',
             'adjustment_opening_balance_banks_account' => 'nullable',
             'adjustment_opening_balance_banks_inventory' => 'nullable',
+            'payroll_account' => 'nullable',
         ]);
 
         // Buscar el primer registro o crear uno nuevo
@@ -317,6 +320,37 @@ class ChartOfAccountController extends Controller
             'success' => true,
             'message' => 'Configuración actualizada exitosamente',
             'data' => $account
+        ], 200);
+    }
+
+    public function payrollAccountConfiguration(Request $request)
+    {
+        $fields = [
+            'salary_account',
+            'transportation_allowance_account',
+            'health_account',
+            'pension_account',
+            'vacation_account',
+            'service_bonus_account',
+            'extra_service_bonus_account',
+            'severance_account',
+            'severance_interest_account',
+            'other_bonuses_account',
+            'net_payable_account',
+        ];
+        $data = $request->only($fields);
+
+        $config = PayrollAccountConfiguration::first();
+        if (!$config) {
+            $config = PayrollAccountConfiguration::create($data);
+        } else {
+            $config->update($data);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Configuración de cuentas de nómina actualizada exitosamente',
+            'data' => $config
         ], 200);
     }
 

@@ -23,6 +23,7 @@ class AccountingChartAccountConfiguration extends ModelTenant
         'lost_period_account',
         'adjustment_opening_balance_banks_account',
         'adjustment_opening_balance_banks_inventory',
+        'payroll_account',
     ];
 
     

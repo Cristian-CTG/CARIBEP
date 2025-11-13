@@ -136,6 +136,33 @@
                     <el-button type="primary" @click.prevent="submit()" :loading="loading_submit" >Guardar</el-button>
                   </div>
                 </el-tab-pane>
+                <el-tab-pane label="Nómina" name="payroll">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="control-label">Configura las cuentas contables asociadas a la nómina.</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4" v-for="(label, field) in payrollAccountFields" :key="field">
+                            <div class="form-group" :class="{'has-danger': errors[field]}">
+                                <label class="control-label">{{ label }}</label>
+                                <el-select v-model="payrollForm[field]" filterable clearable>
+                                    <el-option
+                                        v-for="option in chart_accounts_sales"
+                                        :key="option.code"
+                                        :value="option.code"
+                                        :label="`${option.code} - ${option.name}`"
+                                    ></el-option>
+                                </el-select>
+                                <small class="form-control-feedback" v-if="errors[field]" v-text="errors[field][0]"></small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions text-right pt-2">
+                        <el-button @click.prevent="close()">Cancelar</el-button>
+                        <el-button type="primary" @click.prevent="submitPayrollConfig()" :loading="loading_submit">Guardar</el-button>
+                    </div>
+                </el-tab-pane>
                 <el-tab-pane label="Patrimonio" name="equity">
                   <div class="row">
                       <div class="col-md-12">
@@ -221,6 +248,32 @@
         chart_accounts_purchases: [],
         loading_submit: false,
         errors: {},
+        payrollForm: {
+            net_payable_account: null,
+            salary_account: null,
+            transportation_allowance_account: null,
+            health_account: null,
+            pension_account: null,
+            vacation_account: null,
+            service_bonus_account: null,
+            extra_service_bonus_account: null,
+            severance_account: null,
+            severance_interest_account: null,
+            // other_bonuses_account: null,
+        },
+        payrollAccountFields: {
+            net_payable_account: 'Cuenta por pagar nómina',
+            salary_account: 'Cuenta de Sueldos',
+            transportation_allowance_account: 'Cuenta de Auxilio de transporte',
+            health_account: 'Cuenta de salud',
+            pension_account: 'Cuenta de pensión',
+            vacation_account: 'Cuenta de vacaciones',
+            service_bonus_account: 'Cuenta de prima de servicios',
+            extra_service_bonus_account: 'Cuenta de prima extralegales',
+            severance_account: 'Cuenta de cesantías',
+            severance_interest_account: 'Cuenta de intereses de cesantías',
+            // other_bonuses_account: 'Cuenta de otras bonificaciones',
+        },
       }
     },
     created() {
@@ -243,7 +296,8 @@
             profit_period_account: null,
             lost_period_account: null,
             adjustment_opening_balance_banks_account: null,
-            adjustment_opening_balance_banks_inventory: null
+            adjustment_opening_balance_banks_inventory: null,
+            payroll_account: null,
           };
 
         },
@@ -259,9 +313,26 @@
                         this.form = response.data.chart_account_configurations
                     }
                     this.account_sale_configurations = response.data.account_sale_configurations
+                    if(response.data.payroll_account_configurations){
+                        this.payrollForm = {...this.payrollForm, ...response.data.payroll_account_configurations};
+                    }
                     this.chart_accounts_sales = response.data.chart_accounts_sales
                     this.chart_accounts_purchases = response.data.chart_accounts_purchases
                 })
+        },
+        async submitPayrollConfig() {
+            this.loading_submit = true;
+            try {
+                const response = await this.$http.post('/accounting/charts/payroll-account-configuration', this.payrollForm);
+                this.$message.success(response.data.message);
+                this.close();
+            } catch (error) {
+                if (error.response && error.response.status === 422) {
+                    this.errors = error.response.data;
+                }
+            } finally {
+                this.loading_submit = false;
+            }
         },
         async submit() {
             this.loading_submit = true;

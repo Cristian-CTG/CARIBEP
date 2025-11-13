@@ -25,6 +25,8 @@ use Modules\Factcolombia1\Models\Tenant\{
     PaymentMethod,
     TypeDocument,
 };
+use Modules\Accounting\Models\AccountingChartAccountConfiguration;
+use Modules\Accounting\Models\PayrollAccountConfiguration;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Modules\Payroll\Helpers\DocumentPayrollHelper;
@@ -384,10 +386,13 @@ class DocumentPayrollController extends Controller
                 }
             }
 
+            // Obtener configuración contable de nómina
+            $payrollConfig = PayrollAccountConfiguration::first();
+
             // Sueldos
             $salary = $document->accrued->salary ?? 0;
             if ($salary > 0) {
-                $accountSalary = ChartOfAccount::where('code','510506')->first();
+                $accountSalary = ChartOfAccount::where('code',$payrollConfig->salary_account ?? '510506')->first();
                 if ($movement = $this->makeMovement($accountSalary, $salary, 0, true, $thirdPartyId)) {
                     // $movement['payment_method_name'] = $payment_method_name;
                     $movements[] = $movement;
@@ -397,7 +402,7 @@ class DocumentPayrollController extends Controller
             // EPS salud
             $eps_deduction = $document->deduction->eps_deduction ?? 0;
             if ($eps_deduction > 0) {
-                $accountHealth = ChartOfAccount::where('code','237005')->first();
+                $accountHealth = ChartOfAccount::where('code',$payrollConfig->health_account ?? '237005')->first();
                 if ($movement = $this->makeMovement($accountHealth, 0, $eps_deduction, true, $thirdPartyId)) {
                     // $movement['payment_method_name'] = $payment_method_name;
                     $movements[] = $movement;
@@ -407,7 +412,7 @@ class DocumentPayrollController extends Controller
             // AFP pension
             $pension_deduction = $document->deduction->pension_deduction ?? 0;
             if ($pension_deduction > 0) {
-                $accountPension = ChartOfAccount::where('code','238030')->first();
+                $accountPension = ChartOfAccount::where('code',$payrollConfig->pension_account ?? '238030')->first();
                 if ($movement = $this->makeMovement($accountPension, 0, $pension_deduction, true, $thirdPartyId)) {
                     // $movement['payment_method_name'] = $payment_method_name;
                     $movements[] = $movement;
@@ -417,7 +422,7 @@ class DocumentPayrollController extends Controller
             // subdidio de transporte
             $transportation_allowance = $document->accrued->transportation_allowance ?? 0;
             if ($transportation_allowance > 0) {
-                $accountPayment = ChartOfAccount::where('code','510527')->first(); // auxilio de transporte
+                $accountPayment = ChartOfAccount::where('code',$payrollConfig->transportation_allowance_account ?? '510527')->first(); // auxilio de transporte
                 if ($movement = $this->makeMovement($accountPayment, $transportation_allowance, 0, true, $thirdPartyId)) {
                     $movements[] = $movement;
                 }
@@ -428,7 +433,7 @@ class DocumentPayrollController extends Controller
             if ($document->accrued->common_vacation !== null) {
                 $totalPaymentVacaciones = array_sum(array_column($document->accrued->common_vacation, 'payment'));
                 if($totalPaymentVacaciones > 0) {
-                    $accountVacation = ChartOfAccount::where('code', '510539')->first();
+                    $accountVacation = ChartOfAccount::where('code', $payrollConfig->vacation_account ?? '510539')->first();
                     if ($movement = $this->makeMovement($accountVacation, $totalPaymentVacaciones, 0, true, $thirdPartyId)) {
                         // $movement['payment_method_name'] = $payment_method_name;
                         $movements[] = $movement;
@@ -440,14 +445,14 @@ class DocumentPayrollController extends Controller
             if ($document->accrued->service_bonus !== null) {
                 $totalPaymentSB = array_sum(array_column($document->accrued->service_bonus, 'payment'));
                 if($totalPaymentSB > 0) {
-                    $accountSB = ChartOfAccount::where('code', '510536')->first(); // prima de servicio
+                    $accountSB = ChartOfAccount::where('code', $payrollConfig->service_bonus_account ?? '510536')->first(); // prima de servicio
                     if ($movement = $this->makeMovement($accountSB, $totalPaymentSB, 0, true, $thirdPartyId)) {
                         $movements[] = $movement;
                     }
                 }
                 $totalPaymentSBNS = array_sum(array_column($document->accrued->service_bonus, 'paymentNS'));
                 if($totalPaymentSBNS > 0) {
-                    $accountSB = ChartOfAccount::where('code', '510542')->first(); // prima extralegales
+                    $accountSB = ChartOfAccount::where('code', $payrollConfig->extra_service_bonus_account ?? '510542')->first(); // prima extralegales
                     if ($movement = $this->makeMovement($accountSB, $totalPaymentSBNS, 0, true, $thirdPartyId)) {
                         $movements[] = $movement;
                     }
@@ -458,14 +463,14 @@ class DocumentPayrollController extends Controller
             if ($document->accrued->severance !== null) {
                 $totalPaymentSeverance = array_sum(array_column($document->accrued->severance, 'payment'));
                 if($totalPaymentSeverance > 0) {
-                    $accountSeverance = ChartOfAccount::where('code', '510530')->first();
+                    $accountSeverance = ChartOfAccount::where('code', $payrollConfig->severance_account ?? '510530')->first();
                     if ($movement = $this->makeMovement($accountSeverance, $totalPaymentSeverance, 0, true, $thirdPartyId)) {
                         $movements[] = $movement;
                     }
                 }
                 $totalPaymentSeverancePctg = array_sum(array_column($document->accrued->severance, 'interest_payment'));
                 if($totalPaymentSeverancePctg > 0) {
-                    $accountSP = ChartOfAccount::where('code', '510533')->first(); // intereses de cesantias
+                    $accountSP = ChartOfAccount::where('code', $payrollConfig->severance_interest_account ?? '510533')->first(); // intereses de cesantias
                     if ($movement = $this->makeMovement($accountSP, $totalPaymentSeverancePctg, 0, true, $thirdPartyId)) {
                         $movements[] = $movement;
                     }
@@ -475,9 +480,9 @@ class DocumentPayrollController extends Controller
             // Pago neto | saldo total a pagar al empleado
             $net_payment = ($document->accrued->accrued_total ?? 0) - ($document->deduction->deductions_total ?? 0);
             if ($net_payment > 0) {
-                $accountPayment = ChartOfAccount::where('code','110505')->first(); // TO DO: no se estable forma de pago de nomina
+                $accountPayment = ChartOfAccount::where('code', $payrollConfig->net_payable_account ?? '250505')->first();
                 if ($movement = $this->makeMovement($accountPayment, 0, $net_payment, true, $thirdPartyId)) {
-                    $movement['payment_method_name'] = $payment_method_name;
+                    // $movement['payment_method_name'] = $payment_method_name;
                     $movements[] = $movement;
                 }
             }

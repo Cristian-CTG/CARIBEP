@@ -235,11 +235,11 @@ class ToPay
                 $guides = null;
                 $date_payment_last = '';
 
-                if($row->document_type_id){ 
+                if(isset($row->document_type_id) && $row->document_type_id){ 
 
                     $date_payment_last = PurchasePayment::where('purchase_id', $row->id)->orderBy('date_of_payment', 'desc')->first();
                 
-                }elseif($row->type_document_id){
+                }elseif(isset($row->type_document_id) && $row->type_document_id){
 
                     $date_payment_last = SupportDocumentPayment::where('support_document_id', $row->id)->orderBy('date_of_payment', 'desc')->first();
                 }
