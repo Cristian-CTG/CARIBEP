@@ -121,6 +121,12 @@ if($hostname) {
             Route::get('/trial-balance/records', 'ReportTrialBalanceController@records');
             Route::get('/trial-balance/export', 'ReportTrialBalanceController@export');
 
+            // Reporte de Libro Mayor y Balance
+            Route::get('/general-ledger', 'ReportGeneralLedgerController@index')->name('tenant.accounting.report.general-ledger');
+            Route::get('/general-ledger/records', 'ReportGeneralLedgerController@records');
+            Route::get('/general-ledger/accounts', 'ReportGeneralLedgerController@listAccounts');
+            Route::get('/general-ledger/export', 'ReportGeneralLedgerController@export');
+
             Route::prefix('clasification-sale')->group(function () {
                 Route::get('records', 'ChartAccountSaleConfigurationController@records');
                 Route::get('record/{id}', 'ChartAccountSaleConfigurationController@record');

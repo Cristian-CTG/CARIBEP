@@ -11,7 +11,7 @@ class JournalEntryDetail extends ModelTenant
 {
     use UsesTenantConnection;
 
-    protected $fillable = ['journal_entry_id', 'chart_of_account_id', 'debit', 'credit', 'third_party_id', 'payment_method_name', 'bank_account_id', 'cash_id'];
+    protected $fillable = ['journal_entry_id', 'chart_of_account_id', 'debit', 'credit', 'third_party_id', 'payment_method_name', 'bank_account_id'];
 
     public function journalEntry()
     {
