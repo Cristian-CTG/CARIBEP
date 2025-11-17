@@ -24,6 +24,7 @@
                         <th class="text-left">Tipo nómina</th>
                         <th class="text-center">Nómina</th>
                         <th class="text-center">Estado</th>
+                        <th>Periodo</th>
                         <th class="text-left">Nóminas relacionadas</th>
                         <th class="text-center">Salario</th>
                         <th class="text-center">T. Devengados</th>
@@ -43,6 +44,7 @@
                                 </span>
                             </template>
                         </td>
+                        <td>{{ getPeriodoMesAnio(row.period) }}</td>
                         <td>
                             <span v-for="(item, index) in row.affected_adjust_notes" class="ml-1" :key="index">
                                 {{ item.number_full }}
@@ -181,6 +183,14 @@
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 return `${year}-${month}`;
+            },
+            getPeriodoMesAnio(period) {
+                if (!period || !period.settlement_start_date) return '';
+                let fecha = period.settlement_start_date;
+                if (typeof fecha === 'function') fecha = fecha();
+                if (typeof fecha !== 'string') return '';
+                const [anio, mes] = fecha.split('-');
+                return `${mes}/${anio}`;
             },
         }
     }

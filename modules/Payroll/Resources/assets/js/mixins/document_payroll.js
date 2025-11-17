@@ -32,10 +32,12 @@ export const documentPayrollMixin = {
 
         },
         setPaymentServiceBonus(index) {
-            let salario = this.form.accrued.total_base_salary || 0
-            let subsidio = this.form.accrued.transportation_allowance ? this.form.accrued.transportation_allowance : 0
+            // obtener salario y subsidio
+            let salario = parseFloat(this.form.accrued.total_base_salary || 0)
+            let subsidio = parseFloat(this.form.accrued.transportation_allowance || 0)
 
-            let diasPrima = this.form.accrued.service_bonus[index].quantity || 0
+            // días para la prima (input del usuario)
+            let diasPrima = parseFloat(this.form.accrued.service_bonus[index].quantity || 0)
 
             if (diasPrima < 1 || diasPrima > 360) {
                 this.form.accrued.service_bonus[index].payment = 0
@@ -43,8 +45,56 @@ export const documentPayrollMixin = {
                 return
             }
 
-            let prima = this.roundNumber(((salario + subsidio) * diasPrima) / 360)
-            this.form.accrued.service_bonus[index].payment = prima
+            // sumar conceptos remunerativos adicionales (valores originales)
+            const extras = parseFloat(this.form.accrued.total_extra_hours || 0)
+            const salaryBonuses = _.sumBy(this.form.accrued.bonuses || [], b => parseFloat(b.salary_bonus || 0))
+            const otherSalaryConcepts = _.sumBy(this.form.accrued.other_concepts || [], o => parseFloat(o.salary_concept || 0))
+            const commissions = _.sumBy(this.form.accrued.commissions || [], c => parseFloat(c.commission || 0))
+            const epctvSalary = _.sumBy(this.form.accrued.epctv_bonuses || [], e => parseFloat(e.paymentS || 0) + parseFloat(e.salary_food_payment || 0))
+
+            // Política: redondear cada componente a peso antes de sumar (para reproducir informe legacy)
+            const components = [
+                salario, subsidio, extras, salaryBonuses, otherSalaryConcepts, commissions, epctvSalary
+            ].map(v => Math.round(parseFloat(v || 0)))
+
+            const baseRemunerativaRounded = components.reduce((a,b) => a + b, 0)
+            const baseRemunerativa = salario + subsidio + extras + salaryBonuses + otherSalaryConcepts + commissions + epctvSalary
+
+            // Elegir factor: legacy 0.0833 para 30 días (opción para igualar tabla), si no usar dias/360
+            const useLegacyFactor = true
+            const factor = (useLegacyFactor && diasPrima === 30) ? 0.0833 : (diasPrima / 360)
+
+            // calcular prima (dos variantes para comparar)
+            const primaExact = (baseRemunerativa * diasPrima) / 360
+            const primaLegacy = baseRemunerativaRounded * factor
+
+            // resultado que se guardará (ajustar aquí si se quiere usar exacto vs legacy)
+            const prima = this.roundNumber(primaLegacy, 2)
+
+            // LOG detallado para depuración
+            // try {
+            //     console.group(`Prima de servicios - índice ${index}`)
+            //     console.log('salario (total_base_salary):', salario)
+            //     console.log('subsidio (transportation_allowance):', subsidio)
+            //     console.log('extras (total_extra_hours):', extras)
+            //     console.log('salaryBonuses (bonuses.salary_bonus):', salaryBonuses)
+            //     console.log('otherSalaryConcepts (other_concepts.salary_concept):', otherSalaryConcepts)
+            //     console.log('commissions (commissions.commission):', commissions)
+            //     console.log('epctvSalary (epctv_bonuses paymentS + salary_food_payment):', epctvSalary)
+            //     console.log('baseRemunerativa (sin redondear):', baseRemunerativa)
+            //     console.log('baseRemunerativaRounded (componentes a peso):', baseRemunerativaRounded)
+            //     console.log('diasPrima (días a liquidar):', diasPrima)
+            //     console.log('factor usado:', factor)
+            //     console.log('prima exacta (base * dias/360):', primaExact)
+            //     console.log('prima legacy (baseRounded * factor):', primaLegacy)
+            //     console.log('prima final (guardada):', prima)
+            //     console.groupEnd()
+            // } catch (e) {
+            //     console.log('[Prima] datos:', { salario, subsidio, extras, salaryBonuses, otherSalaryConcepts, commissions, epctvSalary, baseRemunerativa, baseRemunerativaRounded, diasPrima, factor, prima })
+            // }
+
+            // almacenar resultado (paymentNS según estructura actual)
+            this.form.accrued.service_bonus[index].paymentNS = prima
         },
         clickCancelServiceBonus(index){
             this.form.accrued.service_bonus.splice(index, 1)
@@ -77,7 +127,7 @@ export const documentPayrollMixin = {
             this.calculateTotal()
         },
         calculateInterestPayment(index){
-            this.form.accrued.severance[index].interest_payment = this.roundNumber(this.form.accrued.severance[index].payment * this.percentageToFactor(this.form.accrued.severance[index].percentage))
+            this.form.accrued.severance[index].interest_payment = Math.round(this.form.accrued.severance[index].payment * this.percentageToFactor(this.form.accrued.severance[index].percentage))
             this.calculateTotal()
         },
         // cesantias

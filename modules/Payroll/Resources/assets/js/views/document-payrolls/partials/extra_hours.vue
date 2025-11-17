@@ -870,7 +870,7 @@ import moment from 'moment'
             },
             getPricePerExtraHour(percentage){
                 // obtener el precio por hora, incluido el % agregado al ser hora extra --- 30d * 8h = 240
-                return (parseFloat(this.form.accrued.total_base_salary) / 240) * (1 + percentage / 100)
+                return (parseFloat(this.form.accrued.total_base_salary) / 220) * (1 + percentage / 100)
             },
             getTypeOvertimeSurcharge(type)
             {
@@ -898,6 +898,8 @@ import moment from 'moment'
                         start_time,
                         end_time
                     ],
+                    start_date: start_end_date,
+                    end_date: start_end_date,
                     quantity :  quantity,
                     percentage :  percentage_id,
                     payment :  payment,

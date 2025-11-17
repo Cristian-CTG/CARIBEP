@@ -1929,13 +1929,20 @@
             percentageToFactor(percentage){
                 return percentage / 100
             },
+            getBaseForLawDeduction() {
+                let base = 0
+                base += parseFloat(this.form.accrued.salary || 0)
+                base += parseFloat(this.form.accrued.total_extra_hours || 0)
+                base += this.sumValueArrayValidateProperty(this.form.accrued.bonuses, 'salary_bonus')
+                base += this.sumValueArrayValidateProperty(this.form.accrued.other_concepts, 'salary_concept')
+                base += this.sumValueFromArray(this.form.accrued.commissions, 'commission')
+                base += this.sumEpctvBonuses() // solo paymentS y salary_food_payment si son salariales
+                // Agrega aquí otros conceptos salariales si aplica
+                return base
+            },
             getTotalLawDeduction(type_law_deductions_id){
-
                 let type_law_deduction = this.getTypeLawDeduction(type_law_deductions_id)
-
-                // total devengados – subsidio transporte *  % deducciones por ley (type law deductions)
-                return _.round((this.form.accrued.accrued_total - this.getValueFromInputUndefined(this.form.accrued.transportation_allowance)) * this.percentageToFactor(type_law_deduction.percentage), 2)
-
+                return _.round(this.getBaseForLawDeduction() * this.percentageToFactor(type_law_deduction.percentage), 2)
             },
             changeEpsTypeLawDeduction(){
                 this.form.deduction.eps_deduction = this.getTotalLawDeduction(this.form.deduction.eps_type_law_deductions_id)
@@ -2772,9 +2779,6 @@
                 const settlementEndDate = this.form.period.settlement_end_date
                 if (admisionDate && settlementEndDate) {
                     const monthsWorked = moment(settlementEndDate).diff(moment(admisionDate), 'months', true)
-                    if (monthsWorked < 6 && this.form.accrued.service_bonus.length > 0) {
-                        return this.getErrorMessage('El empleado debe tener al menos 6 meses de antigüedad para recibir prima de servicios.')
-                    }
                 }
 
                 return {
@@ -2886,7 +2890,7 @@
                 let endDate = moment(end, 'YYYY-MM-DD');
                 let count = 0;
                 while (startDate.isSameOrBefore(endDate)) {
-                    if (startDate.isoWeekday() <= 5) {
+                    if (startDate.isoWeekday() <= 6) {
                         count++;
                     }
                     startDate.add(1, 'days');

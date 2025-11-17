@@ -315,7 +315,7 @@ class DocumentPayroll extends PayrollBaseModel
             'worker_id' => $this->worker_id,
             'worker_full_name' => $this->model_worker->full_name,
             'worker_email' => $this->model_worker->email,
-
+            'period' => $this->period,
             'salary' => optional($this->accrued)->salary,
             'accrued_total' => optional($this->accrued)->accrued_total,
             'deductions_total' => optional($this->deduction)->deductions_total,
