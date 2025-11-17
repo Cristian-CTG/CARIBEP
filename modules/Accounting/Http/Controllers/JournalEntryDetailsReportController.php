@@ -5,7 +5,10 @@ namespace Modules\Accounting\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Accounting\Models\JournalEntryDetail;
+use Modules\Accounting\Models\JournalEntry;
 use Modules\Factcolombia1\Models\Tenant\Company;
+use Modules\Accounting\Exports\JournalEntryDetailsExport;
+use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Modules\Factcolombia1\Models\Tenant\TypeIdentityDocument;
@@ -34,64 +37,103 @@ class JournalEntryDetailsReportController extends Controller
 
     public function records(Request $request)
     {
-        $query = JournalEntryDetail::with([
-            'journalEntry.journal_prefix', // <-- nombre correcto
-            'journalEntry',
-            'chartOfAccount',
-            'thirdParty'
+        $report = $this->getReportData($request);
+
+        return [
+            'data' => $report['entries'],
+            'meta' => [
+                'total' => count($report['entries']),
+                'total_debit' => $report['totalDebit'],
+                'total_credit' => $report['totalCredit'],
+            ],
+        ];
+    }
+
+    private function getReportData(Request $request)
+    {
+        $query = JournalEntry::with([
+            'journal_prefix',
+            'details.chartOfAccount',
+            'details.thirdParty',
+            'document.person',
+            'purchase.supplier',
+            'support_document.person',
+            'document_pos.person',
+            'document_payroll.worker',
         ]);
 
         if ($request->filled('month')) {
-            $query->whereHas('journalEntry', function($q) use ($request) {
-                $q->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$request->month]);
-            });
+            $query->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$request->month]);
         }
+
+        if ($request->filled('date_start') && $request->filled('date_end')) {
+            $query->whereBetween('date', [$request->date_start, $request->date_end]);
+        }
+
         if ($request->filled('journal_prefix_id')) {
-            $query->whereHas('journalEntry', function($q) use ($request) {
-                $q->where('journal_prefix_id', $request->journal_prefix_id);
-            });
+            $query->where('journal_prefix_id', $request->journal_prefix_id);
         }
+
         if ($request->filled('number_from')) {
-            $query->whereHas('journalEntry', function($q) use ($request) {
-                $q->where('number', '>=', $request->number_from);
-            });
+            $query->where('number', '>=', $request->number_from);
         }
         if ($request->filled('number_to')) {
-            $query->whereHas('journalEntry', function($q) use ($request) {
-                $q->where('number', '<=', $request->number_to);
-            });
+            $query->where('number', '<=', $request->number_to);
         }
-        // Calcular totales según los filtros (sin paginación)
-        $totalsQuery = clone $query;
-        $total_debit = $totalsQuery->sum('debit');
-        $total_credit = $totalsQuery->sum('credit');
 
-        $records = $query->orderBy('id', 'desc')->paginate(20);
+        $entries = $query
+            ->orderBy('date')
+            ->orderBy('journal_prefix_id')
+            ->orderBy('number')
+            ->get();
 
-        // Agregar el nombre del tercero implicado a cada registro
-        foreach ($records as $detail) {
-            $entry = $detail->journalEntry;
-            $thirdParty = $detail->thirdParty;
-            if ($thirdParty && isset($thirdParty->name)) {
-                $thirdPartyName = $thirdParty->name;
-            } else {
-                $tp = $this->getThirdPartyFromEntry($entry);
-                $thirdPartyName = isset($tp['name']) ? $tp['name'] : '-';
+        $entryIds = $entries->pluck('id');
+
+        $totalDebit = JournalEntryDetail::whereIn('journal_entry_id', $entryIds)->sum('debit');
+        $totalCredit = JournalEntryDetail::whereIn('journal_entry_id', $entryIds)->sum('credit');
+
+        $data = [];
+
+        foreach ($entries as $entry) {
+
+            $detailsArr = [];
+            $entryDebit = 0;
+            $entryCredit = 0;
+
+            foreach ($entry->details as $detail) {
+                $thirdParty = $this->resolveThirdPartyForDetail($detail, $entry);
+
+                $detailsArr[] = [
+                    'account_code' => $detail->chartOfAccount->code ?? null,
+                    'account_name' => $detail->chartOfAccount->name ?? null,
+                    'third_party_name' => $thirdParty,
+                    'debit' => floatval($detail->debit),
+                    'credit' => floatval($detail->credit),
+                ];
+
+                $entryDebit += floatval($detail->debit);
+                $entryCredit += floatval($detail->credit);
             }
-            $detail->third_party_name = $thirdPartyName;
+
+            $data[] = [
+                'id' => $entry->id,
+                'date' => $entry->date,
+                'prefix' => $entry->journal_prefix->prefix,
+                'number' => $entry->number,
+                'description' => $entry->description,
+                'total_debit' => $entryDebit,
+                'total_credit' => $entryCredit,
+                'details' => $detailsArr,
+            ];
         }
 
         return [
-            'data' => $records->items(),
-            'meta' => [
-                'total' => $records->total(),
-                'current_page' => $records->currentPage(),
-                'per_page' => $records->perPage(),
-                'total_debit' => $total_debit,
-                'total_credit' => $total_credit,
-            ]
+            'entries' => $data,
+            'totalDebit' => $totalDebit,
+            'totalCredit' => $totalCredit,
         ];
     }
+
     public function export(Request $request)
     {
         $format = $request->input('format', 'pdf');
@@ -103,76 +145,16 @@ class JournalEntryDetailsReportController extends Controller
 
     private function exportPdf(Request $request)
     {
-        $query = JournalEntryDetail::with([
-            'journalEntry.journal_prefix',
-            'journalEntry',
-            'chartOfAccount',
-            'thirdParty'
-        ]);
+        $report = $this->getReportData($request);
 
-        // Filtro por mes
-        if ($request->filled('month')) {
-            $query->whereHas('journalEntry', function($q) use ($request) {
-                $q->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$request->month]);
-            });
-        }
-        // Filtro por tipo de comprobante
-        if ($request->filled('journal_prefix_id')) {
-            $query->whereHas('journalEntry', function($q) use ($request) {
-                $q->where('journal_prefix_id', $request->journal_prefix_id);
-            });
-        }
-        // Filtro por rango de numeración
-        if ($request->filled('number_from')) {
-            $query->whereHas('journalEntry', function($q) use ($request) {
-                $q->where('number', '>=', $request->number_from);
-            });
-        }
-        if ($request->filled('number_to')) {
-            $query->whereHas('journalEntry', function($q) use ($request) {
-                $q->where('number', '<=', $request->number_to);
-            });
-        }
-
-        $details = $query->orderBy('id', 'asc')->get();
-
-        // Agrupar por asiento (prefijo + número)
-        $grouped = [];
-        foreach ($details as $detail) {
-            $entry = $detail->journalEntry;
-            $key = $entry->journal_prefix->prefix . '-' . $entry->number;
-            if (!isset($grouped[$key])) {
-                $grouped[$key] = [
-                    'prefijo_numero' => $key,
-                    'fecha' => $entry->date,
-                    'concepto' => $entry->description,
-                    'detalles' => [],
-                    'total_debito' => 0,
-                    'total_credito' => 0,
-                ];
-            }
-            // Obtener tercero implicado SIEMPRE
-            $thirdParty = $detail->thirdParty;
-            if ($thirdParty && isset($thirdParty->name)) {
-                $thirdPartyName = $thirdParty->name;
-            } else {
-                $tp = $this->getThirdPartyFromEntry($entry);
-                $thirdPartyName = isset($tp['name']) ? $tp['name'] : '-';
-            }
-
-            // Agrega el nombre y número del tercero al detalle
-            $detail->third_party_name = $thirdPartyName;
-
-            $grouped[$key]['detalles'][] = $detail;
-            $grouped[$key]['total_debito'] += $detail->debit;
-            $grouped[$key]['total_credito'] += $detail->credit;
-        }
         $company = Company::first();
 
         $html = view('accounting::pdf.journal_entry_details_report', [
-            'groups' => $grouped,
-            'filters' => $request->all(),
+            'entries' => $report['entries'],
+            'total_debit' => $report['totalDebit'],
+            'total_credit' => $report['totalCredit'],
             'company' => $company,
+            'filters' => $request->all(),
         ])->render();
 
         $mpdf = new Mpdf(['orientation' => 'L']);
@@ -180,169 +162,63 @@ class JournalEntryDetailsReportController extends Controller
         $mpdf->SetFooter('Generado el ' . now()->format('Y-m-d H:i:s'));
         $mpdf->WriteHTML($html);
 
-        return $mpdf->Output('reporte_detalles_contables.pdf', 'I');
+        return $mpdf->Output('libro_diario.pdf', 'I');
     }
-    private function getThirdPartyFromEntry($entry)
+    private function resolveThirdPartyForDetail($detail, $entry)
     {
-        // Tercero directo
-        if ($entry->thirdParty && isset($entry->thirdParty->name)) {
-            return ['name' => $entry->thirdParty->name];
+
+        if ($detail->thirdParty && isset($detail->thirdParty->name)) {
+            return $detail->thirdParty->name;
         }
-        // Compra
+
+        // DOCUMENTO DE VENTA
+        if ($entry->document && $entry->document->person && isset($entry->document->person->name)) {
+            return $entry->document->person->name;
+        }
+
+        // COMPRA
         if ($entry->purchase && $entry->purchase->supplier && isset($entry->purchase->supplier->name)) {
-            return ['name' => $entry->purchase->supplier->name];
+            return $entry->purchase->supplier->name;
         }
-        // Documento de venta
-        if ($entry->document && $entry->document->customer && isset($entry->document->customer->name)) {
-            return ['name' => $entry->document->customer->name];
-        }
-        // Documento POS
+
+        // DOCUMENTO POS
         if ($entry->document_pos && $entry->document_pos->customer && isset($entry->document_pos->customer->name)) {
-            return ['name' => $entry->document_pos->customer->name];
+            return $entry->document_pos->customer->name;
         }
-        // Documento de soporte
+
+        // DOCUMENTO SOPORTE
         if ($entry->support_document && $entry->support_document->supplier && isset($entry->support_document->supplier->name)) {
-            return ['name' => $entry->support_document->supplier->name];
+            return $entry->support_document->supplier->name;
         }
-        // Nómina
-        if ($entry->document_payroll && $entry->document_payroll->worker && (isset($entry->document_payroll->worker->full_name) || isset($entry->document_payroll->worker->name))) {
-            return ['name' => $entry->document_payroll->worker->full_name ?? $entry->document_payroll->worker->name];
+
+        // NÓMINA
+        if ($entry->document_payroll) {
+            if ($entry->document_payroll->model_worker) {
+                $w = $entry->document_payroll->model_worker;
+                return $w->full_name ?? $w->name ?? '-';
+            }
+
+            if ($entry->document_payroll->worker) {
+                $wj = $entry->document_payroll->worker;
+                return $wj->full_name ?? $wj->name ?? '-';
+            }
         }
-        // Nota de ajuste de soporte
-        if ($entry->support_document_adjust_note && $entry->support_document_adjust_note->supplier && isset($entry->support_document_adjust_note->supplier->name)) {
-            return ['name' => $entry->support_document_adjust_note->supplier->name];
-        }
-        return ['name' => '-'];
+        return '-';
     }
 
     public function exportExcel(Request $request)
     {
-        $query = JournalEntryDetail::with([
-            'journalEntry.journal_prefix',
-            'journalEntry',
-            'chartOfAccount',
-            'thirdParty'
-        ]);
-
-        // Aplica los mismos filtros que en records()
-        if ($request->filled('month')) {
-            $query->whereHas('journalEntry', function($q) use ($request) {
-                $q->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$request->month]);
-            });
-        }
-        if ($request->filled('journal_prefix_id')) {
-            $query->whereHas('journalEntry', function($q) use ($request) {
-                $q->where('journal_prefix_id', $request->journal_prefix_id);
-            });
-        }
-        if ($request->filled('number_from')) {
-            $query->whereHas('journalEntry', function($q) use ($request) {
-                $q->where('number', '>=', $request->number_from);
-            });
-        }
-        if ($request->filled('number_to')) {
-            $query->whereHas('journalEntry', function($q) use ($request) {
-                $q->where('number', '<=', $request->number_to);
-            });
-        }
-
-        $details = $query->orderBy('id', 'asc')->get();
-
-        // Agrupa por comprobante (prefijo + número)
-        $grouped = [];
-        foreach ($details as $detail) {
-            $entry = $detail->journalEntry;
-            $key = $entry->journal_prefix->prefix . '-' . $entry->number;
-            if (!isset($grouped[$key])) {
-                $grouped[$key] = [
-                    'prefijo_numero' => $key,
-                    'fecha' => $entry->date,
-                    'concepto' => $entry->description,
-                    'detalles' => [],
-                    'total_debito' => 0,
-                    'total_credito' => 0,
-                ];
-            }
-            // Tercero implicado
-            $thirdParty = $detail->thirdParty ?? null;
-            if ($thirdParty && isset($thirdParty->name)) {
-                $thirdPartyName = $thirdParty->name ?? null;
-            } else {
-                $tp = $this->getThirdPartyFromEntry($entry);
-                $thirdPartyName = isset($tp['name']) ? $tp['name'] : '-';
-            }
-            $detail->third_party_name = $thirdPartyName;
-
-            $grouped[$key]['detalles'][] = $detail;
-            $grouped[$key]['total_debito'] += $detail->debit;
-            $grouped[$key]['total_credito'] += $detail->credit;
-        }
-
-        // Obtén datos de la empresa
+        $report = $this->getReportData($request);
         $company = Company::first();
-        $document_type = $company && $company->type_identity_document_id
-            ? TypeIdentityDocument::find($company->type_identity_document_id)
-            : null;
-
-        // Crea el archivo Excel
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-
-        // Encabezado de empresa
-        $sheet->setCellValue('A1', $company->name ?? '');
-        $sheet->setCellValue('A2', $document_type ? $document_type->name : '');
-        $sheet->setCellValue('B2', $company->identification_number ?? '');
-        $sheet->setCellValue('A3', 'DIRECCIÓN');
-        $sheet->setCellValue('B3', $company->address ?? '');
-        $sheet->setCellValue('A4', 'EMAIL');
-        $sheet->setCellValue('B4', $company->email ?? '');
-        $sheet->setCellValue('A5', 'TELÉFONO');
-        $sheet->setCellValue('B5', $company->phone ?? '');
-
-        // Filtros
-        if ($request->filled('month')) {
-            $sheet->setCellValue('A6', 'Mes');
-            $sheet->setCellValue('B6', $request->month);
-        }
-
-        // Encabezados de columnas
-        $sheet->setCellValue('A8', 'Comprobante');
-        $sheet->setCellValue('B8', 'Fecha de creación');
-        $sheet->setCellValue('C8', 'Concepto');
-        $sheet->setCellValue('D8', 'Tercero implicado');
-        $sheet->setCellValue('E8', 'N° Cuenta Contable');
-        $sheet->setCellValue('F8', 'Débito');
-        $sheet->setCellValue('G8', 'Crédito');
-
-        // Datos
-        $row = 9;
-        foreach ($grouped as $group) {
-            foreach ($group['detalles'] as $detail) {
-                $sheet->setCellValue('A' . $row, $group['prefijo_numero']);
-                $sheet->setCellValue('B' . $row, $group['fecha']);
-                $sheet->setCellValue('C' . $row, $group['concepto']);
-                $sheet->setCellValue('D' . $row, $detail->third_party_name ?? '');
-                $sheet->setCellValue('E' . $row, $detail->chartOfAccount ? $detail->chartOfAccount->code : '');
-                $sheet->setCellValue('F' . $row, isset($detail->debit) ? $detail->debit : 0);
-                $sheet->setCellValue('G' . $row, isset($detail->credit) ? $detail->credit : 0);
-                $row++;
-            }
-            // Fila de totales por grupo
-            $sheet->setCellValue('D' . $row, 'Total para ' . $group['prefijo_numero']);
-            $sheet->setCellValue('F' . $row, $group['total_debito']);
-            $sheet->setCellValue('G' . $row, $group['total_credito']);
-            // Opcional: puedes poner un fondo diferente a la fila de totales
-            $sheet->getStyle("A{$row}:G{$row}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-                ->getStartColor()->setARGB('FFD9D9D9');
-            $row++;
-        }
-
-        // Descargar el archivo Excel
-        $filename = 'reporte_detalles_contables.xlsx';
-        $writer = new Xlsx($spreadsheet);
-        $tempFile = tempnam(sys_get_temp_dir(), $filename);
-        $writer->save($tempFile);
-
-        return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
+        return Excel::download(
+            new JournalEntryDetailsExport(
+                $report['entries'],
+                $company,
+                $request->all(),
+                $report['totalDebit'],
+                $report['totalCredit']
+            ),
+            'libro_diario.xlsx'
+        );
     }
 }

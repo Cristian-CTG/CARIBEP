@@ -2,10 +2,12 @@
   <div>
     <div class="page-header pr-0">
       <h2>
-        <span>Reporte de Terceros</span>
+        <a href="/accounting/third-report" class="mr-2">
+          <i class="fa fa-list-alt"></i>
+        </a>
       </h2>
       <ol class="breadcrumbs">
-        <li class="active"><span>Exportar reporte PDF</span></li>
+        <li class="active"><span>Reporte de Terceros</span></li>
       </ol>
     </div>
     <div class="card mb-0 pt-2 pt-md-0">

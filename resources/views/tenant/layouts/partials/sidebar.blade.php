@@ -867,7 +867,7 @@
                     {{-- Debug temporal --}}
                     {{-- {{ dd($vc_modules) }} --}}
                     @if(in_array('accounting', $vc_modules))
-                    <li class="nav-parent {{$path[0] === 'accounting' && in_array($path[1], ['journal', 'charts', 'income-statement', 'financial-position', 'auxiliary-movement', 'bank-book', 'bank-reconciliation', 'third-report', 'entry-details-report', 'trial-balance']) ? 'nav-active nav-expanded' : ''}}">
+                    <li class="nav-parent {{$path[0] === 'accounting' && in_array($path[1], ['journal', 'charts', 'income-statement', 'financial-position', 'auxiliary-movement', 'bank-book', 'bank-reconciliation', 'third-report', 'entry-details-report', 'trial-balance', 'general-ledger']) ? 'nav-active nav-expanded' : ''}}">
                         <a class="nav-link" href="#">
                             <span class="float-right badge badge-red badge-danger mr-3 bg-secondary bg-danger mt-1">Nuevo</span>
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chart-histogram">
@@ -892,12 +892,7 @@
                                     Asientos contables
                                 </a>
                             </li>
-                            <li class="{{(($path[0] === 'accounting') && ($path[1] == 'entry-details-report')) ? 'nav-active' : ''}}">
-                                <a class="nav-link" href="{{route('tenant.accounting.report.entry-details-report')}}">
-                                    Reporte de Detalles Contables
-                                </a>
-                            </li>
-                            <li class="{{(($path[0] === 'accounting') && ($path[1] == 'financial-position')) ? 'nav-active' : ''}}">
+                            {{-- <li class="{{(($path[0] === 'accounting') && ($path[1] == 'financial-position')) ? 'nav-active' : ''}}">
                                 <a class="nav-link" href="{{route('tenant.accounting.report.financial-position')}}">
                                     Reporte de Situacion Financiera
                                 </a>
@@ -911,7 +906,7 @@
                                 <a class="nav-link" href="{{route('tenant.accounting.report.auxiliary-movement')}}">
                                     Reporte de Movimiento auxiliar
                                 </a>
-                            </li>
+                            </li> --}}
                             <li class="nav-parent
                                 {{(($path[0] === 'accounting') && in_array($path[1], ['bank-book', 'bank-reconciliation'])) ? 'nav-active nav-expanded' : ''}}">
                                 <a class="nav-link" href="#">
@@ -930,35 +925,48 @@
                                     </li>
                                 </ul>
                             </li>
-                            {{-- <li class="nav-parent
-                                {{(($path[0] === 'accounting') && in_array($path[1], ['entry-details-report', 'financial-position', 'income-statement', 'auxiliary-movement', 'trial-balance'])) ? 'nav-active nav-expanded' : ''}}">
+                            <li class="nav-parent
+                                {{(($path[0] === 'accounting') && in_array($path[1], ['financial-position', 'income-statement', 'auxiliary-movement', 'trial-balance', 'third-report'])) ? 'nav-active nav-expanded' : ''}}">
                                 <a class="nav-link" href="#">
                                     Reportes
                                 </a>
                                 <ul class="nav nav-children">
-                                    <li class="{{(($path[0] === 'accounting') && ($path[1] == 'entry-details-report')) ? 'nav-active' : ''}}">
-                                        <a class="nav-link" href="{{route('tenant.accounting.report.entry-details-report')}}">
-                                            Reporte de Detalles Contables
-                                        </a>
-                                    </li>
                                     <li class="{{(($path[0] === 'accounting') && ($path[1] == 'financial-position')) ? 'nav-active' : ''}}">
                                         <a class="nav-link" href="{{route('tenant.accounting.report.financial-position')}}">
-                                            Reporte de Situacion Financiera
+                                            Situacion Financiera
                                         </a>
                                     </li>
                                     <li class="{{(($path[0] === 'accounting') && ($path[1] == 'income-statement')) ? 'nav-active' : ''}}">
                                         <a class="nav-link" href="{{route('tenant.accounting.report.income-statement')}}">
-                                            Reporte de Estado de resultado
+                                            Estado de resultado
                                         </a>
                                     </li>
                                     <li class="{{(($path[0] === 'accounting') && ($path[1] == 'auxiliary-movement')) ? 'nav-active' : ''}}">
                                         <a class="nav-link" href="{{route('tenant.accounting.report.auxiliary-movement')}}">
-                                            Reporte de Movimiento auxiliar
+                                            Movimiento auxiliar
                                         </a>
                                     </li>
                                     <li class="{{(($path[0] === 'accounting') && ($path[1] == 'trial-balance')) ? 'nav-active' : ''}}">
                                         <a class="nav-link" href="{{route('tenant.accounting.report.trial-balance')}}">
                                             Balance de prueba
+                                        </a>
+                                    </li>
+                                    <li class="{{(($path[0] === 'accounting') && ($path[1] == 'third-report')) ? 'nav-active' : ''}}">
+                                        <a class="nav-link" href="{{route('tenant.accounting.report.third-report')}}">
+                                            Terceros
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="nav-parent
+                                {{(($path[0] === 'accounting') && in_array($path[1], ['entry-details-report', 'general-ledger'])) ? 'nav-active nav-expanded' : ''}}">
+                                <a class="nav-link" href="#">
+                                    Libros contables
+                                </a>
+                                <ul class="nav nav-children">
+                                    <li class="{{(($path[0] === 'accounting') && ($path[1] == 'entry-details-report')) ? 'nav-active' : ''}}">
+                                        <a class="nav-link" href="{{route('tenant.accounting.report.entry-details-report')}}">
+                                            Libro Diario
                                         </a>
                                     </li>
                                     <li class="{{(($path[0] === 'accounting') && ($path[1] == 'general-ledger')) ? 'nav-active' : ''}}">
@@ -967,8 +975,8 @@
                                         </a>
                                     </li>
                                 </ul>
-                            </li> --}}
-                            <li class="{{(($path[0] === 'accounting') && ($path[1] == 'trial-balance')) ? 'nav-active' : ''}}">
+                            </li>
+                            {{-- <li class="{{(($path[0] === 'accounting') && ($path[1] == 'trial-balance')) ? 'nav-active' : ''}}">
                                 <a class="nav-link" href="{{route('tenant.accounting.report.trial-balance')}}">
                                     Balance de prueba
                                 </a>
@@ -977,12 +985,17 @@
                                 <a class="nav-link" href="{{route('tenant.accounting.report.third-report')}}">
                                     Reporte de Terceros
                                 </a>
+                            </li> --}}
+                            {{-- <li class="{{(($path[0] === 'accounting') && ($path[1] == 'entry-details-report')) ? 'nav-active' : ''}}">
+                                <a class="nav-link" href="{{route('tenant.accounting.report.entry-details-report')}}">
+                                    Libro Diario
+                                </a>
                             </li>
                             <li class="{{(($path[0] === 'accounting') && ($path[1] == 'general-ledger')) ? 'nav-active' : ''}}">
                                 <a class="nav-link" href="{{route('tenant.accounting.report.general-ledger')}}">
                                     Libro Mayor y Balance
                                 </a>
-                            </li>
+                            </li> --}}
                         </ul>
                     </li>
                     @endif

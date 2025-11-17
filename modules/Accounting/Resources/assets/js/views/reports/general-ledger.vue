@@ -3,7 +3,7 @@
         <div class="page-header pr-0">
             <h2>
                 <a href="/accounting/general-ledger" class="mr-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"></svg>
+                    <i class="fa fa-book"></i>
                 </a>
             </h2>
             <ol class="breadcrumbs">
