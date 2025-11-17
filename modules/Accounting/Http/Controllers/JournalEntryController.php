@@ -228,9 +228,28 @@ class JournalEntryController extends Controller
         if ($entry->status == 'posted') {
             return response()->json(['message' => 'No se puede modificar un asiento publicado'], 403);
         }
+        $oldPrefixId = $entry->journal_prefix_id;
+        $newPrefixId = $request->journal_prefix_id;
 
-        // Actualiza los campos principales
-        $entry->update($request->only(['date', 'journal_prefix_id', 'description']));
+        // Si el prefijo cambia, primero actualizamos el número SIN tocar el prefijo todavía
+        if ($oldPrefixId != $newPrefixId) {
+
+            // Generar nuevo número para el nuevo prefijo
+            $newNumber = JournalEntry::getNextNumber($newPrefixId);
+
+            // Actualizar ambos al mismo tiempo (prefijo y número)
+            $entry->update([
+                'journal_prefix_id' => $newPrefixId,
+                'number' => $newNumber,
+            ]);
+
+        }
+
+        // Actualiza el resto de campos (fecha, descripción)
+        $entry->update([
+            'date' => $request->date,
+            'description' => $request->description,
+        ]);
 
         // Elimina los detalles existentes
         $entry->details()->delete();
@@ -398,6 +417,21 @@ class JournalEntryController extends Controller
             ->get();
 
         return response()->json($bankAccounts);
+    }
+
+    public function nextNumber(Request $request)
+    {
+        $request->validate([
+            'journal_prefix_id' => 'required|integer'
+        ]);
+
+        $prefixId = $request->journal_prefix_id;
+        $number = JournalEntry::getNextNumber($prefixId);
+
+        return response()->json([
+            'success' => true,
+            'number' => $number
+        ]);
     }
 
     public function paymentMethods()

@@ -149,6 +149,10 @@
                                     $payment = $entry->support_document->payments->first();
                                     $globalPayment = $payment->global_payment ?? null;
                                 }
+                                elseif($entry->expense && $entry->expense->payments && $entry->expense->payments->count()) {
+                                    $payment = $entry->expense->payments->first();
+                                    $globalPayment = $payment->global_payment ?? null;
+                                }
                                 if($globalPayment && method_exists($globalPayment, 'payment') && $globalPayment->payment) {
                                     $payment_name = $globalPayment->payment->payment_method_name ?? '';
                                 }

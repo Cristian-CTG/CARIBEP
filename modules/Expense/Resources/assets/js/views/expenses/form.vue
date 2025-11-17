@@ -168,6 +168,7 @@
         <expense-form-item :showDialog.sync="showDialogAddItem"
                            :currency-type="currency_type"
                            :exchange-rate-sale="form.exchange_rate_sale"
+                           :chart-of-accounts="chart_of_accounts"
                            @add="addRow"></expense-form-item>
 
         <person-form :showDialog.sync="showDialogNewPerson"
@@ -215,7 +216,8 @@
                 expense_method_types: [],
                 payment_destinations:  [],
                 expense_reasons: [],
-                expenseNewId: null
+                expenseNewId: null,
+                chart_of_accounts: [],
             }
         },
         created() {
@@ -241,6 +243,11 @@
                     this.changeDateOfIssue()
 
                     this.changeCurrencyType()
+                })
+            // Cargar cuentas contables
+            this.$http.get('/expenses/search-chart-accounts')
+                .then(response => {
+                    this.chart_of_accounts = response.data.data
                 })
 
             this.$eventHub.$on('reloadDataPersons', (supplier_id) => {

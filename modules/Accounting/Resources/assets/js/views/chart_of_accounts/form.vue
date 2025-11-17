@@ -70,9 +70,13 @@
             </div>
 
             <!-- Botones -->
-            <div class="col-12 pt-4 text-right">
-                <el-button @click="close">Cancelar</el-button>
-                <el-button type="primary" native-type="submit" :loading="loading_submit">Guardar</el-button>
+            <div>
+                <div class="d-inline-block mr-2">
+                    <el-button @click="close" class="w-100" style="margin-top: 10px;">Cancelar</el-button>
+                </div>
+                <div class="d-inline-block">
+                    <el-button type="primary" native-type="submit" :loading="loading_submit" class="w-100" style="margin-top: 10px;">Guardar</el-button>
+                </div>
             </div>
         </form>
     </el-dialog>

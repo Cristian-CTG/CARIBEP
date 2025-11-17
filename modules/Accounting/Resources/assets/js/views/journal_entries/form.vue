@@ -16,10 +16,23 @@
                                 Prefijo
                                 <a href="#" @click.prevent="clickAddPrefix">[+ Nuevo]</a>
                             </label>
-                            <el-select v-model="form.journal_prefix_id" placeholder="Seleccionar">
+                            <el-select v-model="form.journal_prefix_id" placeholder="Seleccionar"  @change="onPrefixChange">
                                 <el-option v-for="prefix in filteredJournalPrefixes" :key="prefix.id" :label="prefix.description+ ' - ' + prefix.prefix"
                                     :value="prefix.id"></el-option>
                             </el-select>
+                            <div v-if="nextNumber" class="mt-1 text-primary">
+                                <p style="white-space: nowrap; font-size: 0.9em; line-height: 1.2; margin-top: 5px;">
+                                    <strong>Número asignado: </strong>
+                                    {{ selectedPrefixLabel }} - {{ nextNumber }}
+                                </p>
+                            </div>
+
+                            <div v-else-if="currentNumber" class="mt-1 text-primary">
+                                <p style="white-space: nowrap; font-size: 0.9em; line-height: 1.2; margin-top: 5px;">
+                                    <strong>Número actual: </strong>
+                                    {{ originalPrefixLabel }} - {{ currentNumber }}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -44,17 +57,30 @@
                         <el-table-column prop="account_id" >
                             <template slot="header">
                                 Cuenta Contable <span class="text-danger">*</span>
+                                <div>
+                                    <a href="#" @click.prevent="openCreateAccount" style="font-size: 12px; margin-left: 0; display: inline-block;">[+ Agregar Cuenta]</a>
+                                </div>
                             </template>
                             <template slot-scope="{ row }">
-                                <el-select v-model="row.chart_of_account_id"
-                                    placeholder="Seleccionar cuenta"
-                                    filterable
-                                    clearable
-                                    remote
-                                    :remote-method="loadAccounts"
-                                    :loading="loadingAccounts">
-                                    <el-option v-for="account in accounts" :key="account.id" :label="account.code + ' - ' + account.name" :value="account.id"></el-option>
-                                </el-select>
+                                <div style="display: flex; gap: 6px;">
+                                    <el-select
+                                        v-model="row.chart_of_account_id"
+                                        filterable
+                                        remote
+                                        clearable
+                                        placeholder="Seleccionar cuenta"
+                                        :remote-method="loadAccounts"
+                                        :loading="loadingAccounts"
+                                        style="flex: 1;"
+                                    >
+                                        <el-option
+                                            v-for="account in accounts"
+                                            :key="account.id"
+                                            :label="account.code + ' - ' + account.name"
+                                            :value="account.id">
+                                        </el-option>
+                                    </el-select>
+                                </div>
                             </template>
                         </el-table-column>
                         <el-table-column prop="third_party_type" >
@@ -160,16 +186,22 @@
         >
     </journal-entry-prefix>
 
+    <chart-account-form
+        :showDialog.sync="showDialogChartAccount"
+        :recordId="null">
+    </chart-account-form>
+
+
     </div>
 
 </template>
 
 <script>
-
+import ChartAccountForm from '../chart_of_accounts/form.vue';
 import JournalEntryPrefix from "./partials/prefix.vue";
 
 export default {
-    components: { JournalEntryPrefix },
+    components: { JournalEntryPrefix, ChartAccountForm },
     props: ["showDialog", "recordId", "journalPrefixes"],
     data() {
         return {
@@ -179,6 +211,7 @@ export default {
             form: {},
             accounts: [],
             showDialogPrefix: false,
+            showDialogChartAccount: false,
             loadingAccounts: false,
             thirdParties: [],
             loadingThirdParties: false,
@@ -187,6 +220,10 @@ export default {
             showBankColumn: false,
             showPaymentMethodColumn: false,
             showBankAndPaymentColumn: false,
+            nextNumber: null,
+            currentNumber: null,
+            originalPrefixId: null,
+            originalNumber: null,
         };
     },
     created() {
@@ -195,14 +232,37 @@ export default {
         this.loadAccounts();
         this.loadBanks();
         this.loadPaymentMethods();
+        this.$eventHub.$on('reloadData', () => {
+            this.loadAccounts('');
+        });
     },
     computed: {
         filteredJournalPrefixes() {
             if (!this.journalPrefixes || !Array.isArray(this.journalPrefixes)) {
                 return [];
             }
-            return this.journalPrefixes.filter(p => p && p.modifiable === 1);
-        }
+            //opcion de filtro: .filter(p => p && p.modifiable === 1);
+            return this.journalPrefixes;
+        },
+        selectedPrefix() {
+            return this.filteredJournalPrefixes.find(p => p.id === this.form.journal_prefix_id) || null;
+        },
+
+        selectedPrefixLabel() {
+            return this.selectedPrefix
+                ? `${this.selectedPrefix.prefix}`
+                : '';
+        },
+
+        originalPrefix() {
+            return this.filteredJournalPrefixes.find(p => p.id === this.originalPrefixId) || null;
+        },
+
+        originalPrefixLabel() {
+            return this.originalPrefix
+                ? `${this.originalPrefix.prefix}`
+                : '';
+        },
     },
     methods: {
         initForm() {
@@ -212,6 +272,9 @@ export default {
                 description: "",
                 details: [],
             };
+        },
+        openCreateAccount() {
+            this.showDialogChartAccount = true;
         },
         async fetchThirdParties(row, query) {
             row.loadingThirdParties = true;
@@ -312,6 +375,10 @@ export default {
             if (this.recordId) {
                 const response = await this.$http.get(`/${this.resource}/${this.recordId}`);
                 this.form = response.data.data;
+                this.currentNumber = this.form.number;
+                this.nextNumber = this.form.number; 
+                this.originalPrefixId = this.form.journal_prefix_id;
+                this.originalNumber = this.form.number;
 
                 let hasBankOrPayment = false;
 
@@ -374,6 +441,8 @@ export default {
                 this.showBankAndPaymentColumn = hasBankOrPayment;
             } else {
                 this.initForm();
+                this.nextNumber = null;
+                this.currentNumber = null;
             }
         },
         getSummaries({ columns, data }) {
@@ -505,6 +574,25 @@ export default {
         clickAddPrefix() {
             this.showDialogPrefix = true;
         },
+        async onPrefixChange() {
+
+            if (!this.form.journal_prefix_id) {
+                this.nextNumber = null;
+                return;
+            }
+
+            if (this.recordId && this.form.journal_prefix_id === this.originalPrefixId) {
+                this.nextNumber = this.originalNumber;
+                return;
+            }
+
+            // Para nuevo asiento, o para editar y cambiar a otro prefijo distinto al original:
+            const res = await this.$http.get('/accounting/journal/entries/next-number', {
+                params: { journal_prefix_id: this.form.journal_prefix_id }
+            });
+
+            this.nextNumber = res.data.number;
+        }
     },
 };
 </script>

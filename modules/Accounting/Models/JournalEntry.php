@@ -10,6 +10,7 @@ use App\Models\Tenant\Purchase;
 use App\Models\Tenant\DocumentPos;
 use Modules\Payroll\Models\DocumentPayroll;
 use Modules\Purchase\Models\SupportDocument;
+use Modules\Expense\Models\Expense;
 
 
 class JournalEntry extends ModelTenant
@@ -24,6 +25,7 @@ class JournalEntry extends ModelTenant
         'document_id',
         'purchase_id',
         'support_document_id',
+        'expense_id',
         'document_pos_id',
         'document_payroll_id',
         'status',
@@ -108,6 +110,11 @@ class JournalEntry extends ModelTenant
         return $this->belongsTo(SupportDocument::class, 'support_document_id');
     }
 
+    public function expense()
+    {
+        return $this->belongsTo(Expense::class, 'expense_id');
+    }
+
     public function document_pos()
     {
         return $this->belongsTo(DocumentPos::class, 'document_pos_id');
@@ -168,6 +175,10 @@ class JournalEntry extends ModelTenant
         // Documento soporte
         if ($this->support_document) {
             return $this->support_document->prefix . '-' . $this->support_document->number;
+        }
+        // Gasto
+        if ($this->expense) {
+            return 'Gasto #' . $this->expense->number;
         }
         // POS
         if ($this->document_pos) {

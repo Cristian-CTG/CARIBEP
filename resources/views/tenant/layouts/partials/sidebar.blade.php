@@ -961,6 +961,11 @@
                                             Balance de prueba
                                         </a>
                                     </li>
+                                    <li class="{{(($path[0] === 'accounting') && ($path[1] == 'general-ledger')) ? 'nav-active' : ''}}">
+                                        <a class="nav-link" href="{{route('tenant.accounting.report.general-ledger')}}">
+                                            Libro Mayor y Balance
+                                        </a>
+                                    </li>
                                 </ul>
                             </li> --}}
                             <li class="{{(($path[0] === 'accounting') && ($path[1] == 'trial-balance')) ? 'nav-active' : ''}}">
@@ -971,6 +976,11 @@
                             <li class="{{(($path[0] === 'accounting') && ($path[1] == 'third-report')) ? 'nav-active' : ''}}">
                                 <a class="nav-link" href="{{route('tenant.accounting.report.third-report')}}">
                                     Reporte de Terceros
+                                </a>
+                            </li>
+                            <li class="{{(($path[0] === 'accounting') && ($path[1] == 'general-ledger')) ? 'nav-active' : ''}}">
+                                <a class="nav-link" href="{{route('tenant.accounting.report.general-ledger')}}">
+                                    Libro Mayor y Balance
                                 </a>
                             </li>
                         </ul>

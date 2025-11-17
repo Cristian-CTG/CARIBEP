@@ -5,6 +5,17 @@
         @close="close"
         width="600px">
         <form autocomplete="off" @submit.prevent="submit">
+            <div class="row pb-2">
+                <div class="col-md-12">
+                    <el-alert
+                        title="Ingrese el codigo y el nombre de las cuentas contables que desee registrar en el Formato Excel."
+                        type="info"
+                        show-icon
+                        :closable="false"
+                        class="mb-2"
+                    />
+                </div>
+            </div>
             <div class="row pb-3">
                 <div class="col-md-12">
                     <a
@@ -15,17 +26,6 @@
                     >
                         <i class="fa fa-download"></i> Descargar formato Excel
                     </a>
-                </div>
-            </div>
-            <div class="row pb-2">
-                <div class="col-md-12">
-                    <el-alert
-                        title="Ingrese el codigo y el nombre de las cuentas contables que desee registrar en el Formato Excel."
-                        type="info"
-                        show-icon
-                        :closable="false"
-                        class="mb-2"
-                    />
                 </div>
             </div>
             <div class="row pb-4">

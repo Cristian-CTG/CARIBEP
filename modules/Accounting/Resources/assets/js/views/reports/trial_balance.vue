@@ -194,7 +194,7 @@ export default {
         async fetchData() {
             this.loading = true;
             try {
-                const { data } = await axios.get('/accounting/trial-balance/records', {
+                const { data } = await this.$http.get('/accounting/trial-balance/records', {
                     params: {
                         date_start: this.dateRange[0],
                         date_end: this.dateRange[1],
@@ -211,7 +211,7 @@ export default {
             const params = new URLSearchParams({
                 date_start: this.dateRange[0],
                 date_end: this.dateRange[1],
-                format: type,
+                formats: type,
             });
 
             if (this.filterLevel) params.append('filterLevel', this.filterLevel)

@@ -43,6 +43,7 @@ if($hostname) {
             Route::get('journal/entries/columns', 'JournalEntryController@columns');
             Route::get('journal/entries/records', 'JournalEntryController@records');
             Route::get('journal/search-accounts', 'JournalEntryController@searchAccounts');
+            Route::get('journal/entries/next-number', 'JournalEntryController@nextNumber');
             // Exportar e Importar Asientos Contables
             Route::get('journal/entries/import-format', 'JournalEntryExportImportController@downloadImportFormat');
             Route::get('journal/entries/export-excel', 'JournalEntryExportImportController@exportExcel');
@@ -119,6 +120,12 @@ if($hostname) {
             Route::get('/trial-balance', 'ReportTrialBalanceController@index')->name('tenant.accounting.report.trial-balance');
             Route::get('/trial-balance/records', 'ReportTrialBalanceController@records');
             Route::get('/trial-balance/export', 'ReportTrialBalanceController@export');
+
+            // Reporte de Libro Mayor y Balance
+            Route::get('/general-ledger', 'ReportGeneralLedgerController@index')->name('tenant.accounting.report.general-ledger');
+            Route::get('/general-ledger/records', 'ReportGeneralLedgerController@records');
+            Route::get('/general-ledger/accounts', 'ReportGeneralLedgerController@listAccounts');
+            Route::get('/general-ledger/export', 'ReportGeneralLedgerController@export');
 
             Route::prefix('clasification-sale')->group(function () {
                 Route::get('records', 'ChartAccountSaleConfigurationController@records');
