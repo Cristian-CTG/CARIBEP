@@ -335,7 +335,8 @@
                     type_unit: {},
                     unit_type_id: null,
                     type_generation_transmition_id: this.isFromAdjustNote ? null : 1,
-                    start_date: null
+                    start_date: null,
+                    chart_of_account_code: null,
                 }
 
                 this.total_item = 0
