@@ -33,6 +33,13 @@
             overflow: hidden;
             box-sizing: border-box;
         }
+        td.label-gap {
+            width: 4mm;
+            padding: 0;
+            margin: 0;
+            border: none;
+            background: transparent;
+        }
         .etiqueta-content {
             width: 100%;
             max-width: 100%;
@@ -115,8 +122,11 @@
                         $vaciasDer = ($i == $rows - 1) ? $col - $etiquetasEnFila : 0;
                     @endphp
 
-                    {{-- Etiquetas --}}
+                    {{-- Etiquetas con espacios entre ellas --}}
                     @for($j = 0; $j < $etiquetasEnFila; $j++)
+                        @if($j > 0)
+                            <td class="label-gap"></td>
+                        @endif
                         <td class="label-cell">
                             @if($printed < $total)
                                 <div class="etiqueta-content">
