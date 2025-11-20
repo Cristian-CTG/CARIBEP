@@ -135,11 +135,12 @@
                                         // Soporte para uno o varios productos
                                         $currentItem = $isMultiple ? $items[$printed] : $item;
                                         $details = [];
-                                        if($fields['name']) $details[] = $currentItem->name;
-                                        if($fields['brand'] && $currentItem->brand) $details[] = $currentItem->brand->name;
-                                        if($fields['category'] && $currentItem->category) $details[] = $currentItem->category->name;
-                                        if($fields['color'] && $currentItem->color) $details[] = $currentItem->color->name;
-                                        if($fields['size'] && $currentItem->size) $details[] = $currentItem->size->name;
+                                        $maxChars = 25;
+                                        if($fields['name']) $details[] = wordwrap($currentItem->name, $maxChars, "\n", true);
+                                        if($fields['brand'] && $currentItem->brand) $details[] = wordwrap($currentItem->brand->name, $maxChars, "\n", true);
+                                        if($fields['category'] && $currentItem->category) $details[] = wordwrap($currentItem->category->name, $maxChars, "\n", true);
+                                        if($fields['color'] && $currentItem->color) $details[] = wordwrap($currentItem->color->name, $maxChars, "\n", true);
+                                        if($fields['size'] && $currentItem->size) $details[] = wordwrap($currentItem->size->name, $maxChars, "\n", true);
                                         $detailsText = implode(' | ', $details);
                                         $len = mb_strlen($detailsText);
                                         $fontSize = $len > 50 ? 0.06 * $height : 0.08 * $height;
