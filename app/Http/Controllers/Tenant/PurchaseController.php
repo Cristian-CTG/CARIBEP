@@ -248,13 +248,6 @@ class PurchaseController extends Controller
                 $is_credit = $doc->date_of_issue != $doc->date_of_due;
                 $is_credit_note = $doc->document_type_id == '07';
 
-                foreach ($data['payments'] as $payment) {
-                    $record_payment = $doc->purchase_payments()->create($payment);
-                    if(isset($payment['payment_destination_id'])){
-                            $this->createGlobalPayment($record_payment, $payment, $is_credit);
-                    }
-                }
-
                 // Registrar asientos contables compra/debito
                 if($doc->document_type_id == '01' || $doc->document_type_id == '09' || $doc->document_type_id == '08') {
                     $this->registerAccountingPurchaseEntries($doc);
@@ -264,6 +257,23 @@ class PurchaseController extends Controller
                 if($doc->document_type_id == '07') {
                     $this->registerAccountingCreditNotePurchase($doc);
                 }
+
+                foreach ($data['payments'] as $payment) {
+                    $record_payment = $doc->purchase_payments()->create($payment);
+                    if(isset($payment['payment_destination_id'])){
+                            $this->createGlobalPayment($record_payment, $payment, $is_credit);
+                    }
+                }
+
+                // // Registrar asientos contables compra/debito
+                // if($doc->document_type_id == '01' || $doc->document_type_id == '09' || $doc->document_type_id == '08') {
+                //     $this->registerAccountingPurchaseEntries($doc);
+                // }
+
+                // // Registrar asientos contables credito
+                // if($doc->document_type_id == '07') {
+                //     $this->registerAccountingCreditNotePurchase($doc);
+                // }
 
                 return $doc;
             });
@@ -290,7 +300,7 @@ class PurchaseController extends Controller
         if(!$accountConfiguration) return;
 
         $accountIdLiability = ChartOfAccount::where('code', $accountConfiguration->supplier_payable_account)->first();
-        $accountIdCash = ChartOfAccount::where('code', '110505')->first(); // Caja general
+        // $accountIdCash = ChartOfAccount::where('code', '110505')->first(); // Caja general
         $document_type = DocumentType::find($document->document_type_id);
 
         // Obtener proveedor como tercer implicado
@@ -354,16 +364,16 @@ class PurchaseController extends Controller
             ];
         }
 
-        $is_cash = ($document->date_of_issue == $document->date_of_due);
+        // $is_cash = ($document->date_of_issue == $document->date_of_due);
 
         // Movimiento de la cuenta por pagar a proveedores o caja
         $movements[] = [
-            'account_id' => $is_cash ? $accountIdCash->id : $accountIdLiability->id,
+            'account_id' => $accountIdLiability->id,
             'debit' => 0,
             'credit' => $document->total,
             'affects_balance' => true,
             'third_party_id' => $thirdPartyId,
-            'description' => ($is_cash ? $accountIdCash->code . ' - ' . $accountIdCash->name : $accountIdLiability->code . ' - ' . $accountIdLiability->name),
+            'description' => $accountIdLiability->code . ' - ' . $accountIdLiability->name,
         ];
 
         AccountingEntryHelper::registerEntry([
@@ -389,7 +399,7 @@ class PurchaseController extends Controller
         if(!$accountConfiguration) return;
         $accountIdInventory = ChartOfAccount::where('code',$accountConfiguration->inventory_account)->first();
         $accountIdLiability = ChartOfAccount::where('code',$accountConfiguration->supplier_payable_account)->first();
-        $accountIdCash = ChartOfAccount::where('code', '110505')->first(); // Caja general
+        // $accountIdCash = ChartOfAccount::where('code', '110505')->first(); // Caja general
         $document_type = DocumentType::find($document->document_type_id);
 
         // Obtener proveedor como tercer implicado
@@ -451,21 +461,21 @@ class PurchaseController extends Controller
             ];
         }
         // Determinar contado por fechas (mismo día)
-        $issueDate = $document->date_of_issue ? Carbon::parse($document->date_of_issue) : null;
-        $dueDate = $document->date_of_due ? Carbon::parse($document->date_of_due) : null;
-        $is_cash = $issueDate && $dueDate ? $issueDate->isSameDay($dueDate) : false;
+        // $issueDate = $document->date_of_issue ? Carbon::parse($document->date_of_issue) : null;
+        // $dueDate = $document->date_of_due ? Carbon::parse($document->date_of_due) : null;
+        // $is_cash = $issueDate && $dueDate ? $issueDate->isSameDay($dueDate) : false;
 
         // Movimiento en el debe: caja (contado) o proveedores (crédito)
-        $debitAccount = ($is_cash && $accountIdCash) ? $accountIdCash : $accountIdLiability;
+        // $debitAccount = ($is_cash && $accountIdCash) ? $accountIdCash : $accountIdLiability;
 
         // Movimiento de la cuenta de proveedores en el debe (débito)
         $movements[] = [
-            'account_id' => $debitAccount->id,
+            'account_id' => $accountIdLiability->id,
             'debit' => $document->total,
             'credit' => 0,
             'affects_balance' => true,
             'third_party_id' => $thirdPartyId,
-            'description' => $debitAccount->code . ' - ' . $debitAccount->name,
+            'description' => $accountIdLiability->code . ' - ' . $accountIdLiability->name,
         ];
 
         AccountingEntryHelper::registerEntry([

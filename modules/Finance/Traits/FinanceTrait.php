@@ -115,9 +115,9 @@ trait FinanceTrait
         }
 
         if ($model instanceof PurchasePayment) {
-            if ($is_credit) {
+            // if ($is_credit) {
                 $this->generateJournalEntry($model, $document, $destination);
-            }
+            // }
         } elseif ($model instanceof ExpensePayment) {
             $this->generateJournalEntry($model, $document, $destination);
         } else {
