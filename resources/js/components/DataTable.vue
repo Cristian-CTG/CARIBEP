@@ -3,7 +3,7 @@
         <div class="row">
             <div class="col-md-12 col-lg-12 col-xl-12">
                 <!-- Botón para mostrar/ocultar todos los filtros -->
-                <template v-if="extraFilters">
+                <template v-if="extraFilters || cashFilters">
                     <div class="d-flex mb-2" style="align-items: flex-start;">
                         <el-button 
                             @click="toggleFilters" 
@@ -19,7 +19,7 @@
                 <!-- Todos los filtros se muestran/ocultan con showFilters -->
                 <div v-if="showFilters">
                     <!-- Filtros personalizados solo para cajas -->
-                    <div class="row" v-if="applyFilter && extraFilters && resource === 'cash'">
+                    <div class="row" v-if="applyFilter && cashFilters && resource === 'cash'">
                         <!-- Filtro vendedor -->
                         <div class="col-lg-2 col-md-3 col-sm-12 pb-2">
                             <el-select v-model="search.seller" placeholder="Vendedor" clearable @change="getRecords">
@@ -74,7 +74,7 @@
                             </el-select>
                         </div>
                     </div>
-                    <div class="row" v-if="applyFilter && !extraFilters">
+                    <div class="row" v-if="applyFilter && !cashFilters">
                         <div class="col-lg-3 col-md-3 col-sm-12 pb-2">
                             <div class="d-flex">
                                 <div style="width:100px">
@@ -334,6 +334,10 @@
             extraFilters: {
                 type: Boolean,
                 default: false
+            },
+            cashFilters: {
+                type: Boolean,
+                default: false
             }
         },
         data () {
@@ -392,7 +396,7 @@
                 await this.fetchCustomers();
                 await this.fetchStates();
             }
-            if (this.resource === 'cash') {
+            if (this.cashFilters && this.resource === 'cash') {
                 const res = await this.$http.get('/cash/tables');
                 this.sellers = res.data.users;
             }
