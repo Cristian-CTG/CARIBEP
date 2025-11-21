@@ -28,10 +28,8 @@
     </div>
     @endif
 
-    @if($company->logo)
-    <div class="text-center company_logo_box">
-        <img style="max-width: 150px; height: auto;" src="data:{{ mime_content_type(public_path("storage/uploads/logos/{$company->logo}")) }};base64, {{ base64_encode(file_get_contents(public_path("storage/uploads/logos/{$company->logo}"))) }}" alt="{{ $company->name }}" class="company_logo">
-    </div>
+    @if ($company->logo && file_exists(public_path("storage/uploads/logos/{$company->logo}")))
+        <img style="width: 136px; height: auto;" src="data:{{mime_content_type(public_path("storage/uploads/logos/{$company->logo}"))}};base64, {{base64_encode(file_get_contents(public_path("storage/uploads/logos/{$company->logo}")))}}" alt="{{$company->name}}" class="company_logo" style="max-width: 200px">
     @endif
 
     <!-- Encabezado -->

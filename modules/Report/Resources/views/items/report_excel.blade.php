@@ -71,18 +71,38 @@
                         </thead>
                         <tbody>
                             @foreach($records as $key => $value)
-                            <tr>
-                                <td class="celda">{{$loop->iteration}}</td>
-                                <td class="celda">{{$value->document->date_of_issue->format('Y-m-d')}}</td> 
-                                <td class="celda">{{$value->document->type_document->name}}</td>
-                                <td class="celda">{{$value->document->series}}</td>
-                                <td class="celda">{{$value->document->number}}</td>
-                                <td class="celda">{{$value->document->customer->number}}</td>
-                                <td class="celda">{{$value->document->customer->name}}</td>
-                                <td class="celda">{{$value->quantity}}</td>
-                                <td class="celda">{{$value->total}}</td>
-                           
-                            </tr>
+                                @php
+                                    $is_pos = isset($value->document_pos);
+                                    $is_remission = isset($value->remission);
+                                    $document = $value->document ?? $value->document_pos ?? $value->remission ?? null;
+                                @endphp
+                                <tr>
+                                    <td class="celda">{{$loop->iteration}}</td>
+                                    <td class="celda">
+                                        @if($document && $document->date_of_issue)
+                                            {{ $document->date_of_issue->format('Y-m-d') }}
+                                        @endif
+                                    </td>
+                                    <td class="celda">
+                                        @if($is_remission)
+                                            Remisión
+                                        @elseif($is_pos)
+                                            FACT POS
+                                        @else
+                                            {{ $document->series ?? $document->prefix ?? '' }}
+                                        @endif
+                                    </td>
+                                    <td class="celda">{{ $document->series ?? $document->prefix ?? '' }}</td>
+                                    <td class="celda">{{ $document->number ?? '' }}</td>
+                                    <td class="celda">
+                                        {{ $document->customer->number ?? '' }}
+                                    </td>
+                                    <td class="celda">
+                                        {{ $document->customer->name ?? '' }}
+                                    </td>
+                                    <td class="celda">{{ number_format($value->quantity, 4) }}</td>
+                                    <td class="celda">{{ number_format($value->total, 2, ',', '.') }}</td>
+                                </tr>
                             @endforeach
                         </tbody>
                     </table>

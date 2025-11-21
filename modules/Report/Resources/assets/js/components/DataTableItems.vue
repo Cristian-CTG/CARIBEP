@@ -70,15 +70,15 @@
                                     <el-option v-for="option in establishments" :key="option.id" :value="option.id" :label="option.name"></el-option>
                                 </el-select>
                             </div>
-                        </div>
+                        </div> -->
                         <div class="col-md-3" >
                             <div class="form-group">
                                 <label class="control-label">Tipo de documento</label>
-                                <el-select v-model="form.document_type_id" clearable>
+                                <el-select v-model="form.document_type" clearable>
                                     <el-option v-for="option in document_types" :key="option.id" :value="option.id" :label="option.description"></el-option>
                                 </el-select>
                             </div>
-                        </div> -->
+                        </div>
                         
                         <div class="col-lg-7 col-md-7 col-md-7 col-sm-12" style="margin-top:29px"> 
                             <el-button class="submit" type="primary" @click.prevent="getRecordsByFilter" :loading="loading_submit" icon="el-icon-search" >Buscar</el-button>
@@ -229,12 +229,13 @@
                 this.form = {
                     establishment_id: null,
                     item_id: null,
-                    document_type_id:null,
+                    document_type_id: null,
                     period: 'month',
                     date_start: moment().format('YYYY-MM-DD'),
                     date_end: moment().format('YYYY-MM-DD'),
                     month_start: moment().format('YYYY-MM'),
                     month_end: moment().format('YYYY-MM'),
+                    document_type: 'all',
                 }
 
             }, 

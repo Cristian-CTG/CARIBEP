@@ -11,23 +11,28 @@ use App\Models\Tenant\Establishment;
 use App\Models\Tenant\Document;
 use App\Models\Tenant\DocumentItem;
 use App\Models\Tenant\Company;
+use App\Models\Tenant\DocumentPosItem;
 use Carbon\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Modules\Report\Http\Resources\ItemCollection;
 use Modules\Report\Traits\ReportTrait;
-
+use Modules\Sale\Models\RemissionItem;
 
 class ReportItemController extends Controller
 {
     use ReportTrait;
 
-    public function filter() {
-
-        $document_types = [];
-        $items = $this->getItems('items');
-        $establishments = [];
-
-        return compact('document_types','establishments','items');
-    }
+public function filter() {
+    $document_types = [
+        ['id' => 'all', 'description' => 'Todos'],
+        ['id' => 'normal', 'description' => 'Electrónica'],
+        ['id' => 'pos', 'description' => 'POS'],
+        ['id' => 'remission', 'description' => 'Remisiones'],
+    ];
+    $items = $this->getItems('items');
+    $establishments = [];
+    return compact('document_types','establishments','items');
+}
 
 
     public function index() {
@@ -39,22 +44,35 @@ class ReportItemController extends Controller
     {
         $records = $this->getRecordsItems($request->all(), DocumentItem::class);
 
+        // Si es una colección, paginar manualmente
+        if ($request->document_type === 'all') {
+            $page = request()->get('page', 1);
+            $perPage = config('tenant.items_per_page');
+            $paginated = new LengthAwarePaginator(
+                $records->forPage($page, $perPage),
+                $records->count(),
+                $perPage,
+                $page,
+                ['path' => request()->url(), 'query' => request()->query()]
+            );
+            return new ItemCollection($paginated);
+        }
+
+        // Si es un query builder, usar paginate normalmente
         return new ItemCollection($records->paginate(config('tenant.items_per_page')));
     }
 
 
 
-    public function getRecordsItems($request, $model){
-
-        // dd($request['period']);
-        $document_type_id = $request['document_type_id'];
-        $establishment_id = $request['establishment_id'];
+    public function getRecordsItems($request, $model)
+    {
+        $document_type = $request['document_type'];
+        $item_id = $request['item_id'];
         $period = $request['period'];
         $date_start = $request['date_start'];
         $date_end = $request['date_end'];
         $month_start = $request['month_start'];
         $month_end = $request['month_end'];
-        $item_id = $request['item_id'];
 
         $d_start = null;
         $d_end = null;
@@ -80,31 +98,72 @@ class ReportItemController extends Controller
                 break;
         }
 
-        $records = $this->dataItems($document_type_id, $establishment_id, $d_start, $d_end, $item_id, $model);
+        $records = null;
+
+        if ($document_type === 'pos') {
+            $records = DocumentPosItem::where('item_id', $item_id)
+                ->with('document_pos')
+                ->whereHas('document_pos', function($query) use($d_start, $d_end){
+                    $query->whereBetween('date_of_issue', [$d_start, $d_end])
+                          ->whereIn('state_type_id', ['01','03','05','07','13'])//falta agregar el 11 para las anulaciones
+                          ->latest();
+                });
+        } elseif ($document_type === 'remission') {
+            $records = RemissionItem::where('item_id', $item_id)
+                ->with('remission')
+                ->whereHas('remission', function($query) use($d_start, $d_end){
+                    $query->whereBetween('date_of_issue', [$d_start, $d_end])
+                          ->whereIn('state_type_id', ['01'])//falta agregar el 11 para las anulaciones
+                          ->latest();
+                });
+        } elseif ($document_type === 'all') {
+            // Unir todos los tipos
+            $records_normal = DocumentItem::where('item_id', $item_id)
+                ->with('document')
+                ->whereHas('document', function($query) use($d_start, $d_end){
+                    $query->whereBetween('date_of_issue', [$d_start, $d_end])
+                          ->filterInvoiceDocument()
+                          ->whereIn('state_document_id', [1,2,3,4,5])
+                          ->latest();
+                });
+
+            $records_pos = DocumentPosItem::where('item_id', $item_id)
+                ->with('document_pos')
+                ->whereHas('document_pos', function($query) use($d_start, $d_end){
+                    $query->whereBetween('date_of_issue', [$d_start, $d_end])
+                          ->whereIn('state_type_id', ['01','03','05','07','13'])//falta agregar el 11 para las anulaciones
+                          ->latest();
+                });
+
+            $records_remission = RemissionItem::where('item_id', $item_id)
+                ->with('remission')
+                ->whereHas('remission', function($query) use($d_start, $d_end){
+                    $query->whereBetween('date_of_issue', [$d_start, $d_end])
+                          ->whereIn('state_type_id', ['01'])//falta agregar el 11 para las anulaciones
+                          ->latest();
+                });
+
+            // Unir colecciones
+            $records = $records_normal->get()
+                ->merge($records_pos->get())
+                ->merge($records_remission->get());
+
+            // Devuelve una colección simple (no paginada)
+            return $records;
+        } else {
+            $records = DocumentItem::where('item_id', $item_id)
+                ->with('document')
+                ->whereHas('document', function($query) use($d_start, $d_end){
+                    $query->whereBetween('date_of_issue', [$d_start, $d_end])
+                          ->filterInvoiceDocument()
+                          ->whereIn('state_document_id', [1,2,3,4,5])
+                          ->latest();
+                });
+        }
 
         return $records;
 
     }
-
-
-    private function dataItems($document_type_id, $establishment_id, $date_start, $date_end, $item_id, $model)
-    {
-
-        $data = $model::where('item_id', $item_id)
-                        ->whereHas('document', function($query) use($date_start, $date_end){
-                            $query
-                            ->whereBetween('date_of_issue', [$date_start, $date_end])
-                            // ->whereIn('type_document_id', [1])
-                            ->filterInvoiceDocument()
-                            ->whereIn('state_document_id', [1,2,3,4,5])
-                            ->latest()
-                            ->whereTypeUser();
-                        });
-
-        return $data;
-
-    }
-
 
 
     public function excel(Request $request) {
@@ -112,7 +171,15 @@ class ReportItemController extends Controller
         $company = Company::first();
         $establishment = ($request->establishment_id) ? Establishment::findOrFail($request->establishment_id) : auth()->user()->establishment;
 
-        $records = $this->getRecordsItems($request->all(), DocumentItem::class)->get();
+        $records = $this->getRecordsItems($request->all(), DocumentItem::class);
+
+        // Si es una colección, úsala directamente
+        if ($request->document_type === 'all') {
+            // $records ya es una colección
+        } else {
+            // Si es un query builder, obtén la colección
+            $records = $records->get();
+        }
 
         return (new ItemExport)
                 ->records($records)

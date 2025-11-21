@@ -78,8 +78,8 @@
                 </div>
             </td>
             <td style="width: 25%; text-align: right;" class="vertical-align-top">
-                @if ($company->logo)
-                <img style="width: 136px; height: auto;" src="data:{{mime_content_type(public_path("storage/uploads/logos/{$company->logo}"))}};base64, {{base64_encode(file_get_contents(public_path("storage/uploads/logos/{$company->logo}")))}}" alt="{{$company->name}}" alt="{{ $company->name }}" class="company_logo" style="max-width: 200px">
+                @if ($company->logo && file_exists(public_path("storage/uploads/logos/{$company->logo}")))
+                    <img style="width: 136px; height: auto;" src="data:{{mime_content_type(public_path("storage/uploads/logos/{$company->logo}"))}};base64, {{base64_encode(file_get_contents(public_path("storage/uploads/logos/{$company->logo}")))}}" alt="{{$company->name}}" class="company_logo" style="max-width: 200px">
                 @endif
             </td>
         </tr>
