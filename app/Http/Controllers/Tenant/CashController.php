@@ -42,12 +42,33 @@ class CashController extends Controller
 
     public function records(Request $request)
     {
-    $records = Cash::where($request->column, 'like', "%{$request->value}%")
-            ->whereTypeUser()
-            ->orderBy('id', 'desc');
+        $query = Cash::query();
 
+        if ($request->reference) {
+            $query->where('reference_number', 'like', "%{$request->reference}%");
+        }
+        if ($request->seller) {
+            $query->where('user_id', $request->seller);
+        }
+        if ($request->opening_month) {
+            $query->whereRaw("DATE_FORMAT(date_opening, '%Y-%m') = ?", [$request->opening_month]);
+        }
+        if ($request->opening_date) {
+            $query->whereDate('date_opening', $request->opening_date);
+        }
+        if ($request->closing_month) {
+            $query->whereRaw("DATE_FORMAT(date_closed, '%Y-%m') = ?", [$request->closing_month]);
+        }
+        if ($request->closing_date) {
+            $query->whereDate('date_closed', $request->closing_date);
+        }
+        if ($request->state) {
+            $query->where('state', $request->state == 'open' ? true : false);
+        }
 
-        return new CashCollection($records->paginate(config('tenant.items_per_page')));
+        $query->whereTypeUser()->orderBy('id', 'desc');
+
+        return new CashCollection($query->paginate(config('tenant.items_per_page')));
     }
 
     public function create()

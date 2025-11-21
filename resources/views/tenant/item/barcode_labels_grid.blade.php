@@ -33,6 +33,13 @@
             overflow: hidden;
             box-sizing: border-box;
         }
+        td.label-gap {
+            width: 4mm;
+            padding: 0;
+            margin: 0;
+            border: none;
+            background: transparent;
+        }
         .etiqueta-content {
             width: 100%;
             max-width: 100%;
@@ -115,8 +122,11 @@
                         $vaciasDer = ($i == $rows - 1) ? $col - $etiquetasEnFila : 0;
                     @endphp
 
-                    {{-- Etiquetas --}}
+                    {{-- Etiquetas con espacios entre ellas --}}
                     @for($j = 0; $j < $etiquetasEnFila; $j++)
+                        @if($j > 0)
+                            <td class="label-gap"></td>
+                        @endif
                         <td class="label-cell">
                             @if($printed < $total)
                                 <div class="etiqueta-content">
@@ -125,11 +135,12 @@
                                         // Soporte para uno o varios productos
                                         $currentItem = $isMultiple ? $items[$printed] : $item;
                                         $details = [];
-                                        if($fields['name']) $details[] = $currentItem->name;
-                                        if($fields['brand'] && $currentItem->brand) $details[] = $currentItem->brand->name;
-                                        if($fields['category'] && $currentItem->category) $details[] = $currentItem->category->name;
-                                        if($fields['color'] && $currentItem->color) $details[] = $currentItem->color->name;
-                                        if($fields['size'] && $currentItem->size) $details[] = $currentItem->size->name;
+                                        $maxChars = 25;
+                                        if($fields['name']) $details[] = wordwrap($currentItem->name, $maxChars, "\n", true);
+                                        if($fields['brand'] && $currentItem->brand) $details[] = wordwrap($currentItem->brand->name, $maxChars, "\n", true);
+                                        if($fields['category'] && $currentItem->category) $details[] = wordwrap($currentItem->category->name, $maxChars, "\n", true);
+                                        if($fields['color'] && $currentItem->color) $details[] = wordwrap($currentItem->color->name, $maxChars, "\n", true);
+                                        if($fields['size'] && $currentItem->size) $details[] = wordwrap($currentItem->size->name, $maxChars, "\n", true);
                                         $detailsText = implode(' | ', $details);
                                         $len = mb_strlen($detailsText);
                                         $fontSize = $len > 50 ? 0.06 * $height : 0.08 * $height;
@@ -139,13 +150,14 @@
                                     </div>
                                     <div class="barcode">
                                         @php
-                                            $barcodeWidth = min(3, round($width * 0.04));
-                                            $barcodeHeight = max(40, round($height * 0.7));
-                                            $colour = [0,0,0];
-                                            $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
-                                            echo '<img style="width:60px; height:20px; display:block; margin:0 auto; padding:5px;" src="data:image/png;base64,' .
-                                                base64_encode($generator->getBarcode($currentItem->internal_id, $generator::TYPE_CODE_128, 1.2, 30, $colour)) .
-                                                '">';
+                                            $generator = new \Picqer\Barcode\BarcodeGeneratorSVG();
+                                            // Usar escala y alto similares al PNG original
+                                            $barcodeSVG = $generator->getBarcode($currentItem->internal_id, $generator::TYPE_CODE_128, 1, 30);
+                                            $barcodeSVG = preg_replace('/<\?xml.*\?>/', '', $barcodeSVG);
+                                            // Limitar el tamaño del SVG con un contenedor
+                                            echo '<div style="width:100%;height:30px;display:flex;justify-content:center;align-items:center;padding:5px;">'
+                                                . str_replace('<svg', '<svg style="width:95%;height:30px;max-width:95%;max-height:30px;"', $barcodeSVG)
+                                                . '</div>';
                                         @endphp
                                     </div>
                                     <div class="code">{{ $currentItem->internal_id }}</div>

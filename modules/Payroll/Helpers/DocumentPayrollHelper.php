@@ -13,6 +13,7 @@ use Modules\Payroll\Models\{
     DocumentPayrollAdjustNote
 };
 use Exception;
+use Modules\Factcolombia1\Models\Tenant\TypeDocument;
 
 class DocumentPayrollHelper
 {
@@ -591,14 +592,84 @@ class DocumentPayrollHelper
      */
     public function getConsecutive($type_service, $ignore_state_document_id = false, $prefix = null)
     {
+        try {
+            if ($prefix) {
+                $typeDoc = TypeDocument::where('prefix', $prefix)
+                            ->where('code', $type_service)
+                            ->first();
+            } else {
+                $typeDoc = TypeDocument::where('code', $type_service)->first();
+            }
+
+            if ($typeDoc && isset($typeDoc->generated)) {
+                $next = (int) $typeDoc->generated + 1;
+                if (empty($typeDoc->to) || $next <= (int) $typeDoc->to) {
+
+                    $prefixToUse = $prefix ?? ($typeDoc->prefix ?? null);
+
+                    $used = DocumentPayroll::where('consecutive', (string)$next)
+                                ->when($prefixToUse !== null, function($q) use ($prefixToUse) {
+                                    return $q->where('prefix', $prefixToUse);
+                                })
+                                ->first();
+
+                    if (!$used) {
+                        return (string) $next;
+                    }
+
+                    if ($used->state_document_id == self::REJECTED) {
+                        return (string) $next;
+                    }
+
+                }
+            }
+        } catch (\Exception $e) {
+        }
+
         $connection_api = new HttpConnectionApi($this->company->api_token);
         $url = ($prefix) ? "ubl2.1/payroll/current_number/{$type_service}/{$ignore_state_document_id}/{$prefix}" : "ubl2.1/payroll/current_number/{$type_service}/{$ignore_state_document_id}";
 
         $send_request_to_api = $connection_api->get($url);
 
-        if(isset($send_request_to_api['success']))
-        {
-            return $send_request_to_api['number'];
+        if (isset($send_request_to_api['success'])) {
+
+            $apiNumber = $send_request_to_api['number'];
+            $apiPrefix = $send_request_to_api['prefix'] ?? $prefix ?? null;
+
+            $prefixToCheck = $prefix ?? ($typeDoc->prefix ?? $apiPrefix ?? null);
+
+            $usedApi = DocumentPayroll::where('consecutive', (string)$apiNumber)
+                        ->when($prefixToCheck !== null, function($q) use ($prefixToCheck) {
+                            return $q->whereRaw('UPPER(TRIM(prefix)) = ?', [trim(strtoupper($prefixToCheck))]);
+                        })
+                        ->first();
+
+            if (!$usedApi || $usedApi->state_document_id == self::REJECTED) {
+                return (string) $apiNumber;
+            }
+
+            $lastQuery = DocumentPayroll::when($prefixToCheck !== null, function($q) use ($prefixToCheck) {
+                            return $q->whereRaw('UPPER(TRIM(prefix)) = ?', [trim(strtoupper($prefixToCheck))]);
+                        })
+                        ->orderByRaw('CAST(consecutive AS UNSIGNED) DESC')
+                        ->first();
+
+            if ($lastQuery && is_numeric($lastQuery->consecutive)) {
+                return (string)((int) $lastQuery->consecutive + 1);
+            }
+
+            return (string) $apiNumber;
+        }
+
+        $prefixFinal = $prefix ?? ($typeDoc->prefix ?? null);
+        $lastQuery = DocumentPayroll::when($prefixFinal !== null, function($q) use ($prefixFinal) {
+                        return $q->whereRaw('UPPER(TRIM(prefix)) = ?', [trim(strtoupper($prefixFinal))]);
+                    })
+                    ->orderByRaw('CAST(consecutive AS UNSIGNED) DESC')
+                    ->first();
+
+        if ($lastQuery && is_numeric($lastQuery->consecutive)) {
+            return (string)((int) $lastQuery->consecutive + 1);
         }
 
         return null;
