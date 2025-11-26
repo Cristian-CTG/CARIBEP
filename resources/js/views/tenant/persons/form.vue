@@ -63,7 +63,12 @@
                             <small class="form-control-feedback" v-if="errors.email" v-text="errors.email[0]"></small>
                         </div>
                     </div>
-                    <div class="col-md-4 d-flex justify-content-start align-items-center aling-div">
+                    <div class="col-md-4 d-flex flex-column align-items-start" style="margin-top: 25px;">
+                        <div v-if="type === 'customers'" class="form-group text-center mb-3">
+                            <el-checkbox v-model="form.is_favorite" size="large">
+                                <span class="custom-checkbox-label">VIP</span>
+                            </el-checkbox>
+                        </div>
                         <div class="form-group text-center">
                             <el-checkbox v-model="showAdditionalFields" size="large">
                                 <span class="custom-checkbox-label">Llenar información adicional</span>
@@ -285,6 +290,7 @@ margin-top: 25px;
 
 <script>
 import { calcularDv } from '../../../functions/Nit';
+import axios from 'axios'; // Import axios
 
 export default {
     props: ['showDialog', 'type', 'recordId', 'external', 'document_type_id','input_person'],
@@ -413,14 +419,14 @@ export default {
                 console.error(error)
             });
         },
-        getDepartment(val) {
+        async getDepartment(val) {
             return axios.post(`/departments/${val}`).then(response => {
                 return response.data;
             }).catch(error => {
                 console.log(error)
             });
         },
-        getCities(val) {
+        async getCities(val) {
             return axios.post(`/cities/${val}`).then(response => {
                 return response.data;
             }).catch(error => {
@@ -453,6 +459,7 @@ export default {
                         address: address,
                         telephone: telephone,
                         email: null,
+                        is_favorite: false,
                         perception_agent: false,
                         percentage_perception: 0,
                         person_type_id: null,

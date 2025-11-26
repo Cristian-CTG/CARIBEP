@@ -28,6 +28,7 @@ class Item extends ModelTenant
     protected $fillable = [
         'warehouse_id',
         'name',
+        'location',
         'second_name',
         'description',
         'item_type_id',

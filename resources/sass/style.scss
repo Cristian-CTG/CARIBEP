@@ -16,7 +16,7 @@ File: scss
  *	7. Widgets
  *	8. Custom Templates
  */
-@import '~bootstrap/scss/bootstrap';
+@import "../../node_modules/bootstrap/scss/bootstrap";
 
 @import 'variable';
 @import 'app';
@@ -36,7 +36,7 @@ File: scss
 @import '../css/animate.css';
 @import 'colors/blue';
 
-@import '~element-ui/packages/theme-chalk/src/index';
+@import "../../node_modules/element-ui/packages/theme-chalk/src/index";
 
 @import 'components/table';
 @import 'custom';

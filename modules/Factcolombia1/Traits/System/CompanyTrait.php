@@ -95,9 +95,33 @@ trait CompanyTrait
         ));
 
         $response = curl_exec($ch);
+        $errno = curl_errno($ch);
+        $error = curl_error($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        return json_decode($response);
+        if ($response === false) {
+            \Log::error('createCompanyApiDian curl error', ['error' => $error, 'errno' => $errno, 'http_code' => $httpCode, 'url' => "{$base_url}ubl2.1/config/{$number}/{$dv}"]);
+            return (object)[
+                'success' => false,
+                'message' => 'Curl error: ' . $error,
+                'errno' => $errno,
+                'http_code' => $httpCode
+            ];
+        }
+
+        $decoded = json_decode($response);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            \Log::error('createCompanyApiDian invalid json', ['http_code' => $httpCode, 'body' => $response, 'url' => "{$base_url}ubl2.1/config/{$number}/{$dv}"]);
+            return (object)[
+                'success' => false,
+                'message' => 'Invalid JSON response from ApiDian',
+                'http_code' => $httpCode,
+                'body' => $response
+            ];
+        }
+
+        return $decoded;
     }
 
 

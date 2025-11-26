@@ -49,6 +49,7 @@ class Person extends ModelTenant
         'person_type_id',
         'comment',
         'enabled',
+        'is_favorite',
         'type_person_id',
         'type_regime_id',
         'city_id',
@@ -61,6 +62,7 @@ class Person extends ModelTenant
 
     protected $casts = [
         'additional_emails' => 'array',
+        'is_favorite' => 'boolean',
     ];
 
     // protected static function boot()

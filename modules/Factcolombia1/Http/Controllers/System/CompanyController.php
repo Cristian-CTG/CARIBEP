@@ -73,7 +73,7 @@ class CompanyController extends Controller
         }
 
         $response = $this->createCompanyApiDian($request);
-        if(!property_exists( $response, 'password' ) || !property_exists( $response, 'token' )){
+        if(!is_object($response) || !property_exists( $response, 'password' ) || !property_exists( $response, 'token' )){
             return [
                 'message' => "Error al registrar Compañía en ApiDian",
                 'response' => $response,
@@ -283,7 +283,7 @@ class CompanyController extends Controller
     public function update(CompanyUpdateRequest $request) {
         $response = $this->createCompanyApiDian($request);
 
-        if(!property_exists( $response, 'password' ) || !property_exists( $response, 'token' )){
+        if(!is_object($response) || !property_exists( $response, 'password' ) || !property_exists( $response, 'token' )){
             return [
                 'message' => "Error al actualizar compañía en ApiDian",
                 'response' => $response,

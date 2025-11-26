@@ -78,6 +78,14 @@
                         </div>
 
                         <div class="col-md-3">
+                            <div class="form-group" :class="{'has-danger': errors.location}">
+                                <label class="control-label">Localización</label>
+                                <el-input v-model="form.location" placeholder="Ej: Pasillo A - Estante 3" dusk="location"></el-input>
+                                <small class="form-control-feedback" v-if="errors.location" v-text="errors.location[0]"></small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
                             <div class="form-group" :class="{'has-danger': errors.currency_type_id}">
                                 <label class="control-label">Moneda</label>
                                 <el-select v-model="form.currency_type_id" dusk="currency_type_id" filterable>
@@ -715,6 +723,7 @@
                     currency_type_id: 170,
                     model: null,
                     chart_account_sale_configuration_id: 1,
+                    location: null,
                 }
                 this.show_has_igv = true
                 this.enabled_percentage_of_profit = false
@@ -775,6 +784,8 @@
                             }
                             // Asignar los datos formateados al modelo del formulario
                             this.form = data;
+                            // Asegurar que location exista en el form (compatibilidad hacia atrás)
+                            if (!this.form.hasOwnProperty('location')) this.form.location = null;
                             this.has_percentage_perception = (this.form.percentage_perception) ? true : false;
                         });
                 }
